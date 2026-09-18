@@ -293,7 +293,6 @@
                             <span class="text-xs text-slate-500 mt-1 block">Busca ou cadastra o atleta automaticamente.</span>
                         </div>
 
-                        <!-- Atualizado: Campo Nome Completo com caixa alta automática -->
                         <div>
                             <label class="block text-xs font-bold uppercase text-slate-600 mb-2">Nome Completo</label>
                             <input type="text" id="admin-atleta" required placeholder="NOME DO PARTICIPANTE" oninput="this.value = this.value.toUpperCase()" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-3 text-slate-900 uppercase focus:outline-none focus:border-cob-blue">
@@ -459,17 +458,15 @@
 
         // MÁSCARA E AUTOPREENCHIMENTO DO CPF
         function formatCPFInput(input) {
-            let v = input.value.replace(/\D/g, ''); // Remove tudo o que não é dígito
+            let v = input.value.replace(/\D/g, '');
             if (v.length > 11) v = v.slice(0, 11);
             
-            // Aplica a máscara
             v = v.replace(/(\d{3})(\d)/, '$1.$2');
             v = v.replace(/(\d{3})(\d)/, '$1.$2');
             v = v.replace(/(\d{3})(\d{1,2})$/, '$1-$2');
             
             input.value = v;
 
-            // Se o CPF estiver completo, busca se já existe e autopreenche
             if (v.length === 14) {
                 const existingParticipant = records.find(r => r.cpf === v);
                 if (existingParticipant) {
@@ -482,6 +479,8 @@
         function handleAdminLogin() {
             const pin = document.getElementById('admin-pin-input').value;
             const errorEl = document.getElementById('login-error');
+            
+            // Senha configurada para JJ2026FOZ
             if (pin === 'JJ2026FOZ') {
                 isAdminLoggedIn = true;
                 errorEl.classList.add('hidden');
@@ -531,7 +530,6 @@
         async function submitTimeRecord(e) {
             e.preventDefault();
             const cpf = document.getElementById('admin-cpf').value;
-            // Atualizado: Força `.toUpperCase()` no JavaScript para garantir segurança ao enviar para o DB
             const atleta = document.getElementById('admin-atleta').value.toUpperCase();
             const subcategoria = document.getElementById('admin-subcategoria').value;
             const modalidade = document.getElementById('admin-modalidade').value;
@@ -548,11 +546,9 @@
                 return;
             }
 
-            // Regra: Caso participe de novo da mesma modalidade, atualiza o tempo e joga fora o velho.
             const existingRecord = records.find(r => r.cpf === cpf && r.modalidade === modalidade);
 
             if (existingRecord) {
-                // UPDATE
                 const { error } = await _supabase.from('records')
                     .update({ tempo: tempo, bloco: bloco, atleta: atleta, subcategoria: subcategoria })
                     .eq('id', existingRecord.id);
@@ -565,7 +561,6 @@
                     showModal('Erro', 'Não foi possível atualizar o registro.', 'error');
                 }
             } else {
-                // INSERT
                 const { error } = await _supabase.from('records')
                     .insert([{ cpf, atleta, subcategoria, modalidade, bloco, tempo }]);
                 
@@ -594,7 +589,6 @@
                 return;
             }
             records.forEach(r => {
-                // Mascara parcialmente o CPF na tabela admin para segurança visual
                 const hiddenCpf = r.cpf ? r.cpf.substring(0, 3) + '.***.***-' + r.cpf.substring(12, 14) : '---';
                 
                 tbody.innerHTML += `
@@ -618,15 +612,12 @@
             const modalidade = document.getElementById('filter-modalidade').value;
             const tbody = document.getElementById('leaderboard-tbody');
 
-            // Filtra primeiro a modalidade
             let filtered = records.filter(r => r.modalidade === modalidade);
             
-            // Se NÃO for ranking geral, filtra também pelo bloco selecionado
             if (bloco !== 'Geral') {
                 filtered = filtered.filter(r => r.bloco === bloco);
             }
 
-            // Ordena sempre do menor para o maior tempo
             filtered.sort((a, b) => a.tempo.localeCompare(b.tempo));
 
             tbody.innerHTML = '';
@@ -671,7 +662,6 @@
             document.getElementById('custom-modal').classList.add('hidden');
         }
 
-        // Inicialização e Sincronização em Tempo Real via Supabase
         document.addEventListener('DOMContentLoaded', async () => {
             updateBlocosUI();
             await fetchRecords();
