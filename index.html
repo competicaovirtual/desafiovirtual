@@ -288,8 +288,8 @@
 
                     <form id="time-entry-form" onsubmit="submitTimeRecord(event)" class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div>
-                            <label class="block text-xs font-bold uppercase text-slate-600 mb-2">CPF</label>
-                            <input type="text" id="admin-cpf" required placeholder="000.000.000-00" oninput="formatCPFInput(this)" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-3 text-slate-900 focus:outline-none focus:border-cob-blue">
+                            <label class="block text-xs font-bold uppercase text-slate-600 mb-2">CREDENCIAL</label>
+                            <input type="text" id="admin-credencial" required placeholder="00000000-0" oninput="formatCredencialInput(this)" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-3 text-slate-900 focus:outline-none focus:border-cob-blue">
                             <span class="text-xs text-slate-500 mt-1 block">Busca ou cadastra o atleta automaticamente.</span>
                         </div>
 
@@ -348,7 +348,7 @@
                         <table class="w-full text-left border-collapse">
                             <thead>
                                 <tr class="bg-slate-100 border-b border-slate-200 text-xs font-bold text-slate-600 uppercase tracking-wider">
-                                    <th class="py-3 px-4">CPF</th>
+                                    <th class="py-3 px-4">Credencial</th>
                                     <th class="py-3 px-4">Nome Completo</th>
                                     <th class="py-3 px-4">Perfil</th>
                                     <th class="py-3 px-4">Bloco</th>
@@ -456,19 +456,17 @@
             }
         }
 
-        // MÁSCARA E AUTOPREENCHIMENTO DO CPF
-        function formatCPFInput(input) {
+        // MÁSCARA E AUTOPREENCHIMENTO DA CREDENCIAL
+        function formatCredencialInput(input) {
             let v = input.value.replace(/\D/g, '');
-            if (v.length > 11) v = v.slice(0, 11);
+            if (v.length > 9) v = v.slice(0, 9);
             
-            v = v.replace(/(\d{3})(\d)/, '$1.$2');
-            v = v.replace(/(\d{3})(\d)/, '$1.$2');
-            v = v.replace(/(\d{3})(\d{1,2})$/, '$1-$2');
+            v = v.replace(/(\d{8})(\d)/, '$1-$2');
             
             input.value = v;
 
-            if (v.length === 14) {
-                const existingParticipant = records.find(r => r.cpf === v);
+            if (v.length === 10) { // 9 números + 1 traço = 10 caracteres
+                const existingParticipant = records.find(r => r.credencial === v);
                 if (existingParticipant) {
                     document.getElementById('admin-atleta').value = existingParticipant.atleta;
                     document.getElementById('admin-subcategoria').value = existingParticipant.subcategoria;
@@ -529,15 +527,15 @@
 
         async function submitTimeRecord(e) {
             e.preventDefault();
-            const cpf = document.getElementById('admin-cpf').value;
+            const credencial = document.getElementById('admin-credencial').value;
             const atleta = document.getElementById('admin-atleta').value.toUpperCase();
             const subcategoria = document.getElementById('admin-subcategoria').value;
             const modalidade = document.getElementById('admin-modalidade').value;
             const bloco = document.getElementById('admin-bloco').value;
             const tempo = document.getElementById('admin-tempo').value;
 
-            if (cpf.length !== 14) {
-                showModal('Atenção', 'Digite um CPF válido completo.', 'error');
+            if (credencial.length !== 10) {
+                showModal('Atenção', 'Digite uma Credencial válida completa.', 'error');
                 return;
             }
 
@@ -546,7 +544,7 @@
                 return;
             }
 
-            const existingRecord = records.find(r => r.cpf === cpf && r.modalidade === modalidade);
+            const existingRecord = records.find(r => r.credencial === credencial && r.modalidade === modalidade);
 
             if (existingRecord) {
                 const { error } = await _supabase.from('records')
@@ -562,7 +560,7 @@
                 }
             } else {
                 const { error } = await _supabase.from('records')
-                    .insert([{ cpf, atleta, subcategoria, modalidade, bloco, tempo }]);
+                    .insert([{ credencial, atleta, subcategoria, modalidade, bloco, tempo }]);
                 
                 if (!error) {
                     document.getElementById('time-entry-form').reset();
@@ -589,11 +587,11 @@
                 return;
             }
             records.forEach(r => {
-                const hiddenCpf = r.cpf ? r.cpf.substring(0, 3) + '.***.***-' + r.cpf.substring(12, 14) : '---';
+                const hiddenCredencial = r.credencial ? r.credencial.substring(0, 4) + '****-' + r.credencial.substring(9, 10) : '---';
                 
                 tbody.innerHTML += `
                     <tr class="hover:bg-slate-50 transition-colors">
-                        <td class="py-3 px-4 text-slate-500 font-mono text-xs">${hiddenCpf}</td>
+                        <td class="py-3 px-4 text-slate-500 font-mono text-xs">${hiddenCredencial}</td>
                         <td class="py-3 px-4 font-bold text-slate-900">${r.atleta}</td>
                         <td class="py-3 px-4 text-slate-600">${r.subcategoria}</td>
                         <td class="py-3 px-4 text-slate-600">${r.bloco}</td>
