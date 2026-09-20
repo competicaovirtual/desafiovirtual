@@ -171,9 +171,26 @@
         <section id="tab-rankings" class="space-y-6 hidden animate-fadeIn">
             
             <!-- Letreiro do Modo TV (Oculto por padrão) -->
-            <div id="tv-title-display" class="hidden bg-cob-dark text-white p-8 rounded-3xl shadow-xl text-center border-b-4 border-cob-cyan">
-                <h2 class="text-5xl font-black tracking-widest uppercase" id="tv-title-text">MODALIDADE - NAIPE</h2>
-                <p class="text-cob-cyan font-bold mt-3 text-lg tracking-widest">RANKING OFICIAL ATUALIZADO</p>
+            <div id="tv-title-display" class="hidden relative bg-cob-dark text-white p-6 md:p-8 rounded-3xl shadow-xl border-b-4 border-cob-cyan overflow-hidden">
+                <div class="flex items-center justify-center w-full min-h-[100px]">
+                    
+                    <!-- Lado Esquerdo: Logo JJ -->
+                    <div class="absolute left-6 md:left-12 flex items-center">
+                        <img src="logojj.png" alt="Logo Jogos da Juventude" class="h-16 md:h-24 w-auto object-contain drop-shadow-lg" onerror="this.style.display='none'">
+                    </div>
+
+                    <!-- Centro: Texto e Descrição -->
+                    <div class="text-center z-10 px-32">
+                        <h2 class="text-4xl md:text-5xl font-black tracking-widest uppercase drop-shadow-md" id="tv-title-text">MODALIDADE - NAIPE</h2>
+                        <p class="text-cob-cyan font-bold mt-3 text-lg tracking-widest drop-shadow-sm">RANKING OFICIAL ATUALIZADO</p>
+                    </div>
+
+                    <!-- Lado Direito: Mascote -->
+                    <div class="absolute right-6 md:right-12 flex items-center">
+                        <img src="mascote.png" alt="Mascote" class="h-20 md:h-32 w-auto object-contain drop-shadow-[0_10px_20px_rgba(0,0,0,0.4)]" onerror="this.style.display='none'">
+                    </div>
+
+                </div>
             </div>
 
             <!-- Cabeçalho de Filtros -->
