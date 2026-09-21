@@ -116,7 +116,7 @@
                 </div>
             </div>
 
-            <!-- Cards de Modalidades (Clique direto para o ranking) -->
+            <!-- Cards de Modalidades -->
             <div class="space-y-4">
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                     <!-- Remo -->
@@ -170,27 +170,20 @@
         <!-- TAB: RANKING -->
         <section id="tab-rankings" class="space-y-6 hidden animate-fadeIn">
             
-            <!-- Letreiro do Modo TV (Oculto por padrão) -->
+            <!-- Letreiro do Modo TV -->
             <div id="tv-title-display" class="hidden bg-cob-dark text-white p-6 md:p-8 rounded-3xl shadow-xl border-b-4 border-cob-cyan overflow-hidden">
                 <div class="flex items-center justify-between w-full min-h-[140px]">
-                    
-                    <!-- Lado Esquerdo: Logo JJ White -->
                     <div class="w-1/4 flex justify-start items-center">
                         <img src="logojjwhite.png" alt="Logo Jogos da Juventude" class="h-28 md:h-40 lg:h-48 w-auto object-contain drop-shadow-2xl transform origin-left hover:scale-105 transition-transform" onerror="this.style.display='none'">
                     </div>
-
-                    <!-- Centro: Texto e Descrição -->
                     <div class="w-2/4 text-center px-4 flex flex-col justify-center items-center">
                         <span class="text-cob-cyan font-black tracking-[0.3em] text-sm md:text-lg lg:text-xl uppercase block mb-2 drop-shadow-sm">DESAFIO VIRTUAL</span>
                         <h2 class="text-3xl md:text-4xl lg:text-5xl font-black tracking-widest uppercase drop-shadow-md leading-tight" id="tv-title-text">MODALIDADE - NAIPE</h2>
                         <p class="text-cob-gold font-bold mt-2 text-sm md:text-lg tracking-widest drop-shadow-sm">RANKING OFICIAL ATUALIZADO</p>
                     </div>
-
-                    <!-- Lado Direito: Mascote -->
                     <div class="w-1/4 flex justify-end items-center">
                         <img src="mascote.png" alt="Mascote" class="h-24 md:h-36 lg:h-44 w-auto object-contain drop-shadow-[0_10px_20px_rgba(0,0,0,0.4)]" onerror="this.style.display='none'">
                     </div>
-
                 </div>
             </div>
 
@@ -201,7 +194,6 @@
                     <p class="text-sm text-slate-500">Consulte os tempos homologados pela equipe técnica.</p>
                 </div>
                 
-                <!-- Filtros e Botão TV -->
                 <div class="flex flex-wrap items-center gap-3">
                     <select id="filter-bloco" onchange="renderLeaderboard()" class="bg-slate-50 border border-slate-300 rounded-xl px-4 py-2.5 text-sm text-slate-800 focus:outline-none focus:border-cob-blue">
                         <option value="Geral">Ranking Geral (Todos os Blocos)</option>
@@ -291,50 +283,9 @@
                     </button>
                 </div>
 
-                <!-- Grid de Controle de Blocos (AGORA AUTOMATIZADO) -->
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    <!-- Bloco 1 -->
-                    <div class="bg-white border border-slate-200 p-6 rounded-2xl space-y-4 shadow-md">
-                        <div class="flex items-center justify-between">
-                            <h4 class="font-bold text-slate-900 text-lg">Bloco 1</h4>
-                            <span id="status-badge-Bloco 1" class="px-3 py-1 rounded-full text-xs font-bold">...</span>
-                        </div>
-                        <div class="text-xs text-slate-600 bg-slate-50 p-3 rounded-xl border border-slate-100 space-y-1.5">
-                            <p><i class="fa-solid fa-play text-cob-green mr-1.5"></i> <strong>Início:</strong> 18/10/26 - 08:00h</p>
-                            <p><i class="fa-solid fa-stop text-red-500 mr-1.5"></i> <strong>Fim:</strong> 22/10/26 - 23:59h</p>
-                        </div>
-                        <div class="w-full text-center text-[10px] font-bold text-slate-400 uppercase tracking-widest pt-2 border-t border-slate-100">
-                            Controle Automático
-                        </div>
-                    </div>
-                    <!-- Bloco 2 -->
-                    <div class="bg-white border border-slate-200 p-6 rounded-2xl space-y-4 shadow-md">
-                        <div class="flex items-center justify-between">
-                            <h4 class="font-bold text-slate-900 text-lg">Bloco 2</h4>
-                            <span id="status-badge-Bloco 2" class="px-3 py-1 rounded-full text-xs font-bold">...</span>
-                        </div>
-                        <div class="text-xs text-slate-600 bg-slate-50 p-3 rounded-xl border border-slate-100 space-y-1.5">
-                            <p><i class="fa-solid fa-play text-cob-green mr-1.5"></i> <strong>Início:</strong> 23/10/26 - 08:00h</p>
-                            <p><i class="fa-solid fa-stop text-red-500 mr-1.5"></i> <strong>Fim:</strong> 28/10/26 - 23:59h</p>
-                        </div>
-                        <div class="w-full text-center text-[10px] font-bold text-slate-400 uppercase tracking-widest pt-2 border-t border-slate-100">
-                            Controle Automático
-                        </div>
-                    </div>
-                    <!-- Bloco 3 -->
-                    <div class="bg-white border border-slate-200 p-6 rounded-2xl space-y-4 shadow-md">
-                        <div class="flex items-center justify-between">
-                            <h4 class="font-bold text-slate-900 text-lg">Bloco 3</h4>
-                            <span id="status-badge-Bloco 3" class="px-3 py-1 rounded-full text-xs font-bold">...</span>
-                        </div>
-                        <div class="text-xs text-slate-600 bg-slate-50 p-3 rounded-xl border border-slate-100 space-y-1.5">
-                            <p><i class="fa-solid fa-play text-cob-green mr-1.5"></i> <strong>Início:</strong> 29/10/26 - 08:00h</p>
-                            <p><i class="fa-solid fa-stop text-red-500 mr-1.5"></i> <strong>Fim:</strong> 03/11/26 - 23:59h</p>
-                        </div>
-                        <div class="w-full text-center text-[10px] font-bold text-slate-400 uppercase tracking-widest pt-2 border-t border-slate-100">
-                            Controle Automático
-                        </div>
-                    </div>
+                <!-- Grid de Controle de Blocos Dinâmico -->
+                <div id="admin-blocks-container" class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <!-- Preenchido via JS (renderAdminBlocks) -->
                 </div>
 
                 <!-- Formulário de Lançamento Manual de Tempos -->
@@ -449,7 +400,7 @@
         <i class="fa-solid fa-xmark mr-2"></i>Sair do Modo TV
     </button>
 
-    <!-- Modal Customizado -->
+    <!-- Modal Customizado Info -->
     <div id="custom-modal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
         <div class="bg-white border border-slate-200 max-w-sm w-full p-6 rounded-3xl shadow-2xl text-center space-y-4">
             <div id="modal-icon" class="w-14 h-14 rounded-full bg-emerald-50 text-cob-green flex items-center justify-center mx-auto text-2xl border border-emerald-100">
@@ -458,6 +409,28 @@
             <h4 id="modal-title" class="text-lg font-bold text-slate-900">Sucesso</h4>
             <p id="modal-message" class="text-sm text-slate-600">Mensagem aqui</p>
             <button onclick="closeModal()" class="w-full py-2.5 bg-cob-dark hover:bg-cob-blue text-white font-bold rounded-xl text-sm transition-all">Entendido</button>
+        </div>
+    </div>
+
+    <!-- Modal Editar Datas -->
+    <div id="edit-dates-modal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white border border-slate-200 max-w-sm w-full p-6 rounded-3xl shadow-2xl space-y-4">
+            <div class="flex justify-between items-center">
+                <h4 id="edit-modal-title" class="text-lg font-bold text-slate-900">Editar Datas</h4>
+                <button onclick="closeEditModal()" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark text-xl"></i></button>
+            </div>
+            <div class="space-y-3">
+                <input type="hidden" id="edit-block-name">
+                <div>
+                    <label class="block text-xs font-bold uppercase text-slate-600 mb-1">Início</label>
+                    <input type="datetime-local" id="edit-start-date" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-2 text-slate-900 focus:outline-none focus:border-cob-blue">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold uppercase text-slate-600 mb-1">Término</label>
+                    <input type="datetime-local" id="edit-end-date" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-2 text-slate-900 focus:outline-none focus:border-cob-blue">
+                </div>
+                <button onclick="saveBlockDates()" class="w-full py-2.5 bg-cob-dark hover:bg-cob-blue text-white font-bold rounded-xl text-sm transition-all">Salvar Configuração</button>
+            </div>
         </div>
     </div>
 
@@ -470,42 +443,131 @@
         let records = [];
         let isAdminLoggedIn = false;
         
-        // --- CALENDÁRIO DOS BLOCOS (LÓGICA AUTOMÁTICA) ---
-        // Lembrete: No JS os meses vão de 0 (Jan) a 11 (Dez). Outubro = 9, Novembro = 10.
-        const blocosSchedule = {
-            'Bloco 1': { start: new Date(2026, 9, 18, 8, 0, 0), end: new Date(2026, 9, 22, 23, 59, 59) },
-            'Bloco 2': { start: new Date(2026, 9, 23, 8, 0, 0), end: new Date(2026, 9, 28, 23, 59, 59) },
-            'Bloco 3': { start: new Date(2026, 9, 29, 8, 0, 0), end: new Date(2026, 10, 3, 23, 59, 59) }
+        // --- CALENDÁRIO DOS BLOCOS (LÓGICA AUTOMÁTICA / MANUAL) ---
+        let blockConfig = JSON.parse(localStorage.getItem('jj2026_block_config')) || {
+            'Bloco 1': { mode: 'auto', manualStatus: 'Encerrado', start: '2026-10-18T08:00', end: '2026-10-22T23:59' },
+            'Bloco 2': { mode: 'auto', manualStatus: 'Encerrado', start: '2026-10-23T08:00', end: '2026-10-28T23:59' },
+            'Bloco 3': { mode: 'auto', manualStatus: 'Encerrado', start: '2026-10-29T08:00', end: '2026-11-03T23:59' }
         };
 
         function getBlocoStatus(blocoName) {
+            const config = blockConfig[blocoName];
+            if (!config) return 'Encerrado';
+
+            if (config.mode === 'manual') {
+                return config.manualStatus === 'Ativo' ? 'Ativo' : 'Encerrado';
+            }
+
             const now = new Date();
-            const schedule = blocosSchedule[blocoName];
-            if (!schedule) return 'Encerrado';
+            const start = new Date(config.start);
+            const end = new Date(config.end);
             
-            if (now < schedule.start) return 'Aguardando';
-            if (now > schedule.end) return 'Encerrado';
+            if (now < start) return 'Aguardando';
+            if (now > end) return 'Encerrado';
             return 'Ativo';
         }
 
-        function updateBlocosUI() {
+        function formatDateTimePtBr(isoString) {
+            const date = new Date(isoString);
+            if (isNaN(date)) return '--/--/-- - --:--h';
+            const day = String(date.getDate()).padStart(2, '0');
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const year = String(date.getFullYear()).slice(-2);
+            const hours = String(date.getHours()).padStart(2, '0');
+            const minutes = String(date.getMinutes()).padStart(2, '0');
+            return `${day}/${month}/${year} - ${hours}:${minutes}h`;
+        }
+
+        function renderAdminBlocks() {
+            const container = document.getElementById('admin-blocks-container');
+            if(!container) return;
+            container.innerHTML = '';
+            
             ['Bloco 1', 'Bloco 2', 'Bloco 3'].forEach(b => {
+                const config = blockConfig[b];
                 const status = getBlocoStatus(b);
-                const badge = document.getElementById(`status-badge-${b}`);
-                
-                if (badge) {
-                    if (status === 'Ativo') {
-                        badge.className = 'px-3 py-1 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800 border border-emerald-200';
-                        badge.innerText = 'Ativo Agora';
-                    } else if (status === 'Aguardando') {
-                        badge.className = 'px-3 py-1 rounded-full text-xs font-bold bg-amber-100 text-amber-800 border border-amber-200';
-                        badge.innerText = 'Aguardando Data';
-                    } else {
-                        badge.className = 'px-3 py-1 rounded-full text-xs font-bold bg-red-100 text-red-800 border border-red-200';
-                        badge.innerText = 'Encerrado';
-                    }
-                }
+                const startStr = formatDateTimePtBr(config.start);
+                const endStr = formatDateTimePtBr(config.end);
+
+                let badgeHTML = '';
+                if (status === 'Ativo') badgeHTML = `<span class="px-3 py-1 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800 border border-emerald-200">Ativo Agora</span>`;
+                else if (status === 'Aguardando') badgeHTML = `<span class="px-3 py-1 rounded-full text-xs font-bold bg-amber-100 text-amber-800 border border-amber-200">Aguardando Data</span>`;
+                else badgeHTML = `<span class="px-3 py-1 rounded-full text-xs font-bold bg-red-100 text-red-800 border border-red-200">Encerrado</span>`;
+
+                const autoBtnClass = config.mode === 'auto' ? 'bg-cob-blue text-white shadow' : 'bg-slate-200 text-slate-600 hover:bg-slate-300';
+                const manualBtnClass = config.mode === 'manual' ? 'bg-cob-blue text-white shadow' : 'bg-slate-200 text-slate-600 hover:bg-slate-300';
+
+                const manualActionBtn = config.mode === 'manual' 
+                    ? `<button onclick="toggleManualStatus('${b}')" class="w-full mt-3 py-2 rounded-xl text-sm font-bold transition-all ${config.manualStatus === 'Ativo' ? 'bg-red-600 hover:bg-red-700 text-white' : 'bg-emerald-600 hover:bg-emerald-700 text-white'}">${config.manualStatus === 'Ativo' ? '<i class="fa-solid fa-stop mr-2"></i>Forçar Encerramento' : '<i class="fa-solid fa-play mr-2"></i>Forçar Início'}</button>` 
+                    : ``;
+
+                container.innerHTML += `
+                    <div class="bg-white border border-slate-200 p-6 rounded-2xl space-y-4 shadow-md flex flex-col">
+                        <div class="flex items-center justify-between">
+                            <h4 class="font-bold text-slate-900 text-lg">${b}</h4>
+                            ${badgeHTML}
+                        </div>
+                        <div class="flex-grow text-xs text-slate-600 bg-slate-50 p-3 rounded-xl border border-slate-100 space-y-1.5 relative group">
+                            <p><i class="fa-solid fa-play text-cob-green mr-1.5"></i> <strong>Início:</strong> ${startStr}</p>
+                            <p><i class="fa-solid fa-stop text-red-500 mr-1.5"></i> <strong>Fim:</strong> ${endStr}</p>
+                            
+                            <!-- Botão Editar Visível no Hover (Apenas se for Automático para fazer sentido) -->
+                            <button onclick="openEditModal('${b}')" class="absolute top-2 right-2 p-1.5 bg-white border border-slate-200 rounded-lg shadow-sm text-cob-blue hover:bg-slate-50 hidden group-hover:block transition-all" title="Editar Datas do Bloco">
+                                <i class="fa-solid fa-pen"></i>
+                            </button>
+                        </div>
+                        <div class="pt-2 border-t border-slate-100">
+                            <div class="flex bg-slate-100 rounded-lg p-1 space-x-1">
+                                <button onclick="setBlockMode('${b}', 'auto')" class="flex-1 py-1.5 text-[11px] uppercase tracking-wider font-bold rounded-md transition-colors ${autoBtnClass}">Automático</button>
+                                <button onclick="setBlockMode('${b}', 'manual')" class="flex-1 py-1.5 text-[11px] uppercase tracking-wider font-bold rounded-md transition-colors ${manualBtnClass}">Manual</button>
+                            </div>
+                            ${manualActionBtn}
+                        </div>
+                    </div>
+                `;
             });
+        }
+
+        // Funções do Modal de Edição de Datas
+        function openEditModal(bloco) {
+            document.getElementById('edit-modal-title').innerText = `Editar Datas - ${bloco}`;
+            document.getElementById('edit-block-name').value = bloco;
+            document.getElementById('edit-start-date').value = blockConfig[bloco].start;
+            document.getElementById('edit-end-date').value = blockConfig[bloco].end;
+            document.getElementById('edit-dates-modal').classList.remove('hidden');
+        }
+
+        function closeEditModal() {
+            document.getElementById('edit-dates-modal').classList.add('hidden');
+        }
+
+        function saveBlockDates() {
+            const bloco = document.getElementById('edit-block-name').value;
+            const start = document.getElementById('edit-start-date').value;
+            const end = document.getElementById('edit-end-date').value;
+
+            if (start && end) {
+                blockConfig[bloco].start = start;
+                blockConfig[bloco].end = end;
+                localStorage.setItem('jj2026_block_config', JSON.stringify(blockConfig));
+                closeEditModal();
+                renderAdminBlocks();
+                showModal('Sucesso', `As datas do ${bloco} foram atualizadas!`, 'success');
+            }
+        }
+
+        // Troca Auto/Manual
+        function setBlockMode(bloco, mode) {
+            blockConfig[bloco].mode = mode;
+            localStorage.setItem('jj2026_block_config', JSON.stringify(blockConfig));
+            renderAdminBlocks();
+        }
+
+        function toggleManualStatus(bloco) {
+            const current = blockConfig[bloco].manualStatus;
+            blockConfig[bloco].manualStatus = current === 'Ativo' ? 'Encerrado' : 'Ativo';
+            localStorage.setItem('jj2026_block_config', JSON.stringify(blockConfig));
+            renderAdminBlocks();
         }
         
         // Variáveis Modo TV
@@ -544,7 +606,10 @@
             }
             window.scrollTo({ top: 0, behavior: 'smooth' });
             if (tabId === 'rankings') renderLeaderboard();
-            if (tabId === 'admin' && isAdminLoggedIn) renderAdminRecords();
+            if (tabId === 'admin' && isAdminLoggedIn) {
+                renderAdminBlocks();
+                renderAdminRecords();
+            }
         }
 
         function toggleMobileMenu() {
@@ -598,7 +663,7 @@
                 errorEl.classList.add('hidden');
                 document.getElementById('admin-login-screen').classList.add('hidden');
                 document.getElementById('admin-panel-content').classList.remove('hidden');
-                updateBlocosUI();
+                renderAdminBlocks();
                 renderAdminRecords();
             } else {
                 errorEl.classList.remove('hidden');
@@ -627,10 +692,9 @@
                 return;
             }
 
-            // Verifica bloqueio automático de datas
             const currentStatus = getBlocoStatus(bloco);
             if (currentStatus !== 'Ativo') {
-                showModal('Atenção', `O ${bloco} está ${currentStatus.toLowerCase()}. O sistema aceita lançamentos apenas durante o período oficial do bloco.`, 'error');
+                showModal('Atenção', `O ${bloco} não está Ativo no momento. Verifique as configurações do bloco.`, 'error');
                 return;
             }
 
@@ -714,9 +778,8 @@
 
             filtered.sort((a, b) => a.tempo.localeCompare(b.tempo));
 
-            // Efeito de transição suave ao renderizar nova tabela
             tbody.classList.remove('animate-fadeIn');
-            void tbody.offsetWidth; // trigger reflow
+            void tbody.offsetWidth;
             tbody.classList.add('animate-fadeIn');
             tbody.innerHTML = '';
 
@@ -754,7 +817,6 @@
             const tvTitle = document.getElementById('tv-title-display');
 
             if (tvModeInterval) {
-                // Sair do Modo TV
                 clearInterval(tvModeInterval);
                 tvModeInterval = null;
                 if (document.fullscreenElement) document.exitFullscreen().catch(()=>{});
@@ -769,13 +831,11 @@
                 main.classList.remove('max-w-full', 'px-2', 'py-2');
                 main.classList.add('max-w-7xl', 'px-4', 'sm:px-6', 'lg:px-8', 'py-8');
                 
-                // Reseta para exibição geral e limpa o layout
                 document.getElementById('filter-naipe').value = "Todos";
                 document.getElementById('filter-bloco').value = "Geral";
                 renderLeaderboard();
                 
             } else {
-                // Entrar no Modo TV
                 document.documentElement.requestFullscreen().catch(()=>{});
                 
                 header.classList.add('hidden');
@@ -796,7 +856,7 @@
             tvStateIndex = 0;
             applyTVState();
             
-            // Roda o ciclo a cada 15 segundos
+            // Ciclo a cada 15 segundos
             tvModeInterval = setInterval(() => {
                 tvStateIndex = (tvStateIndex + 1) % tvStates.length;
                 applyTVState();
@@ -805,16 +865,10 @@
 
         function applyTVState() {
             const state = tvStates[tvStateIndex];
-            
-            // Ajusta o filtro da DOM baseada na config atual
             document.getElementById('filter-modalidade').value = state.mod;
             document.getElementById('filter-naipe').value = state.naipe;
             document.getElementById('filter-bloco').value = state.bloco;
-            
-            // Atualiza o letreiro superior
             document.getElementById('tv-title-text').innerText = state.title;
-            
-            // Renderiza tabela visualmente
             renderLeaderboard();
         }
 
@@ -837,10 +891,12 @@
         }
 
         document.addEventListener('DOMContentLoaded', async () => {
-            updateBlocosUI();
+            if (isAdminLoggedIn) renderAdminBlocks();
             
-            // Atualiza a validação da interface dos blocos automaticamente a cada 60s
-            setInterval(updateBlocosUI, 60000); 
+            // Recalcula o status visualmente a cada 30 segundos
+            setInterval(() => {
+                if(isAdminLoggedIn) renderAdminBlocks();
+            }, 30000); 
             
             await fetchRecords();
 
