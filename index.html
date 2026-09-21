@@ -174,7 +174,7 @@
             <div id="tv-title-display" class="hidden bg-cob-dark text-white p-6 md:p-8 rounded-3xl shadow-xl border-b-4 border-cob-cyan overflow-hidden">
                 <div class="flex items-center justify-between w-full min-h-[140px]">
                     
-                    <!-- Lado Esquerdo: Logo JJ White (Tamanho Ampliado e com Destaque) -->
+                    <!-- Lado Esquerdo: Logo JJ White -->
                     <div class="w-1/4 flex justify-start items-center">
                         <img src="logojjwhite.png" alt="Logo Jogos da Juventude" class="h-28 md:h-40 lg:h-48 w-auto object-contain drop-shadow-2xl transform origin-left hover:scale-105 transition-transform" onerror="this.style.display='none'">
                     </div>
@@ -259,7 +259,7 @@
                         <i class="fa-solid fa-shield-halved"></i>
                     </div>
                     <h3 class="text-2xl font-black text-slate-900">Acesso Restrito</h3>
-                    <p class="text-sm text-slate-500">Insira a senha técnica para gerenciar os registros e blocos.</p>
+                    <p class="text-sm text-slate-500">Insira a senha técnica para gerenciar os registros.</p>
                 </div>
 
                 <div class="space-y-4">
@@ -291,37 +291,49 @@
                     </button>
                 </div>
 
-                <!-- Grid de Controle de Blocos -->
+                <!-- Grid de Controle de Blocos (AGORA AUTOMATIZADO) -->
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                     <!-- Bloco 1 -->
                     <div class="bg-white border border-slate-200 p-6 rounded-2xl space-y-4 shadow-md">
                         <div class="flex items-center justify-between">
                             <h4 class="font-bold text-slate-900 text-lg">Bloco 1</h4>
-                            <span id="status-badge-Bloco 1" class="px-3 py-1 rounded-full text-xs font-bold">Ativo</span>
+                            <span id="status-badge-Bloco 1" class="px-3 py-1 rounded-full text-xs font-bold">...</span>
                         </div>
-                        <button onclick="toggleBlocoStatus('Bloco 1')" id="btn-toggle-Bloco 1" class="w-full py-2.5 rounded-xl text-sm font-bold transition-all bg-emerald-600 hover:bg-emerald-700 text-white shadow-sm">
-                            Encerrar Bloco
-                        </button>
+                        <div class="text-xs text-slate-600 bg-slate-50 p-3 rounded-xl border border-slate-100 space-y-1.5">
+                            <p><i class="fa-solid fa-play text-cob-green mr-1.5"></i> <strong>Início:</strong> 18/10/26 - 08:00h</p>
+                            <p><i class="fa-solid fa-stop text-red-500 mr-1.5"></i> <strong>Fim:</strong> 22/10/26 - 23:59h</p>
+                        </div>
+                        <div class="w-full text-center text-[10px] font-bold text-slate-400 uppercase tracking-widest pt-2 border-t border-slate-100">
+                            Controle Automático
+                        </div>
                     </div>
                     <!-- Bloco 2 -->
                     <div class="bg-white border border-slate-200 p-6 rounded-2xl space-y-4 shadow-md">
                         <div class="flex items-center justify-between">
                             <h4 class="font-bold text-slate-900 text-lg">Bloco 2</h4>
-                            <span id="status-badge-Bloco 2" class="px-3 py-1 rounded-full text-xs font-bold">Ativo</span>
+                            <span id="status-badge-Bloco 2" class="px-3 py-1 rounded-full text-xs font-bold">...</span>
                         </div>
-                        <button onclick="toggleBlocoStatus('Bloco 2')" id="btn-toggle-Bloco 2" class="w-full py-2.5 rounded-xl text-sm font-bold transition-all bg-emerald-600 hover:bg-emerald-700 text-white shadow-sm">
-                            Encerrar Bloco
-                        </button>
+                        <div class="text-xs text-slate-600 bg-slate-50 p-3 rounded-xl border border-slate-100 space-y-1.5">
+                            <p><i class="fa-solid fa-play text-cob-green mr-1.5"></i> <strong>Início:</strong> 23/10/26 - 08:00h</p>
+                            <p><i class="fa-solid fa-stop text-red-500 mr-1.5"></i> <strong>Fim:</strong> 28/10/26 - 23:59h</p>
+                        </div>
+                        <div class="w-full text-center text-[10px] font-bold text-slate-400 uppercase tracking-widest pt-2 border-t border-slate-100">
+                            Controle Automático
+                        </div>
                     </div>
                     <!-- Bloco 3 -->
                     <div class="bg-white border border-slate-200 p-6 rounded-2xl space-y-4 shadow-md">
                         <div class="flex items-center justify-between">
                             <h4 class="font-bold text-slate-900 text-lg">Bloco 3</h4>
-                            <span id="status-badge-Bloco 3" class="px-3 py-1 rounded-full text-xs font-bold">Ativo</span>
+                            <span id="status-badge-Bloco 3" class="px-3 py-1 rounded-full text-xs font-bold">...</span>
                         </div>
-                        <button onclick="toggleBlocoStatus('Bloco 3')" id="btn-toggle-Bloco 3" class="w-full py-2.5 rounded-xl text-sm font-bold transition-all bg-emerald-600 hover:bg-emerald-700 text-white shadow-sm">
-                            Encerrar Bloco
-                        </button>
+                        <div class="text-xs text-slate-600 bg-slate-50 p-3 rounded-xl border border-slate-100 space-y-1.5">
+                            <p><i class="fa-solid fa-play text-cob-green mr-1.5"></i> <strong>Início:</strong> 29/10/26 - 08:00h</p>
+                            <p><i class="fa-solid fa-stop text-red-500 mr-1.5"></i> <strong>Fim:</strong> 03/11/26 - 23:59h</p>
+                        </div>
+                        <div class="w-full text-center text-[10px] font-bold text-slate-400 uppercase tracking-widest pt-2 border-t border-slate-100">
+                            Controle Automático
+                        </div>
                     </div>
                 </div>
 
@@ -456,13 +468,45 @@
         const _supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
         let records = [];
-        let blocosStatus = JSON.parse(localStorage.getItem('jj2026_blocos')) || {
-            'Bloco 1': 'Ativo',
-            'Bloco 2': 'Ativo',
-            'Bloco 3': 'Ativo'
+        let isAdminLoggedIn = false;
+        
+        // --- CALENDÁRIO DOS BLOCOS (LÓGICA AUTOMÁTICA) ---
+        // Lembrete: No JS os meses vão de 0 (Jan) a 11 (Dez). Outubro = 9, Novembro = 10.
+        const blocosSchedule = {
+            'Bloco 1': { start: new Date(2026, 9, 18, 8, 0, 0), end: new Date(2026, 9, 22, 23, 59, 59) },
+            'Bloco 2': { start: new Date(2026, 9, 23, 8, 0, 0), end: new Date(2026, 9, 28, 23, 59, 59) },
+            'Bloco 3': { start: new Date(2026, 9, 29, 8, 0, 0), end: new Date(2026, 10, 3, 23, 59, 59) }
         };
 
-        let isAdminLoggedIn = false;
+        function getBlocoStatus(blocoName) {
+            const now = new Date();
+            const schedule = blocosSchedule[blocoName];
+            if (!schedule) return 'Encerrado';
+            
+            if (now < schedule.start) return 'Aguardando';
+            if (now > schedule.end) return 'Encerrado';
+            return 'Ativo';
+        }
+
+        function updateBlocosUI() {
+            ['Bloco 1', 'Bloco 2', 'Bloco 3'].forEach(b => {
+                const status = getBlocoStatus(b);
+                const badge = document.getElementById(`status-badge-${b}`);
+                
+                if (badge) {
+                    if (status === 'Ativo') {
+                        badge.className = 'px-3 py-1 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800 border border-emerald-200';
+                        badge.innerText = 'Ativo Agora';
+                    } else if (status === 'Aguardando') {
+                        badge.className = 'px-3 py-1 rounded-full text-xs font-bold bg-amber-100 text-amber-800 border border-amber-200';
+                        badge.innerText = 'Aguardando Data';
+                    } else {
+                        badge.className = 'px-3 py-1 rounded-full text-xs font-bold bg-red-100 text-red-800 border border-red-200';
+                        badge.innerText = 'Encerrado';
+                    }
+                }
+            });
+        }
         
         // Variáveis Modo TV
         let tvModeInterval = null;
@@ -480,7 +524,7 @@
             const { data, error } = await _supabase.from('records').select('*');
             if (!error && data) {
                 records = data;
-                renderAdminRecords();
+                if (isAdminLoggedIn) renderAdminRecords();
                 renderLeaderboard();
             }
         }
@@ -568,33 +612,6 @@
             document.getElementById('admin-login-screen').classList.remove('hidden');
         }
 
-        function toggleBlocoStatus(blocoName) {
-            blocosStatus[blocoName] = blocosStatus[blocoName] === 'Ativo' ? 'Encerrado' : 'Ativo';
-            localStorage.setItem('jj2026_blocos', JSON.stringify(blocosStatus));
-            updateBlocosUI();
-        }
-
-        function updateBlocosUI() {
-            ['Bloco 1', 'Bloco 2', 'Bloco 3'].forEach(b => {
-                const status = blocosStatus[b];
-                const badge = document.getElementById(`status-badge-${b}`);
-                const btn = document.getElementById(`btn-toggle-${b}`);
-                if (badge && btn) {
-                    if (status === 'Ativo') {
-                        badge.className = 'px-3 py-1 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800 border border-emerald-200';
-                        badge.innerText = 'Ativo';
-                        btn.className = 'w-full py-2.5 rounded-xl text-sm font-bold transition-all bg-red-600 hover:bg-red-700 text-white shadow-sm';
-                        btn.innerText = 'Encerrar Bloco';
-                    } else {
-                        badge.className = 'px-3 py-1 rounded-full text-xs font-bold bg-red-100 text-red-800 border border-red-200';
-                        badge.innerText = 'Encerrado';
-                        btn.className = 'w-full py-2.5 rounded-xl text-sm font-bold transition-all bg-emerald-600 hover:bg-emerald-700 text-white shadow-sm';
-                        btn.innerText = 'Abrir Bloco';
-                    }
-                }
-            });
-        }
-
         async function submitTimeRecord(e) {
             e.preventDefault();
             const credencial = document.getElementById('admin-credencial').value;
@@ -610,8 +627,10 @@
                 return;
             }
 
-            if (blocosStatus[bloco] === 'Encerrado') {
-                showModal('Atenção', `O ${bloco} está encerrado. Não é possível cadastrar novos tempos nele.`, 'error');
+            // Verifica bloqueio automático de datas
+            const currentStatus = getBlocoStatus(bloco);
+            if (currentStatus !== 'Ativo') {
+                showModal('Atenção', `O ${bloco} está ${currentStatus.toLowerCase()}. O sistema aceita lançamentos apenas durante o período oficial do bloco.`, 'error');
                 return;
             }
 
@@ -819,6 +838,10 @@
 
         document.addEventListener('DOMContentLoaded', async () => {
             updateBlocosUI();
+            
+            // Atualiza a validação da interface dos blocos automaticamente a cada 60s
+            setInterval(updateBlocosUI, 60000); 
+            
             await fetchRecords();
 
             _supabase
