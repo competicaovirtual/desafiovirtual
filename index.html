@@ -118,7 +118,7 @@
 
             <!-- Cards de Modalidades -->
             <div class="space-y-4">
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <!-- Remo -->
                     <div onclick="goToRankingModalidade('Remo')" class="bg-white border border-slate-200 rounded-2xl p-6 space-y-4 shadow-md hover:border-cob-cyan hover:shadow-xl hover:scale-[1.02] cursor-pointer transition-all group">
                         <div class="w-12 h-12 rounded-xl bg-blue-50 text-cob-blue flex items-center justify-center overflow-hidden border border-blue-100 group-hover:scale-110 transition-transform">
@@ -146,21 +146,6 @@
                         </h4>
                         <p class="text-slate-600 text-sm leading-relaxed">
                             Sprint de <strong class="text-slate-900">300m</strong> no percurso dos Jogos Olímpicos Rio 2016 através do aplicativo <strong class="text-cob-blue">Rouvy</strong> e utilizando a smart bike <strong class="text-cob-green">Zwift Ride</strong>.
-                        </p>
-                    </div>
-
-                    <!-- Corrida -->
-                    <div onclick="goToRankingModalidade('Corrida')" class="bg-white border border-slate-200 rounded-2xl p-6 space-y-4 shadow-md hover:border-cob-cyan hover:shadow-xl hover:scale-[1.02] cursor-pointer transition-all group">
-                        <div class="w-12 h-12 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center overflow-hidden border border-amber-100 group-hover:scale-110 transition-transform">
-                            <img src="corridavirtual.png" alt="Corrida Virtual" class="w-full h-full object-contain p-1" onerror="this.onerror=null; this.style.display='none'; document.getElementById('corrida-fallback').style.display='flex';">
-                            <div id="corrida-fallback" style="display:none;" class="w-full h-full items-center justify-center text-amber-600"><i class="fa-solid fa-person-running"></i></div>
-                        </div>
-                        <h4 class="text-xl font-bold text-slate-900 flex items-center justify-between">
-                            <span>Corrida (500m)</span>
-                            <i class="fa-solid fa-arrow-right text-xs text-cob-blue group-hover:translate-x-1 transition-transform"></i>
-                        </h4>
-                        <p class="text-slate-600 text-sm leading-relaxed">
-                            Prova de <strong class="text-slate-900">500m</strong> através do aplicativo <strong class="text-cob-blue">Zwift</strong> em pista de atletismo virtual utilizando a esteira curva da <strong class="text-cob-green">Mormaii</strong>.
                         </p>
                     </div>
                 </div>
@@ -211,7 +196,6 @@
                     <select id="filter-modalidade" onchange="renderLeaderboard()" class="bg-slate-50 border border-slate-300 rounded-xl px-4 py-2.5 text-sm text-slate-800 focus:outline-none focus:border-cob-blue">
                         <option value="Remo">Remo (500m)</option>
                         <option value="Ciclismo">Ciclismo (Sprint 300m)</option>
-                        <option value="Corrida">Corrida (500m)</option>
                     </select>
 
                     <button onclick="toggleTVMode()" class="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl shadow-md transition-all flex items-center">
@@ -332,7 +316,6 @@
                             <select id="admin-modalidade" required class="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-3 text-slate-900 focus:outline-none focus:border-cob-blue">
                                 <option value="Remo">Remo (500m)</option>
                                 <option value="Ciclismo">Ciclismo (Sprint 300m)</option>
-                                <option value="Corrida">Corrida (500m)</option>
                             </select>
                         </div>
 
@@ -577,9 +560,7 @@
             { mod: 'Remo', naipe: 'MAS', bloco: 'Geral', title: 'REMO (500m) - MASCULINO' },
             { mod: 'Remo', naipe: 'FEM', bloco: 'Geral', title: 'REMO (500m) - FEMININO' },
             { mod: 'Ciclismo', naipe: 'MAS', bloco: 'Geral', title: 'CICLISMO (300m) - MASCULINO' },
-            { mod: 'Ciclismo', naipe: 'FEM', bloco: 'Geral', title: 'CICLISMO (300m) - FEMININO' },
-            { mod: 'Corrida', naipe: 'MAS', bloco: 'Geral', title: 'CORRIDA (500m) - MASCULINO' },
-            { mod: 'Corrida', naipe: 'FEM', bloco: 'Geral', title: 'CORRIDA (500m) - FEMININO' }
+            { mod: 'Ciclismo', naipe: 'FEM', bloco: 'Geral', title: 'CICLISMO (300m) - FEMININO' }
         ];
 
         async function fetchRecords() {
