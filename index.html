@@ -118,7 +118,7 @@
 
             <!-- Cards de Modalidades -->
             <div class="space-y-4">
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                     <!-- Remo -->
                     <div onclick="goToRankingModalidade('Remo')" class="bg-white border border-slate-200 rounded-2xl p-6 space-y-4 shadow-md hover:border-cob-cyan hover:shadow-xl hover:scale-[1.02] cursor-pointer transition-all group">
                         <div class="w-12 h-12 rounded-xl bg-blue-50 text-cob-blue flex items-center justify-center overflow-hidden border border-blue-100 group-hover:scale-110 transition-transform">
@@ -146,6 +146,21 @@
                         </h4>
                         <p class="text-slate-600 text-sm leading-relaxed">
                             Sprint de <strong class="text-slate-900">300m</strong> no percurso dos Jogos Olímpicos Rio 2016 através do aplicativo <strong class="text-cob-blue">Rouvy</strong> e utilizando a smart bike <strong class="text-cob-green">Zwift Ride</strong>.
+                        </p>
+                    </div>
+
+                    <!-- Fortnite -->
+                    <div onclick="goToRankingModalidade('Fortnite')" class="bg-white border border-slate-200 rounded-2xl p-6 space-y-4 shadow-md hover:border-cob-cyan hover:shadow-xl hover:scale-[1.02] cursor-pointer transition-all group">
+                        <div class="w-12 h-12 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center overflow-hidden border border-purple-100 group-hover:scale-110 transition-transform">
+                            <img src="bambagamer.png" alt="Fortnite Virtual" class="w-full h-full object-cover rounded-xl" onerror="this.onerror=null; this.style.display='none'; document.getElementById('fortnite-fallback').style.display='flex';">
+                            <div id="fortnite-fallback" style="display:none;" class="w-full h-full items-center justify-center text-purple-600"><i class="fa-solid fa-gamepad"></i></div>
+                        </div>
+                        <h4 class="text-xl font-bold text-slate-900 flex items-center justify-between">
+                            <span>Fortnite (Pontos)</span>
+                            <i class="fa-solid fa-arrow-right text-xs text-cob-blue group-hover:translate-x-1 transition-transform"></i>
+                        </h4>
+                        <p class="text-slate-600 text-sm leading-relaxed">
+                            Competição de <strong class="text-slate-900">Fortnite</strong> aberta ao público com classificação baseada em <strong class="text-purple-600">Pontuação Oficial</strong>.
                         </p>
                     </div>
                 </div>
@@ -176,7 +191,7 @@
             <div id="ranking-header" class="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white border border-slate-200 p-6 rounded-2xl shadow-md">
                 <div>
                     <h2 class="text-2xl font-black text-slate-900">Ranking Oficial</h2>
-                    <p class="text-sm text-slate-500">Consulte os tempos homologados pela equipe técnica.</p>
+                    <p class="text-sm text-slate-500">Consulte os tempos e pontos homologados pela equipe técnica.</p>
                 </div>
                 
                 <div class="flex flex-wrap items-center gap-3">
@@ -196,6 +211,7 @@
                     <select id="filter-modalidade" onchange="renderLeaderboard()" class="bg-slate-50 border border-slate-300 rounded-xl px-4 py-2.5 text-sm text-slate-800 focus:outline-none focus:border-cob-blue">
                         <option value="Remo">Remo (500m)</option>
                         <option value="Ciclismo">Ciclismo (Sprint 300m)</option>
+                        <option value="Fortnite">Fortnite (Pontos)</option>
                     </select>
 
                     <button onclick="toggleTVMode()" class="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl shadow-md transition-all flex items-center">
@@ -215,7 +231,7 @@
                                 <th class="py-4 px-6">Naipe</th>
                                 <th class="py-4 px-6">Perfil</th>
                                 <th class="py-4 px-6">Bloco</th>
-                                <th class="py-4 px-6 text-right">Tempo Oficial</th>
+                                <th id="th-resultado" class="py-4 px-6 text-right">Tempo Oficial</th>
                             </tr>
                         </thead>
                         <tbody id="leaderboard-tbody" class="divide-y divide-slate-100 text-sm">
@@ -276,15 +292,16 @@
                 <div class="bg-white border border-slate-200 p-8 rounded-3xl shadow-md space-y-6">
                     <h4 class="text-xl font-black text-slate-900 flex items-center space-x-2">
                         <i class="fa-solid fa-stopwatch text-cob-blue"></i>
-                        <span>Registrar Tempo Oficial de Atleta</span>
+                        <span>Registrar Resultado Oficial do Atleta</span>
                     </h4>
 
                     <form id="time-entry-form" onsubmit="submitTimeRecord(event)" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                         
+                        <!-- Credencial agora é OPCIONAL -->
                         <div>
-                            <label class="block text-xs font-bold uppercase text-slate-600 mb-2">CREDENCIAL</label>
-                            <input type="text" id="admin-credencial" required placeholder="00000000-0" oninput="formatCredencialInput(this)" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-3 text-slate-900 focus:outline-none focus:border-cob-blue">
-                            <span class="text-xs text-slate-500 mt-1 block">Busca cadastro automático.</span>
+                            <label class="block text-xs font-bold uppercase text-slate-600 mb-2">CREDENCIAL <span class="text-slate-400 font-normal lowercase">(Opcional)</span></label>
+                            <input type="text" id="admin-credencial" placeholder="00000000-0" oninput="formatCredencialInput(this)" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-3 text-slate-900 focus:outline-none focus:border-cob-blue">
+                            <span class="text-xs text-slate-500 mt-1 block">Busca cadastro automático se informado.</span>
                         </div>
 
                         <div>
@@ -311,11 +328,13 @@
                             </select>
                         </div>
 
+                        <!-- OnChange adicionado para manipular o campo Tempo/Pontos -->
                         <div>
                             <label class="block text-xs font-bold uppercase text-slate-600 mb-2">Modalidade</label>
-                            <select id="admin-modalidade" required class="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-3 text-slate-900 focus:outline-none focus:border-cob-blue">
+                            <select id="admin-modalidade" required onchange="handleModalidadeChange()" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-3 text-slate-900 focus:outline-none focus:border-cob-blue">
                                 <option value="Remo">Remo (500m)</option>
                                 <option value="Ciclismo">Ciclismo (Sprint 300m)</option>
+                                <option value="Fortnite">Fortnite (Pontos)</option>
                             </select>
                         </div>
 
@@ -328,9 +347,10 @@
                             </select>
                         </div>
 
+                        <!-- Label com ID dinâmico, Input recebendo formatação global baseada na Modalidade -->
                         <div>
-                            <label class="block text-xs font-bold uppercase text-slate-600 mb-2">Tempo (HH:MM:SS)</label>
-                            <input type="text" id="admin-tempo" required placeholder="00:00:00" maxlength="8" oninput="formatTimeInput(this)" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-3 text-slate-900 font-mono text-lg focus:outline-none focus:border-cob-blue">
+                            <label id="label-tempo-pontos" class="block text-xs font-bold uppercase text-slate-600 mb-2">Tempo (HH:MM:SS)</label>
+                            <input type="text" id="admin-tempo" required placeholder="00:00:00" oninput="formatInputData(this)" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-3 text-slate-900 font-mono text-lg focus:outline-none focus:border-cob-blue">
                         </div>
 
                         <div class="lg:col-span-2 flex items-end justify-end">
@@ -355,7 +375,7 @@
                                     <th class="py-3 px-4">Perfil</th>
                                     <th class="py-3 px-4">Bloco</th>
                                     <th class="py-3 px-4">Modalidade</th>
-                                    <th class="py-3 px-4">Tempo</th>
+                                    <th class="py-3 px-4">Tempo / Pontos</th>
                                     <th class="py-3 px-4 text-right">Ação</th>
                                 </tr>
                             </thead>
@@ -494,7 +514,7 @@
                             <p><i class="fa-solid fa-play text-cob-green mr-1.5"></i> <strong>Início:</strong> ${startStr}</p>
                             <p><i class="fa-solid fa-stop text-red-500 mr-1.5"></i> <strong>Fim:</strong> ${endStr}</p>
                             
-                            <!-- Botão Editar Visível no Hover (Apenas se for Automático para fazer sentido) -->
+                            <!-- Botão Editar Visível no Hover -->
                             <button onclick="openEditModal('${b}')" class="absolute top-2 right-2 p-1.5 bg-white border border-slate-200 rounded-lg shadow-sm text-cob-blue hover:bg-slate-50 hidden group-hover:block transition-all" title="Editar Datas do Bloco">
                                 <i class="fa-solid fa-pen"></i>
                             </button>
@@ -560,7 +580,9 @@
             { mod: 'Remo', naipe: 'MAS', bloco: 'Geral', title: 'REMO (500m) - MASCULINO' },
             { mod: 'Remo', naipe: 'FEM', bloco: 'Geral', title: 'REMO (500m) - FEMININO' },
             { mod: 'Ciclismo', naipe: 'MAS', bloco: 'Geral', title: 'CICLISMO (300m) - MASCULINO' },
-            { mod: 'Ciclismo', naipe: 'FEM', bloco: 'Geral', title: 'CICLISMO (300m) - FEMININO' }
+            { mod: 'Ciclismo', naipe: 'FEM', bloco: 'Geral', title: 'CICLISMO (300m) - FEMININO' },
+            { mod: 'Fortnite', naipe: 'MAS', bloco: 'Geral', title: 'FORTNITE - MASCULINO' },
+            { mod: 'Fortnite', naipe: 'FEM', bloco: 'Geral', title: 'FORTNITE - FEMININO' }
         ];
 
         async function fetchRecords() {
@@ -604,6 +626,31 @@
             if (selectMod) {
                 selectMod.value = modalidadeNome;
                 renderLeaderboard();
+            }
+        }
+
+        // Modifica rótulo e máscara do formulário com base na modalidade
+        function handleModalidadeChange() {
+            const mod = document.getElementById('admin-modalidade').value;
+            const label = document.getElementById('label-tempo-pontos');
+            const input = document.getElementById('admin-tempo');
+            
+            if (mod === 'Fortnite') {
+                label.innerText = 'Pontos';
+                input.placeholder = 'Ex: 1500';
+            } else {
+                label.innerText = 'Tempo (HH:MM:SS)';
+                input.placeholder = '00:00:00';
+            }
+            input.value = '';
+        }
+
+        function formatInputData(input) {
+            const mod = document.getElementById('admin-modalidade').value;
+            if (mod === 'Fortnite') {
+                input.value = input.value.replace(/\D/g, ''); // Somente números para Pontos
+            } else {
+                formatTimeInput(input);
             }
         }
 
@@ -668,8 +715,8 @@
             const bloco = document.getElementById('admin-bloco').value;
             const tempo = document.getElementById('admin-tempo').value;
 
-            if (credencial.length !== 10) {
-                showModal('Atenção', 'Digite uma Credencial válida completa.', 'error');
+            if (credencial && credencial.length !== 10) {
+                showModal('Atenção', 'Se informada, a Credencial deve ser completa (ex: 12345678-9).', 'error');
                 return;
             }
 
@@ -679,17 +726,22 @@
                 return;
             }
 
-            const existingRecord = records.find(r => r.credencial === credencial && r.modalidade === modalidade);
+            let existingRecord = null;
+            if (credencial) {
+                existingRecord = records.find(r => r.credencial === credencial && r.modalidade === modalidade);
+            } else {
+                existingRecord = records.find(r => r.atleta === atleta && r.modalidade === modalidade);
+            }
 
             if (existingRecord) {
                 const { error } = await _supabase.from('records')
-                    .update({ tempo: tempo, bloco: bloco, atleta: atleta, subcategoria: subcategoria, naipe: naipe })
+                    .update({ tempo: tempo, bloco: bloco, atleta: atleta, subcategoria: subcategoria, naipe: naipe, credencial: credencial })
                     .eq('id', existingRecord.id);
 
                 if (!error) {
                     document.getElementById('time-entry-form').reset();
                     await fetchRecords();
-                    showModal('Sucesso', 'O tempo deste participante foi atualizado nesta modalidade!', 'success');
+                    showModal('Sucesso', 'O resultado deste participante foi atualizado!', 'success');
                 } else {
                     showModal('Erro', 'Não foi possível atualizar o registro.', 'error');
                 }
@@ -700,7 +752,7 @@
                 if (!error) {
                     document.getElementById('time-entry-form').reset();
                     await fetchRecords();
-                    showModal('Sucesso', 'Tempo oficial cadastrado com sucesso!', 'success');
+                    showModal('Sucesso', 'Resultado oficial cadastrado com sucesso!', 'success');
                 } else {
                     showModal('Erro', 'Não foi possível salvar o registro no banco de dados.', 'error');
                 }
@@ -722,7 +774,12 @@
                 return;
             }
             records.forEach(r => {
-                const hiddenCredencial = r.credencial ? r.credencial.substring(0, 4) + '****-' + r.credencial.substring(9, 10) : '---';
+                let hiddenCredencial = 'N/A';
+                if (r.credencial && r.credencial.length === 10) {
+                    hiddenCredencial = r.credencial.substring(0, 4) + '****-' + r.credencial.substring(9, 10);
+                } else if (r.credencial) {
+                    hiddenCredencial = r.credencial;
+                }
                 
                 tbody.innerHTML += `
                     <tr class="hover:bg-slate-50 transition-colors">
@@ -732,7 +789,7 @@
                         <td class="py-3 px-4 text-slate-600">${r.subcategoria}</td>
                         <td class="py-3 px-4 text-slate-600">${r.bloco}</td>
                         <td class="py-3 px-4 text-slate-600">${r.modalidade}</td>
-                        <td class="py-3 px-4 font-mono font-bold text-emerald-600">${r.tempo}</td>
+                        <td class="py-3 px-4 font-mono font-bold ${r.modalidade === 'Fortnite' ? 'text-purple-600' : 'text-emerald-600'}">${r.tempo}</td>
                         <td class="py-3 px-4 text-right">
                             <button onclick="deleteRecord('${r.id}')" class="text-red-500 hover:text-red-700 p-2"><i class="fa-solid fa-trash"></i></button>
                         </td>
@@ -747,6 +804,12 @@
             const naipe = document.getElementById('filter-naipe').value;
             
             const tbody = document.getElementById('leaderboard-tbody');
+            const thResultado = document.getElementById('th-resultado');
+
+            // Ajusta o cabeçalho dinamicamente
+            if (thResultado) {
+                thResultado.innerText = modalidade === 'Fortnite' ? 'Pontuação' : 'Tempo Oficial';
+            }
 
             let filtered = records.filter(r => r.modalidade === modalidade);
             
@@ -757,7 +820,12 @@
                 filtered = filtered.filter(r => r.naipe === naipe);
             }
 
-            filtered.sort((a, b) => a.tempo.localeCompare(b.tempo));
+            // Ordenação: Fortnite (Pontos Decrescente) vs Demais (Tempo Crescente)
+            if (modalidade === 'Fortnite') {
+                filtered.sort((a, b) => parseInt(b.tempo) - parseInt(a.tempo));
+            } else {
+                filtered.sort((a, b) => a.tempo.localeCompare(b.tempo));
+            }
 
             tbody.classList.remove('animate-fadeIn');
             void tbody.offsetWidth;
@@ -775,6 +843,9 @@
                 if (index === 1) badgeClass = "text-slate-700 font-black bg-slate-200 px-3 py-1 rounded-full border border-slate-300";
                 if (index === 2) badgeClass = "text-amber-800 font-black bg-amber-50 px-3 py-1 rounded-full border border-amber-200";
 
+                const displayResult = modalidade === 'Fortnite' ? `${r.tempo} pts` : r.tempo;
+                const resultColor = modalidade === 'Fortnite' ? 'text-purple-600' : 'text-emerald-600';
+
                 tbody.innerHTML += `
                     <tr class="hover:bg-slate-50 transition-colors">
                         <td class="py-4 px-6 text-center font-black ${badgeClass}">#${index + 1}</td>
@@ -782,7 +853,7 @@
                         <td class="py-4 px-6 text-slate-500 font-semibold">${r.naipe || '-'}</td>
                         <td class="py-4 px-6 text-slate-600">${r.subcategoria}</td>
                         <td class="py-4 px-6 text-slate-500">${r.bloco}</td>
-                        <td class="py-4 px-6 text-right font-mono font-black text-emerald-600 text-base">${r.tempo}</td>
+                        <td class="py-4 px-6 text-right font-mono font-black ${resultColor} text-base">${displayResult}</td>
                     </tr>
                 `;
             });
