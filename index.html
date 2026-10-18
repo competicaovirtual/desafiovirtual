@@ -6,6 +6,8 @@
     <title>Desafio Virtual | Jogos da Juventude 2026</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <!-- Adicionada Biblioteca Leitor de Código de Barras / QR Code -->
+    <script src="https://unpkg.com/html5-qrcode"></script>
     <script>
         tailwind.config = {
             theme: {
@@ -297,11 +299,16 @@
 
                     <form id="time-entry-form" onsubmit="submitTimeRecord(event)" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                         
-                        <!-- Credencial agora é OPCIONAL -->
-                        <div>
-                            <label class="block text-xs font-bold uppercase text-slate-600 mb-2">CREDENCIAL <span class="text-slate-400 font-normal lowercase">(Opcional)</span></label>
-                            <input type="text" id="admin-credencial" placeholder="00000000-0" oninput="formatCredencialInput(this)" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-3 text-slate-900 focus:outline-none focus:border-cob-blue">
-                            <span class="text-xs text-slate-500 mt-1 block">Busca cadastro automático se informado.</span>
+                        <!-- Leitor de Código de Barras / Credencial com Máscara Restaurada -->
+                        <div class="lg:col-span-2 xl:col-span-1">
+                            <label class="block text-xs font-bold uppercase text-slate-600 mb-2">CREDENCIAL <span class="text-slate-400 font-normal lowercase">(00000000-0)</span></label>
+                            <div class="flex space-x-2">
+                                <input type="text" id="admin-credencial" placeholder="Ler código ou digitar" oninput="formatCredencialInput(this)" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-3 text-slate-900 focus:outline-none focus:border-cob-blue">
+                                <button type="button" onclick="openScannerModal()" class="bg-cob-dark hover:bg-cob-blue text-white px-5 rounded-xl shadow-md transition-all flex items-center justify-center border-none cursor-pointer" title="Escanear com Câmera">
+                                    <i class="fa-solid fa-qrcode text-xl"></i>
+                                </button>
+                            </div>
+                            <span class="text-xs text-slate-500 mt-1 block">Busca cadastro automático por leitura ou digitação.</span>
                         </div>
 
                         <div>
@@ -404,7 +411,7 @@
     </button>
 
     <!-- Modal Customizado Info -->
-    <div id="custom-modal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+    <div id="custom-modal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-[9999] hidden flex items-center justify-center p-4">
         <div class="bg-white border border-slate-200 max-w-sm w-full p-6 rounded-3xl shadow-2xl text-center space-y-4">
             <div id="modal-icon" class="w-14 h-14 rounded-full bg-emerald-50 text-cob-green flex items-center justify-center mx-auto text-2xl border border-emerald-100">
                 <i class="fa-solid fa-check"></i>
@@ -416,7 +423,7 @@
     </div>
 
     <!-- Modal Editar Datas -->
-    <div id="edit-dates-modal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+    <div id="edit-dates-modal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-[9998] hidden flex items-center justify-center p-4">
         <div class="bg-white border border-slate-200 max-w-sm w-full p-6 rounded-3xl shadow-2xl space-y-4">
             <div class="flex justify-between items-center">
                 <h4 id="edit-modal-title" class="text-lg font-bold text-slate-900">Editar Datas</h4>
@@ -434,6 +441,18 @@
                 </div>
                 <button onclick="saveBlockDates()" class="w-full py-2.5 bg-cob-dark hover:bg-cob-blue text-white font-bold rounded-xl text-sm transition-all">Salvar Configuração</button>
             </div>
+        </div>
+    </div>
+
+    <!-- Modal Leitor de Código de Barras -->
+    <div id="scanner-modal" class="fixed inset-0 bg-slate-900/90 backdrop-blur-sm z-[9999] hidden flex items-center justify-center p-4">
+        <div class="bg-white border border-slate-200 max-w-md w-full p-6 rounded-3xl shadow-2xl space-y-4">
+            <div class="flex justify-between items-center mb-2">
+                <h4 class="text-lg font-bold text-slate-900 flex items-center"><i class="fa-solid fa-qrcode mr-2 text-cob-blue"></i> Escanear Credencial</h4>
+                <button onclick="closeScannerModal()" class="text-slate-400 hover:text-red-600 transition-colors"><i class="fa-solid fa-xmark text-2xl"></i></button>
+            </div>
+            <div id="reader" class="w-full rounded-xl overflow-hidden bg-black"></div>
+            <p class="text-xs text-center text-slate-500">Aponte a câmera para o código de barras ou QR Code da credencial do atleta.</p>
         </div>
     </div>
 
@@ -573,6 +592,84 @@
             renderAdminBlocks();
         }
         
+        // --- FUNÇÕES DO SCANNER DE CÓDIGO DE BARRAS E MÁSCARA ---
+        let html5QrCode = null;
+
+        function formatCredencialInput(input) {
+            let v = input.value.replace(/\D/g, '');
+            if (v.length > 9) v = v.slice(0, 9);
+            v = v.replace(/(\d{8})(\d)/, '$1-$2');
+            input.value = v;
+
+            if (v.length === 10) { 
+                const existingParticipant = records.find(r => r.credencial === v);
+                if (existingParticipant) {
+                    document.getElementById('admin-atleta').value = existingParticipant.atleta || '';
+                    document.getElementById('admin-subcategoria').value = existingParticipant.subcategoria || '';
+                    if(existingParticipant.naipe) document.getElementById('admin-naipe').value = existingParticipant.naipe;
+                }
+            }
+        }
+
+        function openScannerModal() {
+            document.getElementById('scanner-modal').classList.remove('hidden');
+            if (!html5QrCode) {
+                html5QrCode = new Html5Qrcode("reader");
+            }
+            
+            // Configurações para ler Código de barras e QR Codes
+            const config = { fps: 10, qrbox: { width: 250, height: 250 } };
+            
+            html5QrCode.start({ facingMode: "environment" }, config, onScanSuccess)
+            .catch(err => {
+                showModal('Erro na Câmera', 'Não foi possível acessar a câmera. Verifique as permissões do seu navegador.', 'error');
+                closeScannerModal();
+            });
+        }
+
+        function closeScannerModal() {
+            document.getElementById('scanner-modal').classList.add('hidden');
+            if (html5QrCode && html5QrCode.isScanning) {
+                html5QrCode.stop().catch(err => console.error("Erro ao parar a câmera.", err));
+            }
+        }
+
+        function onScanSuccess(decodedText, decodedResult) {
+            closeScannerModal();
+            
+            // Aplica a máscara no texto escaneado para forçar o formato 00000000-0
+            let v = decodedText.replace(/\D/g, '');
+            if (v.length > 9) v = v.slice(0, 9);
+            v = v.replace(/(\d{8})(\d)/, '$1-$2');
+            
+            const credInput = document.getElementById('admin-credencial');
+            credInput.value = v;
+            
+            // Feedback tátil no celular se suportado
+            if (navigator.vibrate) { navigator.vibrate(200); }
+
+            // Só processa a busca automática se atingir os 10 caracteres
+            if (v.length === 10) {
+                const existingParticipant = records.find(r => r.credencial === v);
+                
+                if (existingParticipant) {
+                    document.getElementById('admin-atleta').value = existingParticipant.atleta || '';
+                    document.getElementById('admin-subcategoria').value = existingParticipant.subcategoria || '';
+                    if(existingParticipant.naipe) document.getElementById('admin-naipe').value = existingParticipant.naipe;
+                    
+                    showModal('Atleta Localizado', `Dados de ${existingParticipant.atleta} puxados com sucesso!`, 'success');
+                } else {
+                    // Caso não exista, limpa os inputs para novo cadastro manual
+                    document.getElementById('admin-atleta').value = '';
+                    document.getElementById('admin-subcategoria').value = 'Atleta';
+                    
+                    showModal('Nova Credencial', `Código ${v} registrado. Preencha os dados do atleta para o primeiro cadastro.`, 'success');
+                }
+            } else {
+                showModal('Atenção', `O código lido não possui os 9 dígitos padrão da credencial.`, 'error');
+            }
+        }
+        
         // Variáveis Modo TV
         let tvModeInterval = null;
         let tvStateIndex = 0;
@@ -666,22 +763,6 @@
             }
         }
 
-        function formatCredencialInput(input) {
-            let v = input.value.replace(/\D/g, '');
-            if (v.length > 9) v = v.slice(0, 9);
-            v = v.replace(/(\d{8})(\d)/, '$1-$2');
-            input.value = v;
-
-            if (v.length === 10) { 
-                const existingParticipant = records.find(r => r.credencial === v);
-                if (existingParticipant) {
-                    document.getElementById('admin-atleta').value = existingParticipant.atleta || '';
-                    document.getElementById('admin-subcategoria').value = existingParticipant.subcategoria || '';
-                    if(existingParticipant.naipe) document.getElementById('admin-naipe').value = existingParticipant.naipe;
-                }
-            }
-        }
-
         function handleAdminLogin() {
             const pin = document.getElementById('admin-pin-input').value;
             const errorEl = document.getElementById('login-error');
@@ -707,7 +788,7 @@
 
         async function submitTimeRecord(e) {
             e.preventDefault();
-            const credencial = document.getElementById('admin-credencial').value;
+            const credencial = document.getElementById('admin-credencial').value.trim();
             const atleta = document.getElementById('admin-atleta').value.toUpperCase();
             const naipe = document.getElementById('admin-naipe').value;
             const subcategoria = document.getElementById('admin-subcategoria').value;
@@ -715,6 +796,7 @@
             const bloco = document.getElementById('admin-bloco').value;
             const tempo = document.getElementById('admin-tempo').value;
 
+            // Restaura a trava que exige os 10 caracteres no envio
             if (credencial && credencial.length !== 10) {
                 showModal('Atenção', 'Se informada, a Credencial deve ser completa (ex: 12345678-9).', 'error');
                 return;
@@ -727,6 +809,7 @@
             }
 
             let existingRecord = null;
+            // Se credencial existe procuramos por ela e a modalidade, senão pelo nome
             if (credencial) {
                 existingRecord = records.find(r => r.credencial === credencial && r.modalidade === modalidade);
             } else {
@@ -775,6 +858,7 @@
             }
             records.forEach(r => {
                 let hiddenCredencial = 'N/A';
+                // Máscara mantida como no original: mostra início e fim
                 if (r.credencial && r.credencial.length === 10) {
                     hiddenCredencial = r.credencial.substring(0, 4) + '****-' + r.credencial.substring(9, 10);
                 } else if (r.credencial) {
@@ -783,7 +867,7 @@
                 
                 tbody.innerHTML += `
                     <tr class="hover:bg-slate-50 transition-colors">
-                        <td class="py-3 px-4 text-slate-500 font-mono text-xs">${hiddenCredencial}</td>
+                        <td class="py-3 px-4 text-slate-500 font-mono text-xs" title="${r.credencial}">${hiddenCredencial}</td>
                         <td class="py-3 px-4 font-bold text-slate-900">${r.atleta}</td>
                         <td class="py-3 px-4 text-slate-600">${r.naipe || '-'}</td>
                         <td class="py-3 px-4 text-slate-600">${r.subcategoria}</td>
@@ -918,15 +1002,11 @@
         async function applyTVState() {
             const state = tvStates[tvStateIndex];
             
-            // 1. Atualiza os filtros primeiro
             document.getElementById('filter-modalidade').value = state.mod;
             document.getElementById('filter-naipe').value = state.naipe;
             document.getElementById('filter-bloco').value = state.bloco;
             document.getElementById('tv-title-text').innerText = state.title;
             
-            // 2. Busca os dados atualizados no banco a cada ciclo do Modo TV
-            // O fetchRecords() já aciona o renderLeaderboard() no final, 
-            // garantindo que a tela seja montada com os dados mais recentes.
             await fetchRecords(); 
         }
 
@@ -951,12 +1031,9 @@
         document.addEventListener('DOMContentLoaded', async () => {
             if (isAdminLoggedIn) renderAdminBlocks();
             
-            // 1. Loop contínuo a cada 30 segundos
+            // Loop contínuo a cada 30 segundos
             setInterval(() => {
                 if(isAdminLoggedIn) renderAdminBlocks();
-                
-                // Se o modo TV NÃO estiver ligado, força a atualização da aba Ranking
-                // (Isso garante que a tela atualize mesmo se a Smart TV derrubar o WebSocket do Supabase)
                 if (!tvModeInterval) {
                     fetchRecords();
                 }
@@ -964,7 +1041,6 @@
             
             await fetchRecords();
 
-            // 2. Mantém o listener do Supabase (para atualizações imediatas se a conexão da TV não cair)
             _supabase
                 .channel('public:records')
                 .on('postgres_changes', { event: '*', schema: 'public', table: 'records' }, payload => {
@@ -972,9 +1048,7 @@
                 })
                 .subscribe();
                 
-            // 3. Prevenção de travamento na Smart TV (Memory Leak)
-            // Recarrega a página inteira automaticamente a cada 2 horas (7200000 ms).
-            // Em Smart TVs, painéis que ficam ligados dias seguidos costumam travar. Isso evita o problema.
+            // Prevenção de travamento na Smart TV (Memory Leak) - 2 horas
             setTimeout(() => {
                 window.location.reload();
             }, 7200000);
