@@ -915,13 +915,19 @@
             }, 15000); 
         }
 
-        function applyTVState() {
+        async function applyTVState() {
             const state = tvStates[tvStateIndex];
+            
+            // 1. Atualiza os filtros primeiro
             document.getElementById('filter-modalidade').value = state.mod;
             document.getElementById('filter-naipe').value = state.naipe;
             document.getElementById('filter-bloco').value = state.bloco;
             document.getElementById('tv-title-text').innerText = state.title;
-            renderLeaderboard();
+            
+            // 2. Busca os dados atualizados no banco a cada ciclo do Modo TV
+            // O fetchRecords() já aciona o renderLeaderboard() no final, 
+            // garantindo que a tela seja montada com os dados mais recentes.
+            await fetchRecords(); 
         }
 
         function showModal(title, message, type = 'success') {
@@ -945,19 +951,33 @@
         document.addEventListener('DOMContentLoaded', async () => {
             if (isAdminLoggedIn) renderAdminBlocks();
             
-            // Recalcula o status visualmente a cada 30 segundos
+            // 1. Loop contínuo a cada 30 segundos
             setInterval(() => {
                 if(isAdminLoggedIn) renderAdminBlocks();
+                
+                // Se o modo TV NÃO estiver ligado, força a atualização da aba Ranking
+                // (Isso garante que a tela atualize mesmo se a Smart TV derrubar o WebSocket do Supabase)
+                if (!tvModeInterval) {
+                    fetchRecords();
+                }
             }, 30000); 
             
             await fetchRecords();
 
+            // 2. Mantém o listener do Supabase (para atualizações imediatas se a conexão da TV não cair)
             _supabase
                 .channel('public:records')
                 .on('postgres_changes', { event: '*', schema: 'public', table: 'records' }, payload => {
                     fetchRecords();
                 })
                 .subscribe();
+                
+            // 3. Prevenção de travamento na Smart TV (Memory Leak)
+            // Recarrega a página inteira automaticamente a cada 2 horas (7200000 ms).
+            // Em Smart TVs, painéis que ficam ligados dias seguidos costumam travar. Isso evita o problema.
+            setTimeout(() => {
+                window.location.reload();
+            }, 7200000);
         });
     </script>
 </body>
