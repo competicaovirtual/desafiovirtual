@@ -505,6 +505,7 @@
         <i class="fa-solid fa-xmark mr-2"></i>Sair do Modo TV
     </button>
 
+    <!-- Modal Padrão -->
     <div id="custom-modal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-[9999] hidden flex items-center justify-center p-4">
         <div class="bg-white border border-slate-200 max-w-sm w-full p-6 rounded-3xl shadow-2xl text-center space-y-4">
             <div id="modal-icon" class="w-14 h-14 rounded-full bg-emerald-50 text-cob-green flex items-center justify-center mx-auto text-2xl border border-emerald-100">
@@ -516,6 +517,7 @@
         </div>
     </div>
 
+    <!-- Modal Editar Datas Bloco -->
     <div id="edit-dates-modal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-[9998] hidden flex items-center justify-center p-4">
         <div class="bg-white border border-slate-200 max-w-sm w-full p-6 rounded-3xl shadow-2xl space-y-4">
             <div class="flex justify-between items-center">
@@ -537,6 +539,88 @@
         </div>
     </div>
 
+    <!-- NOVO: Modal para Edição do Participante -->
+    <div id="edit-participant-modal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-[9999] hidden flex items-center justify-center p-4">
+        <div class="bg-white border border-slate-200 max-w-3xl w-full p-6 md:p-8 rounded-3xl shadow-2xl space-y-6 overflow-y-auto max-h-[90vh]">
+            <div class="flex justify-between items-center border-b border-slate-100 pb-4">
+                <h4 class="text-xl font-black text-slate-900 flex items-center space-x-2">
+                    <i class="fa-solid fa-pen-to-square text-cob-blue"></i>
+                    <span>Editar Registro do Participante</span>
+                </h4>
+                <button onclick="closeEditParticipantModal()" class="text-slate-400 hover:text-red-600 transition-colors">
+                    <i class="fa-solid fa-xmark text-2xl"></i>
+                </button>
+            </div>
+
+            <form id="modal-edit-form" onsubmit="submitEditParticipant(event)" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <input type="hidden" id="modal-edit-id" value="">
+
+                <div>
+                    <label class="block text-xs font-bold uppercase text-slate-600 mb-2">CREDENCIAL</label>
+                    <input type="text" id="modal-credencial" placeholder="00000000-0" oninput="formatModalCredencialInput(this)" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-3 text-slate-900 focus:outline-none focus:border-cob-blue">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold uppercase text-slate-600 mb-2">Nome Completo</label>
+                    <input type="text" id="modal-atleta" required placeholder="NOME DO PARTICIPANTE" oninput="this.value = this.value.toUpperCase()" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-3 text-slate-900 uppercase focus:outline-none focus:border-cob-blue">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold uppercase text-slate-600 mb-2">Naipe</label>
+                    <select id="modal-naipe" required class="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-3 text-slate-900 focus:outline-none focus:border-cob-blue">
+                        <option value="MAS">Masculino (MAS)</option>
+                        <option value="FEM">Feminino (FEM)</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold uppercase text-slate-600 mb-2">Subcategoria / Perfil</label>
+                    <select id="modal-subcategoria" required class="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-3 text-slate-900 focus:outline-none focus:border-cob-blue">
+                        <option value="Atleta">Atleta</option>
+                        <option value="Treinador">Treinador</option>
+                        <option value="Arbitragem">Arbitragem</option>
+                        <option value="Comitê Organizador">Comitê Organizador</option>
+                        <option value="Público Geral">Público Geral</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold uppercase text-slate-600 mb-2">Modalidade</label>
+                    <select id="modal-modalidade" required onchange="handleModalModalidadeChange()" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-3 text-slate-900 focus:outline-none focus:border-cob-blue">
+                        <option value="Remo">Remo (500m)</option>
+                        <option value="Ciclismo">Ciclismo (Sprint 300m)</option>
+                        <option value="Fortnite">Fortnite (Pontos)</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold uppercase text-slate-600 mb-2">Bloco</label>
+                    <select id="modal-bloco" required class="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-3 text-slate-900 focus:outline-none focus:border-cob-blue">
+                        <option value="Bloco 1">Bloco 1</option>
+                        <option value="Bloco 2">Bloco 2</option>
+                        <option value="Bloco 3">Bloco 3</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label id="modal-label-tempo-pontos" class="block text-xs font-bold uppercase text-slate-600 mb-2">Tempo (HH:MM:SS)</label>
+                    <input type="text" id="modal-tempo" required placeholder="00:00:00" oninput="formatModalInputData(this)" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-3 text-slate-900 font-mono text-lg focus:outline-none focus:border-cob-blue">
+                </div>
+
+                <div class="md:col-span-2 flex items-end justify-end space-x-3 mt-4">
+                    <button type="button" onclick="closeEditParticipantModal()" class="px-6 py-3.5 bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold rounded-xl transition-all">
+                        Cancelar
+                    </button>
+                    <button type="submit" id="btn-save-modal-edit" class="px-8 py-3.5 bg-cob-dark hover:bg-cob-blue text-white font-bold rounded-xl shadow-md transition-all flex items-center space-x-2">
+                        <i class="fa-solid fa-floppy-disk"></i>
+                        <span>Salvar Alterações</span>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal Scanner -->
     <div id="scanner-modal" class="fixed inset-0 bg-slate-900/90 backdrop-blur-sm z-[9999] hidden flex items-center justify-center p-4">
         <div class="bg-white border border-slate-200 max-w-md w-full p-6 rounded-3xl shadow-2xl space-y-4">
             <div class="flex justify-between items-center mb-2">
@@ -725,6 +809,14 @@
             }
         }
 
+        // NOVO: Função sem preenchimento automático para o input do modal
+        function formatModalCredencialInput(input) {
+            let v = input.value.replace(/\D/g, '');
+            if (v.length > 9) v = v.slice(0, 9);
+            v = v.replace(/(\d{8})(\d)/, '$1-$2');
+            input.value = v;
+        }
+
         function openScannerModal() {
             document.getElementById('scanner-modal').classList.remove('hidden');
             if (!html5QrCode) {
@@ -866,8 +958,32 @@
             if(!document.getElementById('admin-edit-id').value) input.value = '';
         }
 
+        // NOVO: Função Change do Modal
+        function handleModalModalidadeChange() {
+            const mod = document.getElementById('modal-modalidade').value;
+            const label = document.getElementById('modal-label-tempo-pontos');
+            const input = document.getElementById('modal-tempo');
+            if (mod === 'Fortnite') {
+                label.innerText = 'Pontos';
+                input.placeholder = 'Ex: 1500';
+            } else {
+                label.innerText = 'Tempo (HH:MM:SS)';
+                input.placeholder = '00:00:00';
+            }
+        }
+
         function formatInputData(input) {
             const mod = document.getElementById('admin-modalidade').value;
+            if (mod === 'Fortnite') {
+                input.value = input.value.replace(/\D/g, ''); 
+            } else {
+                formatTimeInput(input);
+            }
+        }
+
+        // NOVO: Formatador do input do modal
+        function formatModalInputData(input) {
+            const mod = document.getElementById('modal-modalidade').value;
             if (mod === 'Fortnite') {
                 input.value = input.value.replace(/\D/g, ''); 
             } else {
@@ -989,6 +1105,48 @@
             resetSaveBtn(btn, originalHTML);
         }
 
+        // NOVO: Função para Submissão Exclusiva do Modal
+        async function submitEditParticipant(e) {
+            e.preventDefault();
+            
+            const btn = document.getElementById('btn-save-modal-edit');
+            const originalHTML = btn.innerHTML;
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> <span>Salvando...</span>';
+
+            const editId = document.getElementById('modal-edit-id').value;
+            const credencial = document.getElementById('modal-credencial').value.trim();
+            const atleta = document.getElementById('modal-atleta').value.toUpperCase();
+            const naipe = document.getElementById('modal-naipe').value;
+            const subcategoria = document.getElementById('modal-subcategoria').value;
+            const modalidade = document.getElementById('modal-modalidade').value;
+            const bloco = document.getElementById('modal-bloco').value;
+            const tempo = document.getElementById('modal-tempo').value;
+
+            if (credencial && credencial.length !== 10) {
+                showModal('Atenção', 'Se informada, a Credencial deve ser completa (ex: 12345678-9).', 'error');
+                resetSaveBtn(btn, originalHTML);
+                return;
+            }
+
+            try {
+                const { error } = await _supabase.from('records')
+                    .update({ credencial, atleta, naipe, subcategoria, modalidade, bloco, tempo })
+                    .eq('id', editId);
+                
+                if (!error) {
+                    closeEditParticipantModal();
+                    await fetchRecords();
+                    showModal('Sucesso', 'O registro foi atualizado!', 'success');
+                } else {
+                    showModal('Erro', 'Não foi possível atualizar o registro.', 'error');
+                }
+            } catch (err) {
+                console.error(err);
+            }
+            resetSaveBtn(btn, originalHTML);
+        }
+
         function resetSaveBtn(btn, html) {
             btn.disabled = false;
             btn.innerHTML = html;
@@ -1015,6 +1173,32 @@
                 
                 window.scrollTo({ top: document.getElementById('form-container').offsetTop - 100, behavior: 'auto' });
             }
+        }
+
+        // NOVO: Função para abrir o novo modal de Edição de Participante
+        function openEditParticipantModal(id) {
+            const r = records.find(rec => rec.id === id);
+            if (r) {
+                document.getElementById('modal-edit-id').value = r.id;
+                document.getElementById('modal-credencial').value = r.credencial || '';
+                document.getElementById('modal-atleta').value = r.atleta || '';
+                document.getElementById('modal-naipe').value = r.naipe || 'MAS';
+                document.getElementById('modal-subcategoria').value = r.subcategoria || 'Atleta';
+                document.getElementById('modal-modalidade').value = r.modalidade || 'Remo';
+                document.getElementById('modal-bloco').value = r.bloco || getActiveBlock();
+                
+                handleModalModalidadeChange();
+                document.getElementById('modal-tempo').value = r.tempo || ''; 
+                
+                document.getElementById('edit-participant-modal').classList.remove('hidden');
+            }
+        }
+
+        // NOVO: Função para fechar o novo modal de Edição de Participante
+        function closeEditParticipantModal() {
+            document.getElementById('edit-participant-modal').classList.add('hidden');
+            document.getElementById('modal-edit-form').reset();
+            document.getElementById('modal-edit-id').value = '';
         }
 
         function cancelEdit() {
@@ -1072,7 +1256,8 @@
                         <td class="py-3 px-4 text-slate-600">${r.modalidade}</td>
                         <td class="py-3 px-4 font-mono font-bold ${r.modalidade === 'Fortnite' ? 'text-purple-600' : 'text-emerald-600'}">${r.tempo}</td>
                         <td class="py-3 px-4 text-right flex justify-end space-x-1">
-                            <button onclick="editRecord('${r.id}')" class="text-cob-blue hover:text-cob-cyan p-2" title="Editar"><i class="fa-solid fa-pen"></i></button>
+                            <!-- ATUALIZADO: Acionando openEditParticipantModal ao invés de editRecord -->
+                            <button onclick="openEditParticipantModal('${r.id}')" class="text-cob-blue hover:text-cob-cyan p-2" title="Editar"><i class="fa-solid fa-pen"></i></button>
                             <button onclick="deleteRecord('${r.id}')" class="text-red-500 hover:text-red-700 p-2" title="Excluir"><i class="fa-solid fa-trash"></i></button>
                         </td>
                     </tr>
