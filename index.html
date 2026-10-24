@@ -190,7 +190,7 @@
                     <div class="w-2/4 text-center px-4 flex flex-col justify-center items-center">
                         <span class="text-cob-cyan font-black tracking-[0.3em] text-sm md:text-lg lg:text-xl uppercase block mb-2 drop-shadow-sm">DESAFIO VIRTUAL</span>
                         <h2 class="text-3xl md:text-4xl lg:text-5xl font-black tracking-widest uppercase drop-shadow-md leading-tight" id="tv-title-text">MODALIDADE - NAIPE</h2>
-                        <p class="text-cob-gold font-bold mt-2 text-sm md:text-lg tracking-widest drop-shadow-sm">RANKING OFICIAL ATUALIZADO</p>
+                        <p class="text-cob-gold font-bold mt-2 text-sm md:text-lg tracking-widest drop-shadow-sm">RANKING OFICIAL ATUALIZADO (BLOCO ATIVO)</p>
                     </div>
                     <div class="w-1/4 flex justify-end items-center">
                         <img src="mascote.png" alt="Mascote" class="h-24 md:h-36 lg:h-44 w-auto object-contain drop-shadow-[0_10px_20px_rgba(0,0,0,0.4)]" onerror="this.style.display='none'">
@@ -415,63 +415,89 @@
                     </div>
                 </div>
 
-                <!-- SEÇÃO FINAL: DASHBOARD E RELATÓRIOS -->
+                <!-- SEÇÃO FINAL: DASHBOARD E RELATÓRIOS OTIMIZADO PARA MOBILE -->
                 <div class="space-y-6 mt-12 border-t border-slate-200 pt-10">
-                    <h3 class="text-2xl font-black text-slate-900 flex items-center"><i class="fa-solid fa-chart-pie text-cob-blue mr-3"></i> Dashboard & Estatísticas</h3>
+                    <h3 class="text-2xl font-black text-slate-900 flex items-center"><i class="fa-solid fa-chart-bar text-cob-blue mr-3"></i> Dashboard Estatístico</h3>
                     
                     <!-- KPI Cards Gerais -->
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                         <div class="bg-white border border-slate-200 p-6 rounded-2xl shadow-sm text-center">
-                            <p class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Total de Participações</p>
+                            <p class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">1. Total de Participações</p>
                             <h2 class="text-4xl font-black text-cob-blue" id="kpi-total">0</h2>
                         </div>
                         <div class="bg-white border border-slate-200 p-6 rounded-2xl shadow-sm text-center">
-                            <p class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Participantes Únicos</p>
+                            <p class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">8 e 10. Participantes Únicos</p>
                             <h2 class="text-4xl font-black text-cob-green" id="kpi-unicos">0</h2>
-                            <p class="text-xs text-slate-400 mt-2" id="kpi-unicos-naipe">MAS: 0 | FEM: 0</p>
+                            <p class="text-xs text-slate-500 mt-2 font-semibold" id="kpi-unicos-naipe">MAS: 0 | FEM: 0</p>
                         </div>
                         <div class="bg-white border border-slate-200 p-6 rounded-2xl shadow-sm text-center">
-                            <p class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Participaram em +1 Mod.</p>
+                            <p class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">9 e 11. Multi-Modalidades</p>
                             <h2 class="text-4xl font-black text-purple-600" id="kpi-multimod">0</h2>
-                            <p class="text-xs text-slate-400 mt-2" id="kpi-multimod-naipe">MAS: 0 | FEM: 0</p>
+                            <p class="text-xs text-slate-500 mt-2 font-semibold" id="kpi-multimod-naipe">MAS: 0 | FEM: 0</p>
                         </div>
                     </div>
 
-                    <!-- Divisor para Métricas Cronológicas -->
-                    <h4 class="text-xl font-bold text-slate-800 mt-10 mb-4 border-b border-slate-200 pb-2 flex items-center"><i class="fa-solid fa-calendar-days text-cob-blue mr-2"></i> Evolução Diária</h4>
+                    <!-- Divisor para Métricas Detalhadas -->
+                    <h4 class="text-xl font-bold text-slate-800 mt-10 mb-4 border-b border-slate-200 pb-2 flex items-center">
+                        <i class="fa-solid fa-chart-column text-cob-blue mr-2"></i> Análises Detalhadas em Barras (Total, Blocos e Modalidades)
+                    </h4>
 
-                    <!-- Novos Gráficos: Data de Cadastro (Chronological - Compactados) -->
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div class="bg-white border border-slate-200 p-4 md:p-5 rounded-2xl shadow-sm md:col-span-2 flex flex-col">
-                            <h4 class="text-xs md:text-sm font-bold text-slate-800 text-center mb-2">Participantes Totais por Dia</h4>
-                            <div class="relative h-48 md:h-56 w-full">
-                                <canvas id="chartParticipantesDia"></canvas>
+                    <!-- Gráficos Restantes (Barras Verticais) Layout Focado no Mobile -->
+                    <div class="grid grid-cols-1 gap-8">
+                        
+                        <!-- Gráfico de Blocos (Cobre itens 2, 3, 4) -->
+                        <div class="bg-white border border-slate-200 p-4 md:p-6 rounded-2xl shadow-sm flex flex-col">
+                            <h4 class="text-sm md:text-base font-bold text-slate-800 text-center mb-2">2, 3 e 4. Participações Totais por Bloco e Naipe</h4>
+                            <div class="relative h-64 md:h-72 w-full">
+                                <canvas id="chartBlocos"></canvas>
                             </div>
                         </div>
-                        <div class="bg-white border border-slate-200 p-4 md:p-5 rounded-2xl shadow-sm flex flex-col">
-                            <h4 class="text-xs md:text-sm font-bold text-slate-800 text-center mb-2">Participantes por Dia (por Naipe)</h4>
-                            <div class="relative h-48 md:h-56 w-full">
-                                <canvas id="chartDiaNaipe"></canvas>
+
+                        <!-- Gráfico de Modalidades (Cobre itens 5, 6) -->
+                        <div class="bg-white border border-slate-200 p-4 md:p-6 rounded-2xl shadow-sm flex flex-col">
+                            <h4 class="text-sm md:text-base font-bold text-slate-800 text-center mb-2">5 e 6. Participações Totais por Modalidade e Naipe</h4>
+                            <div class="relative h-64 md:h-72 w-full">
+                                <canvas id="chartMods"></canvas>
                             </div>
                         </div>
-                        <div class="bg-white border border-slate-200 p-4 md:p-5 rounded-2xl shadow-sm flex flex-col">
-                            <h4 class="text-xs md:text-sm font-bold text-slate-800 text-center mb-2">Participantes por Dia (por Modalidade)</h4>
-                            <div class="relative h-48 md:h-56 w-full">
-                                <canvas id="chartDiaMod"></canvas>
+
+                        <!-- Gráfico de Bloco x Mod x Naipe (Cobre item 7) -->
+                        <div class="bg-white border border-slate-200 p-4 md:p-6 rounded-2xl shadow-sm flex flex-col">
+                            <h4 class="text-sm md:text-base font-bold text-slate-800 text-center mb-2">7. Participações por Bloco, Modalidade e Naipe</h4>
+                            <div class="relative h-72 md:h-80 w-full overflow-x-auto">
+                                <div class="min-w-[600px] h-full">
+                                    <canvas id="chartBlocoModNaipe"></canvas>
+                                </div>
                             </div>
                         </div>
-                        <div class="bg-white border border-slate-200 p-4 md:p-5 rounded-2xl shadow-sm md:col-span-2 flex flex-col">
-                            <h4 class="text-xs md:text-sm font-bold text-slate-800 text-center mb-2">Participantes por Dia (Cruzamento: Modalidade x Naipe)</h4>
-                            <div class="relative h-48 md:h-56 w-full">
-                                <canvas id="chartDiaNaipeMod"></canvas>
+
+                        <!-- Gráficos de Evolução Diária (Cobre itens 12, 13, 14, 15) -->
+                        <div class="bg-white border border-slate-200 p-4 md:p-6 rounded-2xl shadow-sm flex flex-col">
+                            <h4 class="text-sm md:text-base font-bold text-slate-800 text-center mb-2">12 e 13. Participações Diárias (Total e por Naipe)</h4>
+                            <div class="relative h-64 md:h-72 w-full overflow-x-auto">
+                                <div class="min-w-[500px] h-full">
+                                    <canvas id="chartDiasNaipe"></canvas>
+                                </div>
                             </div>
                         </div>
-                        <div class="bg-white border border-slate-200 p-4 md:p-5 rounded-2xl shadow-sm md:col-span-2 flex flex-col">
-                            <h4 class="text-xs md:text-sm font-bold text-slate-800 text-center mb-2">Média de Participantes Diários (Total e Naipe) por Bloco</h4>
-                            <div class="relative h-48 md:h-56 w-full">
-                                <canvas id="chartMediasBloco"></canvas>
+
+                        <div class="bg-white border border-slate-200 p-4 md:p-6 rounded-2xl shadow-sm flex flex-col">
+                            <h4 class="text-sm md:text-base font-bold text-slate-800 text-center mb-2">14 e 15. Participações Diárias (Por Modalidade e Naipe)</h4>
+                            <div class="relative h-72 md:h-80 w-full overflow-x-auto">
+                                <div class="min-w-[600px] h-full">
+                                    <canvas id="chartDiasModsNaipe"></canvas>
+                                </div>
                             </div>
                         </div>
+
+                        <!-- Gráficos de Média Diária (Cobre itens 16, 17) -->
+                        <div class="bg-white border border-slate-200 p-4 md:p-6 rounded-2xl shadow-sm flex flex-col">
+                            <h4 class="text-sm md:text-base font-bold text-slate-800 text-center mb-2">16 e 17. Média de Participantes/Dia por Bloco (Total e Naipe)</h4>
+                            <div class="relative h-64 md:h-72 w-full">
+                                <canvas id="chartMedias"></canvas>
+                            </div>
+                        </div>
+
                     </div>
 
                     <!-- Exportação e Relatórios -->
@@ -482,11 +508,11 @@
                         <div class="flex flex-col sm:flex-row gap-4">
                             <button onclick="exportFirstPlacesPDF()" class="flex-1 bg-white text-cob-dark hover:bg-slate-100 py-4 px-6 rounded-xl font-bold shadow-md transition-all flex items-center justify-center space-x-2">
                                 <i class="fa-solid fa-medal text-cob-gold text-lg"></i>
-                                <span>Exportar Campeões (1º Lugar por Bloco/Modalidade)</span>
+                                <span>Exportar Campeões (1º Lugar)</span>
                             </button>
                             <button onclick="exportTop3OverallPDF()" class="flex-1 bg-white text-cob-dark hover:bg-slate-100 py-4 px-6 rounded-xl font-bold shadow-md transition-all flex items-center justify-center space-x-2">
                                 <i class="fa-solid fa-trophy text-cob-cyan text-lg"></i>
-                                <span>Exportar Top 3 Geral (Por Modalidade)</span>
+                                <span>Exportar Top 3 Geral</span>
                             </button>
                         </div>
                     </div>
@@ -689,6 +715,25 @@
             blockConfig[bloco].manualStatus = current === 'Ativo' ? 'Encerrado' : 'Ativo';
             localStorage.setItem('jj2026_block_config', JSON.stringify(blockConfig));
             renderAdminBlocks();
+        }
+
+        function showModal(title, message, type='success') {
+            document.getElementById('modal-title').innerText = title;
+            document.getElementById('modal-message').innerText = message;
+            
+            const iconEl = document.getElementById('modal-icon');
+            if(type === 'error') {
+                iconEl.className = 'w-14 h-14 rounded-full bg-red-50 text-red-600 flex items-center justify-center mx-auto text-2xl border border-red-100';
+                iconEl.innerHTML = '<i class="fa-solid fa-xmark"></i>';
+            } else {
+                iconEl.className = 'w-14 h-14 rounded-full bg-emerald-50 text-cob-green flex items-center justify-center mx-auto text-2xl border border-emerald-100';
+                iconEl.innerHTML = '<i class="fa-solid fa-check"></i>';
+            }
+            document.getElementById('custom-modal').classList.remove('hidden');
+        }
+        
+        function closeModal() {
+            document.getElementById('custom-modal').classList.add('hidden');
         }
         
         // --- FUNÇÕES DO SCANNER DE CÓDIGO DE BARRAS E MÁSCARA ---
@@ -1045,29 +1090,82 @@
             });
         }
 
-        // --- DASHBOARD E ESTATÍSTICAS ---
+        // --- DASHBOARD E ESTATÍSTICAS (NOVA LÓGICA DE AGRUPAMENTO 1 A 17) ---
         let dashboardCharts = {};
+
+        function drawChart(elementId, type, labels, datasets, stacked = false) {
+            const ctx = document.getElementById(elementId).getContext('2d');
+            if (dashboardCharts[elementId]) {
+                dashboardCharts[elementId].destroy();
+            }
+            dashboardCharts[elementId] = new Chart(ctx, {
+                type: type, // Todas serão de barra ('bar') conforme pedido
+                data: { labels: labels, datasets: datasets },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    layout: { padding: { top: 10, bottom: 0, left: 0, right: 0 } },
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: { boxWidth: 10, font: { size: 10 }, padding: 10 }
+                        }
+                    },
+                    scales: {
+                        x: { stacked: stacked, ticks: { font: { size: 9 }, maxRotation: 45, minRotation: 0 } },
+                        y: { stacked: stacked, ticks: { font: { size: 9 } } }
+                    }
+                }
+            });
+        }
 
         function updateDashboard() {
             if (!isAdminLoggedIn) return;
             
-            // 1. KPI Gerais
+            // Variáveis para Processamento dos 17 requisitos
             const totalRecords = records.length;
             const uniqueMap = new Map();
-            
-            // Variáveis para agrupamento por data (created_at)
             let dateMap = {}; 
             let blockDaysMap = {}; 
-            let blockCounts = { 'Bloco 1': { total: 0, MAS: 0, FEM: 0 }, 'Bloco 2': { total: 0, MAS: 0, FEM: 0 }, 'Bloco 3': { total: 0, MAS: 0, FEM: 0 } };
+
+            let blockStats = {
+                'Bloco 1': { total: 0, MAS: 0, FEM: 0, Remo: {MAS:0, FEM:0}, Ciclismo: {MAS:0, FEM:0}, Fortnite: {MAS:0, FEM:0} },
+                'Bloco 2': { total: 0, MAS: 0, FEM: 0, Remo: {MAS:0, FEM:0}, Ciclismo: {MAS:0, FEM:0}, Fortnite: {MAS:0, FEM:0} },
+                'Bloco 3': { total: 0, MAS: 0, FEM: 0, Remo: {MAS:0, FEM:0}, Ciclismo: {MAS:0, FEM:0}, Fortnite: {MAS:0, FEM:0} },
+                'Geral': { total: 0, MAS: 0, FEM: 0, Remo: {MAS:0, FEM:0}, Ciclismo: {MAS:0, FEM:0}, Fortnite: {MAS:0, FEM:0} } // Fallback
+            };
+
+            let modStats = {
+                'Remo': { total: 0, MAS: 0, FEM: 0 },
+                'Ciclismo': { total: 0, MAS: 0, FEM: 0 },
+                'Fortnite': { total: 0, MAS: 0, FEM: 0 }
+            };
 
             records.forEach(r => {
+                const bloco = r.bloco || 'Geral';
+                const mod = r.modalidade;
+                const naipe = r.naipe || 'MAS';
+
+                // Agrupamento para Únicos e Multi-modalidades
                 const key = r.credencial || r.atleta;
                 if(!uniqueMap.has(key)) {
-                    uniqueMap.set(key, { naipe: r.naipe || 'MAS', mods: new Set() });
+                    uniqueMap.set(key, { naipe: naipe, mods: new Set() });
                 }
-                uniqueMap.get(key).mods.add(r.modalidade);
+                uniqueMap.get(key).mods.add(mod);
 
-                // Agrupamento por Data de Cadastro
+                // Agrupamentos Bloco, Naipe, Mod
+                if(blockStats[bloco]) {
+                    blockStats[bloco].total++;
+                    blockStats[bloco][naipe]++;
+                    if(blockStats[bloco][mod]) blockStats[bloco][mod][naipe]++;
+                }
+                
+                if(modStats[mod]) {
+                    modStats[mod].total++;
+                    modStats[mod][naipe]++;
+                }
+
+                // Agrupamento Cronológico
                 const dateStr = r.created_at ? new Date(r.created_at).toISOString().split('T')[0] : new Date().toISOString().split('T')[0];
                 const d = dateStr.split('-').reverse().join('/'); // Formato DD/MM/YYYY
 
@@ -1080,39 +1178,19 @@
                 }
                 
                 dateMap[d].total++;
-                if (r.naipe === 'MAS') dateMap[d].MAS++;
-                if (r.naipe === 'FEM') dateMap[d].FEM++;
-                
-                if (r.modalidade === 'Remo') {
-                    dateMap[d].Remo++;
-                    if (r.naipe === 'MAS') dateMap[d].RemoMAS++;
-                    if (r.naipe === 'FEM') dateMap[d].RemoFEM++;
-                }
-                if (r.modalidade === 'Ciclismo') {
-                    dateMap[d].Ciclismo++;
-                    if (r.naipe === 'MAS') dateMap[d].CiclismoMAS++;
-                    if (r.naipe === 'FEM') dateMap[d].CiclismoFEM++;
-                }
-                if (r.modalidade === 'Fortnite') {
-                    dateMap[d].Fortnite++;
-                    if (r.naipe === 'MAS') dateMap[d].FortniteMAS++;
-                    if (r.naipe === 'FEM') dateMap[d].FortniteFEM++;
-                }
+                dateMap[d][naipe]++;
+                dateMap[d][mod]++;
+                dateMap[d][mod + naipe]++;
 
-                // Agrupamento de Dias e Totais por Bloco para Cálculo de Média
-                if(r.bloco && blockCounts[r.bloco]) {
-                    if (!blockDaysMap[r.bloco]) blockDaysMap[r.bloco] = new Set();
-                    blockDaysMap[r.bloco].add(d);
-                    
-                    blockCounts[r.bloco].total++;
-                    if (r.naipe === 'MAS') blockCounts[r.bloco].MAS++;
-                    if (r.naipe === 'FEM') blockCounts[r.bloco].FEM++;
+                // Map de Dias por Bloco para cálculo de Média
+                if(bloco !== 'Geral') {
+                    if (!blockDaysMap[bloco]) blockDaysMap[bloco] = new Set();
+                    blockDaysMap[bloco].add(d);
                 }
             });
             
-            const totalUnicos = uniqueMap.size;
+            // Processa KPIs (Itens 1, 8, 9, 10, 11)
             let unicosMas = 0, unicosFem = 0, multiMod = 0, multiModMas = 0, multiModFem = 0;
-            
             uniqueMap.forEach(val => {
                 if (val.naipe === 'MAS') unicosMas++;
                 if (val.naipe === 'FEM') unicosFem++;
@@ -1124,7 +1202,7 @@
             });
 
             document.getElementById('kpi-total').innerText = totalRecords;
-            document.getElementById('kpi-unicos').innerText = totalUnicos;
+            document.getElementById('kpi-unicos').innerText = uniqueMap.size;
             document.getElementById('kpi-unicos-naipe').innerText = `MAS: ${unicosMas} | FEM: ${unicosFem}`;
             document.getElementById('kpi-multimod').innerText = multiMod;
             document.getElementById('kpi-multimod-naipe').innerText = `MAS: ${multiModMas} | FEM: ${multiModFem}`;
@@ -1136,107 +1214,61 @@
                 return new Date(y1, m1-1, d1) - new Date(y2, m2-1, d2);
             });
 
-            // Geração dos Gráficos Baseados em Data
-            
-            // 1. Número de Participantes por Dia (Total)
-            drawChart('chartParticipantesDia', 'line', sortedDates, [{
-                label: 'Participações Cadastradas',
-                data: sortedDates.map(d => dateMap[d].total),
-                borderColor: '#0066CC',
-                backgroundColor: 'rgba(0, 102, 204, 0.1)',
-                fill: true,
-                tension: 0.3
-            }]);
+            // Preparação dos Datasets para os Gráficos
+            const blocks = ['Bloco 1', 'Bloco 2', 'Bloco 3'];
+            const mods = ['Remo', 'Ciclismo', 'Fortnite'];
 
-            // 2. Número de Participantes por Dia (por Naipe)
-            drawChart('chartDiaNaipe', 'bar', sortedDates, [
-                { label: 'Masculino', data: sortedDates.map(d => dateMap[d].MAS), backgroundColor: '#004A80' },
-                { label: 'Feminino', data: sortedDates.map(d => dateMap[d].FEM), backgroundColor: '#00A859' }
+            // 1. Gráfico Blocos (Itens 2, 3, 4)
+            drawChart('chartBlocos', 'bar', blocks, [
+                { label: 'Total', data: blocks.map(b => blockStats[b].total), backgroundColor: '#FFB81C' },
+                { label: 'Masc.', data: blocks.map(b => blockStats[b].MAS), backgroundColor: '#004A80' },
+                { label: 'Fem.', data: blocks.map(b => blockStats[b].FEM), backgroundColor: '#00A859' }
+            ], false);
+
+            // 2. Gráfico Modalidades (Itens 5, 6)
+            drawChart('chartMods', 'bar', mods, [
+                { label: 'Total', data: mods.map(m => modStats[m].total), backgroundColor: '#0099FF' },
+                { label: 'Masc.', data: mods.map(m => modStats[m].MAS), backgroundColor: '#004A80' },
+                { label: 'Fem.', data: mods.map(m => modStats[m].FEM), backgroundColor: '#00A859' }
+            ], false);
+
+            // 3. Gráfico Bloco x Mod x Naipe (Item 7)
+            const labelsBlocoMod = blocks.flatMap(b => mods.map(m => `${b} - ${m}`));
+            const dataBlocoModMAS = blocks.flatMap(b => mods.map(m => blockStats[b][m].MAS));
+            const dataBlocoModFEM = blocks.flatMap(b => mods.map(m => blockStats[b][m].FEM));
+
+            drawChart('chartBlocoModNaipe', 'bar', labelsBlocoMod, [
+                { label: 'Masculino', data: dataBlocoModMAS, backgroundColor: '#004A80' },
+                { label: 'Feminino', data: dataBlocoModFEM, backgroundColor: '#00A859' }
+            ], true); // Stacked Bar
+
+            // 4. Evolução Diária + Naipe (Itens 12, 13)
+            drawChart('chartDiasNaipe', 'bar', sortedDates, [
+                { label: 'Total', data: sortedDates.map(d => dateMap[d].total), backgroundColor: '#FFB81C' },
+                { label: 'Masc.', data: sortedDates.map(d => dateMap[d].MAS), backgroundColor: '#004A80' },
+                { label: 'Fem.', data: sortedDates.map(d => dateMap[d].FEM), backgroundColor: '#00A859' }
+            ], false);
+
+            // 5. Evolução Diária Mod x Naipe (Itens 14, 15)
+            drawChart('chartDiasModsNaipe', 'bar', sortedDates, [
+                { label: 'Remo MAS', data: sortedDates.map(d => dateMap[d].RemoMAS), backgroundColor: '#003366', stack: 'G1' },
+                { label: 'Remo FEM', data: sortedDates.map(d => dateMap[d].RemoFEM), backgroundColor: '#0066CC', stack: 'G1' },
+                { label: 'Ciclismo MAS', data: sortedDates.map(d => dateMap[d].CiclismoMAS), backgroundColor: '#005c2e', stack: 'G2' },
+                { label: 'Ciclismo FEM', data: sortedDates.map(d => dateMap[d].CiclismoFEM), backgroundColor: '#00A859', stack: 'G2' },
+                { label: 'Fortnite MAS', data: sortedDates.map(d => dateMap[d].FortniteMAS), backgroundColor: '#5c2a9d', stack: 'G3' },
+                { label: 'Fortnite FEM', data: sortedDates.map(d => dateMap[d].FortniteFEM), backgroundColor: '#7e3ff2', stack: 'G3' }
             ], true);
 
-            // 3. Número de Participantes por Dia (por Modalidade)
-            drawChart('chartDiaMod', 'bar', sortedDates, [
-                { label: 'Remo', data: sortedDates.map(d => dateMap[d].Remo), backgroundColor: '#003366' },
-                { label: 'Ciclismo', data: sortedDates.map(d => dateMap[d].Ciclismo), backgroundColor: '#008542' },
-                { label: 'Fortnite', data: sortedDates.map(d => dateMap[d].Fortnite), backgroundColor: '#7e3ff2' }
-            ], true);
+            // 6. Médias (Itens 16, 17)
+            const avgTotal = blocks.map(b => blockDaysMap[b] && blockDaysMap[b].size > 0 ? (blockStats[b].total / blockDaysMap[b].size).toFixed(1) : 0);
+            const avgMAS = blocks.map(b => blockDaysMap[b] && blockDaysMap[b].size > 0 ? (blockStats[b].MAS / blockDaysMap[b].size).toFixed(1) : 0);
+            const avgFEM = blocks.map(b => blockDaysMap[b] && blockDaysMap[b].size > 0 ? (blockStats[b].FEM / blockDaysMap[b].size).toFixed(1) : 0);
 
-            // 4. Número de Participantes por Dia (por Naipe x Modalidade)
-            drawChart('chartDiaNaipeMod', 'bar', sortedDates, [
-                { label: 'Remo MAS', data: sortedDates.map(d => dateMap[d].RemoMAS), backgroundColor: '#003366', stack: 'Stack 0' },
-                { label: 'Remo FEM', data: sortedDates.map(d => dateMap[d].RemoFEM), backgroundColor: '#004A80', stack: 'Stack 0' },
-                { label: 'Ciclismo MAS', data: sortedDates.map(d => dateMap[d].CiclismoMAS), backgroundColor: '#008542', stack: 'Stack 1' },
-                { label: 'Ciclismo FEM', data: sortedDates.map(d => dateMap[d].CiclismoFEM), backgroundColor: '#00A859', stack: 'Stack 1' },
-                { label: 'Fortnite MAS', data: sortedDates.map(d => dateMap[d].FortniteMAS), backgroundColor: '#5c2a9d', stack: 'Stack 2' },
-                { label: 'Fortnite FEM', data: sortedDates.map(d => dateMap[d].FortniteFEM), backgroundColor: '#7e3ff2', stack: 'Stack 2' }
-            ], true);
-
-            // 5 e 6. Média de Participantes Totais e Por Naipe Diária (Por Bloco)
-            const blockLabels = ['Bloco 1', 'Bloco 2', 'Bloco 3'];
-            const avgTotal = blockLabels.map(b => blockDaysMap[b] && blockDaysMap[b].size > 0 ? (blockCounts[b].total / blockDaysMap[b].size).toFixed(1) : 0);
-            const avgMAS = blockLabels.map(b => blockDaysMap[b] && blockDaysMap[b].size > 0 ? (blockCounts[b].MAS / blockDaysMap[b].size).toFixed(1) : 0);
-            const avgFEM = blockLabels.map(b => blockDaysMap[b] && blockDaysMap[b].size > 0 ? (blockCounts[b].FEM / blockDaysMap[b].size).toFixed(1) : 0);
-
-            drawChart('chartMediasBloco', 'bar', blockLabels, [
+            drawChart('chartMedias', 'bar', blocks, [
                 { label: 'Média Total/Dia', data: avgTotal, backgroundColor: '#FFB81C' },
                 { label: 'Média Masc./Dia', data: avgMAS, backgroundColor: '#004A80' },
                 { label: 'Média Fem./Dia', data: avgFEM, backgroundColor: '#00A859' }
-            ]);
-        }
-
-        function drawChart(elementId, type, labels, datasets, stacked = false) {
-            const ctx = document.getElementById(elementId).getContext('2d');
-            if (dashboardCharts[elementId]) {
-                dashboardCharts[elementId].destroy();
-            }
-            dashboardCharts[elementId] = new Chart(ctx, {
-                type: type,
-                data: { labels: labels, datasets: datasets },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    layout: {
-                        padding: {
-                            top: 10,
-                            bottom: 0,
-                            left: 0,
-                            right: 0
-                        }
-                    },
-                    plugins: {
-                        legend: {
-                            position: 'bottom',
-                            labels: {
-                                boxWidth: 10,
-                                font: {
-                                    size: 10
-                                },
-                                padding: 10
-                            }
-                        }
-                    },
-                    scales: {
-                        x: {
-                            stacked: stacked,
-                            ticks: {
-                                font: {
-                                    size: 9
-                                },
-                                maxRotation: 45,
-                                minRotation: 0
-                            }
-                        },
-                        y: {
-                            stacked: stacked,
-                            ticks: {
-                                font: {
-                                    size: 9
-                                }
-                            }
-                        }
-                    }
-                }
-            });
+            ], false);
         }
 
         // --- RELATÓRIOS PDF ---
@@ -1334,6 +1366,7 @@
                 thResultado.innerText = modalidade === 'Fortnite' ? 'Pontuação' : 'Tempo Oficial';
             }
 
+            // O filtro atua em cima da matriz aplicando as opções, no modo TV o filtro bloco recebe o 'getActiveBlock()'
             let filtered = records.filter(r => r.modalidade === modalidade);
             if (bloco !== 'Geral') filtered = filtered.filter(r => r.bloco === bloco);
             if (naipe !== 'Todos') filtered = filtered.filter(r => r.naipe === naipe);
@@ -1413,7 +1446,7 @@
                 main.classList.remove('max-w-7xl', 'px-4', 'sm:px-6', 'lg:px-8', 'py-8');
                 main.classList.add('max-w-full', 'px-2', 'py-2');
 
-                // Força o seletor visual iniciar com o bloco ativo
+                // Força o seletor visual iniciar explicitamente com o bloco ativo
                 document.getElementById('filter-bloco').value = getActiveBlock();
 
                 startTVCycle();
@@ -1431,7 +1464,9 @@
 
         async function applyTVState() {
             const state = tvStates[tvStateIndex];
-            const activeBlock = getActiveBlock(); // Somente bloco ativo
+            
+            // FILTRO DE BLOCO ATIVO ESTRITO NO MODO TV
+            const activeBlock = getActiveBlock(); 
             
             document.getElementById('filter-modalidade').value = state.mod;
             document.getElementById('filter-naipe').value = state.naipe;
