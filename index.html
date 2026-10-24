@@ -416,21 +416,23 @@
                     </div>
                     
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                        <div class="bg-white border border-slate-200 p-6 rounded-2xl shadow-sm text-center">
+                        <!-- ALTERAÇÃO: Adicionada a soma das modalidades no total -->
+                        <div class="bg-white border border-slate-200 p-6 rounded-2xl shadow-sm text-center flex flex-col justify-center">
                             <p class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Total de Participações</p>
                             <h2 class="text-4xl font-black text-cob-blue" id="kpi-total">0</h2>
-                            <!-- CORREÇÃO 2: Adicionado a divisão de naipe também para os participantes totais -->
-                            <p class="text-xs text-slate-500 mt-2 font-semibold" id="kpi-total-naipe">MAS: 0 | FEM: 0</p>
+                            <p class="text-[11px] text-slate-500 mt-2 font-semibold" id="kpi-total-naipe">MAS: 0 | FEM: 0</p>
+                            <p class="text-[11px] text-cob-blue mt-1 font-bold" id="kpi-total-mods">Remo: 0 | Ciclismo: 0 | Fortnite: 0</p>
                         </div>
-                        <div class="bg-white border border-slate-200 p-6 rounded-2xl shadow-sm text-center">
+                        <div class="bg-white border border-slate-200 p-6 rounded-2xl shadow-sm text-center flex flex-col justify-center">
                             <p class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Participantes Únicos</p>
                             <h2 class="text-4xl font-black text-cob-green" id="kpi-unicos">0</h2>
-                            <p class="text-xs text-slate-500 mt-2 font-semibold" id="kpi-unicos-naipe">MAS: 0 | FEM: 0</p>
+                            <p class="text-[11px] text-slate-500 mt-2 font-semibold" id="kpi-unicos-naipe">MAS: 0 | FEM: 0</p>
                         </div>
-                        <div class="bg-white border border-slate-200 p-6 rounded-2xl shadow-sm text-center">
-                            <p class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Multi-Modalidades</p>
-                            <h2 class="text-4xl font-black text-purple-600" id="kpi-multimod">0</h2>
-                            <p class="text-xs text-slate-500 mt-2 font-semibold" id="kpi-multimod-naipe">MAS: 0 | FEM: 0</p>
+                        <!-- ALTERAÇÃO: Trocado de Multi-Modalidades para Provas Adicionais (Total - Únicos) -->
+                        <div class="bg-white border border-slate-200 p-6 rounded-2xl shadow-sm text-center flex flex-col justify-center">
+                            <p class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Provas Adicionais</p>
+                            <h2 class="text-4xl font-black text-purple-600" id="kpi-adicionais">0</h2>
+                            <p class="text-[11px] text-slate-500 mt-2 font-semibold" id="kpi-adicionais-naipe">MAS: 0 | FEM: 0</p>
                         </div>
                     </div>
 
@@ -1306,7 +1308,6 @@
             let totalPartMas = 0;
             let totalPartFem = 0;
 
-            // CORREÇÃO: Higienização forçada para garantir que todo registro recaia exatamente em 'MAS' ou 'FEM'
             records.forEach(r => {
                 const bloco = r.bloco || 'Geral';
                 const mod = r.modalidade;
@@ -1356,26 +1357,33 @@
                 }
             });
             
-            let unicosMas = 0, unicosFem = 0, multiMod = 0, multiModMas = 0, multiModFem = 0;
+            let unicosMas = 0, unicosFem = 0;
             uniqueMap.forEach(val => {
                 if (val.naipe === 'MAS') unicosMas++;
                 if (val.naipe === 'FEM') unicosFem++;
-                if (val.mods.size > 1) {
-                    multiMod++;
-                    if (val.naipe === 'MAS') multiModMas++;
-                    if (val.naipe === 'FEM') multiModFem++;
-                }
             });
 
+            // ATUALIZAÇÃO DOS CARDS
             document.getElementById('kpi-total').innerText = totalRecords;
             const kpiTotalNaipe = document.getElementById('kpi-total-naipe');
             if(kpiTotalNaipe) kpiTotalNaipe.innerText = `MAS: ${totalPartMas} | FEM: ${totalPartFem}`;
+            
+            // CARD 1: Detalhamento por Modalidade 
+            const kpiTotalMods = document.getElementById('kpi-total-mods');
+            if(kpiTotalMods) {
+                kpiTotalMods.innerText = `Remo: ${modStats['Remo'].total} | Ciclismo: ${modStats['Ciclismo'].total} | Fortnite: ${modStats['Fortnite'].total}`;
+            }
 
+            // CARD 2: Participantes Únicos
             document.getElementById('kpi-unicos').innerText = uniqueMap.size;
             document.getElementById('kpi-unicos-naipe').innerText = `MAS: ${unicosMas} | FEM: ${unicosFem}`;
             
-            document.getElementById('kpi-multimod').innerText = multiMod;
-            document.getElementById('kpi-multimod-naipe').innerText = `MAS: ${multiModMas} | FEM: ${multiModFem}`;
+            // CARD 3: Provas Adicionais (Garante que Unicos + Adicionais = Total)
+            const totalAdicionais = totalRecords - uniqueMap.size;
+            const adicionaisMas = totalPartMas - unicosMas;
+            const adicionaisFem = totalPartFem - unicosFem;
+            document.getElementById('kpi-adicionais').innerText = totalAdicionais;
+            document.getElementById('kpi-adicionais-naipe').innerText = `MAS: ${adicionaisMas} | FEM: ${adicionaisFem}`;
 
             const sortedDates = Object.keys(dateMap).sort((a, b) => {
                 const [d1, m1, y1] = a.split('/');
@@ -1440,8 +1448,9 @@
 
             let bodyData = [
                 ["Total de Participações", document.getElementById('kpi-total').innerText + " (" + document.getElementById('kpi-total-naipe').innerText + ")"],
+                ["Soma por Modalidade", document.getElementById('kpi-total-mods').innerText],
                 ["Participantes Únicos", document.getElementById('kpi-unicos').innerText + " (" + document.getElementById('kpi-unicos-naipe').innerText + ")"],
-                ["Multi-Modalidades", document.getElementById('kpi-multimod').innerText + " (" + document.getElementById('kpi-multimod-naipe').innerText + ")"]
+                ["Provas Adicionais", document.getElementById('kpi-adicionais').innerText + " (" + document.getElementById('kpi-adicionais-naipe').innerText + ")"]
             ];
 
             doc.autoTable({
@@ -1489,19 +1498,31 @@
             return uniqueList;
         }
 
+        /* ----- FUNÇÃO ATUALIZADA ----- */
         function exportFirstPlacesPDF() {
             const { jsPDF } = window.jspdf;
             const doc = new jsPDF();
-            doc.text("Campeões por Bloco e Modalidade", 14, 15);
+            doc.text("Campeões por Bloco/Geral, Modalidade e Naipe", 14, 15);
             let bodyData = [];
             
-            ['Bloco 1', 'Bloco 2', 'Bloco 3'].forEach(b => {
-                ['Remo', 'Ciclismo', 'Fortnite'].forEach(mod => {
-                    const recs = records.filter(r => r.bloco === b && r.modalidade === mod);
-                    if(recs.length > 0) {
-                        const top = getUniqueTopRecords(recs, mod === 'Fortnite')[0]; 
-                        bodyData.push([b, mod, top.credencial || '-', top.atleta, top.naipe || '-', top.tempo]);
-                    }
+            const blocos = ['Bloco 1', 'Bloco 2', 'Bloco 3', 'Geral'];
+            const mods = ['Remo', 'Ciclismo', 'Fortnite'];
+            const naipes = ['MAS', 'FEM'];
+
+            blocos.forEach(b => {
+                mods.forEach(mod => {
+                    naipes.forEach(naipe => {
+                        let recs = records.filter(r => r.modalidade === mod && r.naipe === naipe);
+                        
+                        if (b !== 'Geral') {
+                            recs = recs.filter(r => r.bloco === b);
+                        }
+                        
+                        if(recs.length > 0) {
+                            const top = getUniqueTopRecords(recs, mod === 'Fortnite')[0]; 
+                            bodyData.push([b, mod, top.credencial || '-', top.atleta, top.naipe || naipe, top.tempo]);
+                        }
+                    });
                 });
             });
 
@@ -1511,7 +1532,7 @@
             }
 
             doc.autoTable({
-                head: [['Bloco', 'Modalidade', 'Credencial', 'Nome Completo', 'Naipe', 'Resultado']],
+                head: [['Bloco / Geral', 'Modalidade', 'Credencial', 'Nome Completo', 'Naipe', 'Resultado']],
                 body: bodyData,
                 startY: 25,
                 theme: 'grid',
