@@ -416,7 +416,6 @@
                     </div>
                     
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                        <!-- ALTERAÇÃO: Adicionada a soma das modalidades no total -->
                         <div class="bg-white border border-slate-200 p-6 rounded-2xl shadow-sm text-center flex flex-col justify-center">
                             <p class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Total de Participações</p>
                             <h2 class="text-4xl font-black text-cob-blue" id="kpi-total">0</h2>
@@ -428,7 +427,6 @@
                             <h2 class="text-4xl font-black text-cob-green" id="kpi-unicos">0</h2>
                             <p class="text-[11px] text-slate-500 mt-2 font-semibold" id="kpi-unicos-naipe">MAS: 0 | FEM: 0</p>
                         </div>
-                        <!-- ALTERAÇÃO: Trocado de Multi-Modalidades para Provas Adicionais (Total - Únicos) -->
                         <div class="bg-white border border-slate-200 p-6 rounded-2xl shadow-sm text-center flex flex-col justify-center">
                             <p class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Provas Adicionais</p>
                             <h2 class="text-4xl font-black text-purple-600" id="kpi-adicionais">0</h2>
@@ -1288,7 +1286,7 @@
             if (!isAdminLoggedIn || currentAdminSubTab !== 'dashboard') return;
             
             const totalRecords = records.length;
-            const uniqueMap = new Map();
+            const uniqueParticipants = new Set();
             let dateMap = {}; 
             let blockDaysMap = {}; 
 
@@ -1307,6 +1305,7 @@
 
             let totalPartMas = 0;
             let totalPartFem = 0;
+            let uniqueMap = new Map();
 
             records.forEach(r => {
                 const bloco = r.bloco || 'Geral';
@@ -1318,11 +1317,14 @@
                 if (naipe === 'MAS') totalPartMas++;
                 else totalPartFem++;
 
-                const key = r.credencial || r.atleta;
-                if(!uniqueMap.has(key)) {
-                    uniqueMap.set(key, { naipe: naipe, mods: new Set() });
+                // Identificador único robusto para cada pessoa
+                const uniqueKey = r.credencial ? r.credencial.trim() : (r.atleta ? r.atleta.trim().toUpperCase() : null);
+                if (uniqueKey) {
+                    uniqueParticipants.add(uniqueKey);
+                    if (!uniqueMap.has(uniqueKey)) {
+                        uniqueMap.set(uniqueKey, naipe);
+                    }
                 }
-                uniqueMap.get(key).mods.add(mod);
 
                 if(blockStats[bloco]) {
                     blockStats[bloco].total++;
@@ -1358,28 +1360,26 @@
             });
             
             let unicosMas = 0, unicosFem = 0;
-            uniqueMap.forEach(val => {
-                if (val.naipe === 'MAS') unicosMas++;
-                if (val.naipe === 'FEM') unicosFem++;
+            uniqueMap.forEach((naipeVal) => {
+                if (naipeVal === 'MAS') unicosMas++;
+                if (naipeVal === 'FEM') unicosFem++;
             });
 
-            // ATUALIZAÇÃO DOS CARDS
+            // ATUALIZAÇÃO DOS CARDS COM VALORES EXATOS
             document.getElementById('kpi-total').innerText = totalRecords;
             const kpiTotalNaipe = document.getElementById('kpi-total-naipe');
             if(kpiTotalNaipe) kpiTotalNaipe.innerText = `MAS: ${totalPartMas} | FEM: ${totalPartFem}`;
             
-            // CARD 1: Detalhamento por Modalidade 
             const kpiTotalMods = document.getElementById('kpi-total-mods');
             if(kpiTotalMods) {
                 kpiTotalMods.innerText = `Remo: ${modStats['Remo'].total} | Ciclismo: ${modStats['Ciclismo'].total} | Fortnite: ${modStats['Fortnite'].total}`;
             }
 
-            // CARD 2: Participantes Únicos
-            document.getElementById('kpi-unicos').innerText = uniqueMap.size;
+            const totalUnicosCount = uniqueParticipants.size;
+            document.getElementById('kpi-unicos').innerText = totalUnicosCount;
             document.getElementById('kpi-unicos-naipe').innerText = `MAS: ${unicosMas} | FEM: ${unicosFem}`;
             
-            // CARD 3: Provas Adicionais (Garante que Unicos + Adicionais = Total)
-            const totalAdicionais = totalRecords - uniqueMap.size;
+            const totalAdicionais = totalRecords - totalUnicosCount;
             const adicionaisMas = totalPartMas - unicosMas;
             const adicionaisFem = totalPartFem - unicosFem;
             document.getElementById('kpi-adicionais').innerText = totalAdicionais;
@@ -1498,13 +1498,14 @@
             return uniqueList;
         }
 
-        /* ----- FUNÇÃO ATUALIZADA ----- */
+        /* ----- FUNÇÃO CORRIGIDA: POR BLOCO PRIMEIRO E DEPOIS GERAL ----- */
         function exportFirstPlacesPDF() {
             const { jsPDF } = window.jspdf;
             const doc = new jsPDF();
-            doc.text("Campeões por Bloco/Geral, Modalidade e Naipe", 14, 15);
+            doc.text("Campeões por Bloco e Geral (1 MAS e 1 FEM por Modalidade)", 14, 15);
             let bodyData = [];
             
+            // Ordem solicitada: Blocos primeiro, e por último o Geral
             const blocos = ['Bloco 1', 'Bloco 2', 'Bloco 3', 'Geral'];
             const mods = ['Remo', 'Ciclismo', 'Fortnite'];
             const naipes = ['MAS', 'FEM'];
@@ -1512,7 +1513,7 @@
             blocos.forEach(b => {
                 mods.forEach(mod => {
                     naipes.forEach(naipe => {
-                        let recs = records.filter(r => r.modalidade === mod && r.naipe === naipe);
+                        let recs = records.filter(r => r.modalidade === mod && (r.naipe || 'MAS').toUpperCase() === naipe);
                         
                         if (b !== 'Geral') {
                             recs = recs.filter(r => r.bloco === b);
@@ -1520,7 +1521,9 @@
                         
                         if(recs.length > 0) {
                             const top = getUniqueTopRecords(recs, mod === 'Fortnite')[0]; 
-                            bodyData.push([b, mod, top.credencial || '-', top.atleta, top.naipe || naipe, top.tempo]);
+                            if (top) {
+                                bodyData.push([b, mod, top.credencial || '-', top.atleta, top.naipe || naipe, top.tempo]);
+                            }
                         }
                     });
                 });
