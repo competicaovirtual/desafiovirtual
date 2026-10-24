@@ -6,8 +6,17 @@
     <title>Desafio Virtual | Jogos da Juventude 2026</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <!-- Adicionada Biblioteca Leitor de Código de Barras / QR Code -->
+    
+    <!-- Biblioteca Leitor de Código de Barras / QR Code -->
     <script src="https://unpkg.com/html5-qrcode"></script>
+    
+    <!-- Chart.js para Dashboard -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <!-- jsPDF para Exportação de Relatórios -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
+
     <script>
         tailwind.config = {
             theme: {
@@ -270,6 +279,7 @@
 
             <!-- Conteúdo do Painel Admin (Após Login) -->
             <div id="admin-panel-content" class="space-y-8 hidden">
+                
                 <div class="flex items-center justify-between bg-white border border-slate-200 p-6 rounded-2xl shadow-md">
                     <div class="flex items-center space-x-3">
                         <div class="w-10 h-10 rounded-xl bg-emerald-50 text-cob-green flex items-center justify-center border border-emerald-100">
@@ -290,16 +300,19 @@
                     <!-- Preenchido via JS (renderAdminBlocks) -->
                 </div>
 
-                <!-- Formulário de Lançamento Manual de Tempos -->
-                <div class="bg-white border border-slate-200 p-8 rounded-3xl shadow-md space-y-6">
+                <!-- Formulário de Lançamento e Edição de Tempos -->
+                <div class="bg-white border border-slate-200 p-8 rounded-3xl shadow-md space-y-6 relative" id="form-container">
                     <h4 class="text-xl font-black text-slate-900 flex items-center space-x-2">
                         <i class="fa-solid fa-stopwatch text-cob-blue"></i>
-                        <span>Registrar Resultado Oficial do Atleta</span>
+                        <span id="form-title">Registrar Resultado Oficial</span>
                     </h4>
 
                     <form id="time-entry-form" onsubmit="submitTimeRecord(event)" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                         
-                        <!-- Leitor de Código de Barras / Credencial com Máscara Restaurada -->
+                        <!-- ID Oculto para Edição Rápida -->
+                        <input type="hidden" id="admin-edit-id" value="">
+
+                        <!-- Leitor de Código de Barras / Credencial -->
                         <div class="lg:col-span-2 xl:col-span-1">
                             <label class="block text-xs font-bold uppercase text-slate-600 mb-2">CREDENCIAL <span class="text-slate-400 font-normal lowercase">(00000000-0)</span></label>
                             <div class="flex space-x-2">
@@ -308,7 +321,7 @@
                                     <i class="fa-solid fa-qrcode text-xl"></i>
                                 </button>
                             </div>
-                            <span class="text-xs text-slate-500 mt-1 block">Busca cadastro automático por leitura ou digitação.</span>
+                            <span class="text-xs text-slate-500 mt-1 block">Busca automática por leitura ou digitação.</span>
                         </div>
 
                         <div>
@@ -335,7 +348,6 @@
                             </select>
                         </div>
 
-                        <!-- OnChange adicionado para manipular o campo Tempo/Pontos -->
                         <div>
                             <label class="block text-xs font-bold uppercase text-slate-600 mb-2">Modalidade</label>
                             <select id="admin-modalidade" required onchange="handleModalidadeChange()" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-3 text-slate-900 focus:outline-none focus:border-cob-blue">
@@ -354,14 +366,16 @@
                             </select>
                         </div>
 
-                        <!-- Label com ID dinâmico, Input recebendo formatação global baseada na Modalidade -->
                         <div>
                             <label id="label-tempo-pontos" class="block text-xs font-bold uppercase text-slate-600 mb-2">Tempo (HH:MM:SS)</label>
                             <input type="text" id="admin-tempo" required placeholder="00:00:00" oninput="formatInputData(this)" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-3 text-slate-900 font-mono text-lg focus:outline-none focus:border-cob-blue">
                         </div>
 
-                        <div class="lg:col-span-2 flex items-end justify-end">
-                            <button type="submit" class="px-8 py-3.5 bg-cob-dark hover:bg-cob-blue text-white font-bold rounded-xl shadow-md transition-all flex items-center space-x-2">
+                        <div class="lg:col-span-2 flex items-end justify-end space-x-3">
+                            <button type="button" id="btn-cancel-edit" onclick="cancelEdit()" class="hidden px-6 py-3.5 bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold rounded-xl transition-all">
+                                Cancelar Edição
+                            </button>
+                            <button type="submit" id="btn-save-record" class="px-8 py-3.5 bg-cob-dark hover:bg-cob-blue text-white font-bold rounded-xl shadow-md transition-all flex items-center space-x-2">
                                 <i class="fa-solid fa-floppy-disk"></i>
                                 <span>Salvar Registro Oficial</span>
                             </button>
@@ -369,9 +383,17 @@
                     </form>
                 </div>
 
-                <!-- Lista de Registros Cadastrados -->
+                <!-- Lista de Registros Cadastrados e Pesquisa Rápida -->
                 <div class="bg-white border border-slate-200 p-8 rounded-3xl shadow-md space-y-6">
-                    <h4 class="text-xl font-black text-slate-900">Registros Cadastrados no Sistema</h4>
+                    <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                        <h4 class="text-xl font-black text-slate-900">Registros Cadastrados</h4>
+                        <!-- Pesquisa Rápida -->
+                        <div class="w-full sm:w-72 relative">
+                            <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400"></i>
+                            <input type="text" id="admin-search-input" oninput="renderAdminRecords()" placeholder="Buscar nome ou credencial..." class="w-full bg-slate-50 border border-slate-300 rounded-xl pl-10 pr-4 py-2.5 text-sm text-slate-900 focus:outline-none focus:border-cob-blue shadow-sm">
+                        </div>
+                    </div>
+                    
                     <div class="overflow-x-auto">
                         <table class="w-full text-left border-collapse">
                             <thead>
@@ -383,7 +405,7 @@
                                     <th class="py-3 px-4">Bloco</th>
                                     <th class="py-3 px-4">Modalidade</th>
                                     <th class="py-3 px-4">Tempo / Pontos</th>
-                                    <th class="py-3 px-4 text-right">Ação</th>
+                                    <th class="py-3 px-4 text-right">Ações</th>
                                 </tr>
                             </thead>
                             <tbody id="admin-records-tbody" class="divide-y divide-slate-100 text-sm">
@@ -391,6 +413,68 @@
                             </tbody>
                         </table>
                     </div>
+                </div>
+
+                <!-- SEÇÃO FINAL: DASHBOARD E RELATÓRIOS -->
+                <div class="space-y-6 mt-12 border-t border-slate-200 pt-10">
+                    <h3 class="text-2xl font-black text-slate-900 flex items-center"><i class="fa-solid fa-chart-pie text-cob-blue mr-3"></i> Dashboard & Estatísticas</h3>
+                    
+                    <!-- KPI Cards (Métricas 1, 8, 9) -->
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div class="bg-white border border-slate-200 p-6 rounded-2xl shadow-sm text-center">
+                            <p class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Total de Participações</p>
+                            <h2 class="text-4xl font-black text-cob-blue" id="kpi-total">0</h2>
+                        </div>
+                        <div class="bg-white border border-slate-200 p-6 rounded-2xl shadow-sm text-center">
+                            <p class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Participantes Únicos</p>
+                            <h2 class="text-4xl font-black text-cob-green" id="kpi-unicos">0</h2>
+                            <p class="text-xs text-slate-400 mt-2" id="kpi-unicos-naipe">MAS: 0 | FEM: 0</p>
+                        </div>
+                        <div class="bg-white border border-slate-200 p-6 rounded-2xl shadow-sm text-center">
+                            <p class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Participaram em +1 Mod.</p>
+                            <h2 class="text-4xl font-black text-purple-600" id="kpi-multimod">0</h2>
+                            <p class="text-xs text-slate-400 mt-2" id="kpi-multimod-naipe">MAS: 0 | FEM: 0</p>
+                        </div>
+                    </div>
+
+                    <!-- Gráficos -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <!-- Chart: Participantes Totais por Bloco -->
+                        <div class="bg-white border border-slate-200 p-6 rounded-2xl shadow-sm">
+                            <h4 class="text-sm font-bold text-slate-800 text-center mb-4">Participações por Bloco</h4>
+                            <canvas id="chartBloco"></canvas>
+                        </div>
+                        
+                        <!-- Chart: Participantes por Modalidade e Naipe -->
+                        <div class="bg-white border border-slate-200 p-6 rounded-2xl shadow-sm">
+                            <h4 class="text-sm font-bold text-slate-800 text-center mb-4">Participações por Modalidade & Naipe</h4>
+                            <canvas id="chartModalidadeNaipe"></canvas>
+                        </div>
+
+                        <!-- Chart: Participantes por Naipe e Bloco -->
+                        <div class="bg-white border border-slate-200 p-6 rounded-2xl shadow-sm md:col-span-2">
+                            <h4 class="text-sm font-bold text-slate-800 text-center mb-4">Cruzamento: Modalidade x Bloco x Naipe</h4>
+                            <canvas id="chartCompleto" style="max-height: 300px;"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- Exportação e Relatórios -->
+                    <div class="bg-gradient-to-r from-cob-dark to-cob-blue p-8 rounded-3xl shadow-lg text-white mt-8">
+                        <h4 class="text-xl font-black mb-2"><i class="fa-solid fa-file-pdf mr-2"></i> Relatórios Oficiais (PDF)</h4>
+                        <p class="text-sm text-white/80 mb-6">Gere listas formatadas automaticamente. O sistema filtra os atletas únicos evitando duplicidade nas primeiras posições de uma mesma prova.</p>
+                        
+                        <div class="flex flex-col sm:flex-row gap-4">
+                            <button onclick="exportFirstPlacesPDF()" class="flex-1 bg-white text-cob-dark hover:bg-slate-100 py-4 px-6 rounded-xl font-bold shadow-md transition-all flex items-center justify-center space-x-2">
+                                <i class="fa-solid fa-medal text-cob-gold text-lg"></i>
+                                <span>Exportar Campeões (1º Lugar por Bloco/Modalidade)</span>
+                            </button>
+                            <button onclick="exportTop3OverallPDF()" class="flex-1 bg-white text-cob-dark hover:bg-slate-100 py-4 px-6 rounded-xl font-bold shadow-md transition-all flex items-center justify-center space-x-2">
+                                <i class="fa-solid fa-trophy text-cob-cyan text-lg"></i>
+                                <span>Exportar Top 3 Geral (Por Modalidade)</span>
+                            </button>
+                        </div>
+                    </div>
+
                 </div>
             </div>
         </section>
@@ -475,15 +559,10 @@
         function getBlocoStatus(blocoName) {
             const config = blockConfig[blocoName];
             if (!config) return 'Encerrado';
-
-            if (config.mode === 'manual') {
-                return config.manualStatus === 'Ativo' ? 'Ativo' : 'Encerrado';
-            }
-
+            if (config.mode === 'manual') return config.manualStatus === 'Ativo' ? 'Ativo' : 'Encerrado';
             const now = new Date();
             const start = new Date(config.start);
             const end = new Date(config.end);
-            
             if (now < start) return 'Aguardando';
             if (now > end) return 'Encerrado';
             return 'Ativo';
@@ -533,7 +612,6 @@
                             <p><i class="fa-solid fa-play text-cob-green mr-1.5"></i> <strong>Início:</strong> ${startStr}</p>
                             <p><i class="fa-solid fa-stop text-red-500 mr-1.5"></i> <strong>Fim:</strong> ${endStr}</p>
                             
-                            <!-- Botão Editar Visível no Hover -->
                             <button onclick="openEditModal('${b}')" class="absolute top-2 right-2 p-1.5 bg-white border border-slate-200 rounded-lg shadow-sm text-cob-blue hover:bg-slate-50 hidden group-hover:block transition-all" title="Editar Datas do Bloco">
                                 <i class="fa-solid fa-pen"></i>
                             </button>
@@ -550,7 +628,6 @@
             });
         }
 
-        // Funções do Modal de Edição de Datas
         function openEditModal(bloco) {
             document.getElementById('edit-modal-title').innerText = `Editar Datas - ${bloco}`;
             document.getElementById('edit-block-name').value = bloco;
@@ -567,7 +644,6 @@
             const bloco = document.getElementById('edit-block-name').value;
             const start = document.getElementById('edit-start-date').value;
             const end = document.getElementById('edit-end-date').value;
-
             if (start && end) {
                 blockConfig[bloco].start = start;
                 blockConfig[bloco].end = end;
@@ -578,7 +654,6 @@
             }
         }
 
-        // Troca Auto/Manual
         function setBlockMode(bloco, mode) {
             blockConfig[bloco].mode = mode;
             localStorage.setItem('jj2026_block_config', JSON.stringify(blockConfig));
@@ -601,7 +676,7 @@
             v = v.replace(/(\d{8})(\d)/, '$1-$2');
             input.value = v;
 
-            if (v.length === 10) { 
+            if (v.length === 10 && !document.getElementById('admin-edit-id').value) { 
                 const existingParticipant = records.find(r => r.credencial === v);
                 if (existingParticipant) {
                     document.getElementById('admin-atleta').value = existingParticipant.atleta || '';
@@ -616,10 +691,7 @@
             if (!html5QrCode) {
                 html5QrCode = new Html5Qrcode("reader");
             }
-            
-            // Configurações para ler Código de barras e QR Codes
             const config = { fps: 10, qrbox: { width: 250, height: 250 } };
-            
             html5QrCode.start({ facingMode: "environment" }, config, onScanSuccess)
             .catch(err => {
                 showModal('Erro na Câmera', 'Não foi possível acessar a câmera. Verifique as permissões do seu navegador.', 'error');
@@ -636,33 +708,24 @@
 
         function onScanSuccess(decodedText, decodedResult) {
             closeScannerModal();
-            
-            // Aplica a máscara no texto escaneado para forçar o formato 00000000-0
             let v = decodedText.replace(/\D/g, '');
             if (v.length > 9) v = v.slice(0, 9);
             v = v.replace(/(\d{8})(\d)/, '$1-$2');
             
             const credInput = document.getElementById('admin-credencial');
             credInput.value = v;
-            
-            // Feedback tátil no celular se suportado
             if (navigator.vibrate) { navigator.vibrate(200); }
 
-            // Só processa a busca automática se atingir os 10 caracteres
             if (v.length === 10) {
                 const existingParticipant = records.find(r => r.credencial === v);
-                
                 if (existingParticipant) {
                     document.getElementById('admin-atleta').value = existingParticipant.atleta || '';
                     document.getElementById('admin-subcategoria').value = existingParticipant.subcategoria || '';
                     if(existingParticipant.naipe) document.getElementById('admin-naipe').value = existingParticipant.naipe;
-                    
                     showModal('Atleta Localizado', `Dados de ${existingParticipant.atleta} puxados com sucesso!`, 'success');
                 } else {
-                    // Caso não exista, limpa os inputs para novo cadastro manual
                     document.getElementById('admin-atleta').value = '';
                     document.getElementById('admin-subcategoria').value = 'Atleta';
-                    
                     showModal('Nova Credencial', `Código ${v} registrado. Preencha os dados do atleta para o primeiro cadastro.`, 'success');
                 }
             } else {
@@ -670,7 +733,7 @@
             }
         }
         
-        // Variáveis Modo TV
+        // --- Variáveis Globais e Fetch ---
         let tvModeInterval = null;
         let tvStateIndex = 0;
         const tvStates = [
@@ -686,7 +749,10 @@
             const { data, error } = await _supabase.from('records').select('*');
             if (!error && data) {
                 records = data;
-                if (isAdminLoggedIn) renderAdminRecords();
+                if (isAdminLoggedIn) {
+                    renderAdminRecords();
+                    updateDashboard();
+                }
                 renderLeaderboard();
             }
         }
@@ -709,6 +775,7 @@
             if (tabId === 'admin' && isAdminLoggedIn) {
                 renderAdminBlocks();
                 renderAdminRecords();
+                updateDashboard();
             }
         }
 
@@ -726,12 +793,10 @@
             }
         }
 
-        // Modifica rótulo e máscara do formulário com base na modalidade
         function handleModalidadeChange() {
             const mod = document.getElementById('admin-modalidade').value;
             const label = document.getElementById('label-tempo-pontos');
             const input = document.getElementById('admin-tempo');
-            
             if (mod === 'Fortnite') {
                 label.innerText = 'Pontos';
                 input.placeholder = 'Ex: 1500';
@@ -739,13 +804,13 @@
                 label.innerText = 'Tempo (HH:MM:SS)';
                 input.placeholder = '00:00:00';
             }
-            input.value = '';
+            if(!document.getElementById('admin-edit-id').value) input.value = '';
         }
 
         function formatInputData(input) {
             const mod = document.getElementById('admin-modalidade').value;
             if (mod === 'Fortnite') {
-                input.value = input.value.replace(/\D/g, ''); // Somente números para Pontos
+                input.value = input.value.replace(/\D/g, ''); 
             } else {
                 formatTimeInput(input);
             }
@@ -766,7 +831,6 @@
         function handleAdminLogin() {
             const pin = document.getElementById('admin-pin-input').value;
             const errorEl = document.getElementById('login-error');
-            
             if (pin === 'JJ2026FOZ') {
                 isAdminLoggedIn = true;
                 errorEl.classList.add('hidden');
@@ -774,6 +838,7 @@
                 document.getElementById('admin-panel-content').classList.remove('hidden');
                 renderAdminBlocks();
                 renderAdminRecords();
+                updateDashboard();
             } else {
                 errorEl.classList.remove('hidden');
             }
@@ -786,8 +851,16 @@
             document.getElementById('admin-login-screen').classList.remove('hidden');
         }
 
+        // --- SUBMISSÃO E EDIÇÃO ---
         async function submitTimeRecord(e) {
             e.preventDefault();
+            
+            const btn = document.getElementById('btn-save-record');
+            const originalHTML = btn.innerHTML;
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> <span>Processando...</span>';
+
+            const editId = document.getElementById('admin-edit-id').value;
             const credencial = document.getElementById('admin-credencial').value.trim();
             const atleta = document.getElementById('admin-atleta').value.toUpperCase();
             const naipe = document.getElementById('admin-naipe').value;
@@ -796,69 +869,139 @@
             const bloco = document.getElementById('admin-bloco').value;
             const tempo = document.getElementById('admin-tempo').value;
 
-            // Restaura a trava que exige os 10 caracteres no envio
             if (credencial && credencial.length !== 10) {
                 showModal('Atenção', 'Se informada, a Credencial deve ser completa (ex: 12345678-9).', 'error');
+                resetSaveBtn(btn, originalHTML);
                 return;
             }
 
             const currentStatus = getBlocoStatus(bloco);
-            if (currentStatus !== 'Ativo') {
-                showModal('Atenção', `O ${bloco} não está Ativo no momento. Verifique as configurações do bloco.`, 'error');
+            if (currentStatus !== 'Ativo' && !editId) { 
+                showModal('Atenção', `O ${bloco} não está Ativo no momento. Verifique as configurações.`, 'error');
+                resetSaveBtn(btn, originalHTML);
                 return;
             }
 
-            let existingRecord = null;
-            // Se credencial existe procuramos por ela e a modalidade, senão pelo nome
-            if (credencial) {
-                existingRecord = records.find(r => r.credencial === credencial && r.modalidade === modalidade);
-            } else {
-                existingRecord = records.find(r => r.atleta === atleta && r.modalidade === modalidade);
-            }
-
-            if (existingRecord) {
-                const { error } = await _supabase.from('records')
-                    .update({ tempo: tempo, bloco: bloco, atleta: atleta, subcategoria: subcategoria, naipe: naipe, credencial: credencial })
-                    .eq('id', existingRecord.id);
-
-                if (!error) {
-                    document.getElementById('time-entry-form').reset();
-                    await fetchRecords();
-                    showModal('Sucesso', 'O resultado deste participante foi atualizado!', 'success');
-                } else {
-                    showModal('Erro', 'Não foi possível atualizar o registro.', 'error');
-                }
-            } else {
-                const { error } = await _supabase.from('records')
-                    .insert([{ credencial, atleta, naipe, subcategoria, modalidade, bloco, tempo }]);
+            // Atraso artificial solicitado de 1.5s a 2.5s
+            const delay = Math.floor(Math.random() * 1000) + 1500;
+            
+            setTimeout(async () => {
                 
-                if (!error) {
-                    document.getElementById('time-entry-form').reset();
-                    await fetchRecords();
-                    showModal('Sucesso', 'Resultado oficial cadastrado com sucesso!', 'success');
+                // Se existe ID de edição, atualiza diretamente
+                if (editId) {
+                    const { error } = await _supabase.from('records')
+                        .update({ credencial, atleta, naipe, subcategoria, modalidade, bloco, tempo })
+                        .eq('id', editId);
+                    
+                    if (!error) {
+                        cancelEdit();
+                        await fetchRecords();
+                        showModal('Sucesso', 'O registro foi atualizado!', 'success');
+                    } else {
+                        showModal('Erro', 'Não foi possível atualizar o registro.', 'error');
+                    }
                 } else {
-                    showModal('Erro', 'Não foi possível salvar o registro no banco de dados.', 'error');
+                    // Impede cadastro duplicado caso usuário não tenha editado mas tente salvar outro da mesma modalidade
+                    let existingRecord = credencial 
+                        ? records.find(r => r.credencial === credencial && r.modalidade === modalidade)
+                        : records.find(r => r.atleta === atleta && r.modalidade === modalidade);
+
+                    if (existingRecord) {
+                        const { error } = await _supabase.from('records')
+                            .update({ tempo: tempo, bloco: bloco, atleta: atleta, subcategoria: subcategoria, naipe: naipe, credencial: credencial })
+                            .eq('id', existingRecord.id);
+
+                        if (!error) {
+                            document.getElementById('time-entry-form').reset();
+                            await fetchRecords();
+                            showModal('Sucesso', 'O resultado deste participante foi atualizado!', 'success');
+                        } else {
+                            showModal('Erro', 'Não foi possível atualizar o registro.', 'error');
+                        }
+                    } else {
+                        const { error } = await _supabase.from('records')
+                            .insert([{ credencial, atleta, naipe, subcategoria, modalidade, bloco, tempo }]);
+                        
+                        if (!error) {
+                            document.getElementById('time-entry-form').reset();
+                            await fetchRecords();
+                            showModal('Sucesso', 'Resultado oficial cadastrado com sucesso!', 'success');
+                        } else {
+                            showModal('Erro', 'Não foi possível salvar o registro no banco de dados.', 'error');
+                        }
+                    }
                 }
+                resetSaveBtn(btn, originalHTML);
+            }, delay);
+        }
+
+        function resetSaveBtn(btn, html) {
+            btn.disabled = false;
+            btn.innerHTML = html;
+        }
+
+        function editRecord(id) {
+            const r = records.find(rec => rec.id === id);
+            if (r) {
+                document.getElementById('admin-edit-id').value = r.id;
+                document.getElementById('admin-credencial').value = r.credencial || '';
+                document.getElementById('admin-atleta').value = r.atleta || '';
+                document.getElementById('admin-naipe').value = r.naipe || 'MAS';
+                document.getElementById('admin-subcategoria').value = r.subcategoria || 'Atleta';
+                document.getElementById('admin-modalidade').value = r.modalidade || 'Remo';
+                document.getElementById('admin-bloco').value = r.bloco || 'Bloco 1';
+                document.getElementById('admin-tempo').value = r.tempo || '';
+                
+                document.getElementById('form-title').innerText = 'Editando Registro';
+                document.getElementById('form-container').classList.add('border-cob-gold', 'border-2');
+                document.getElementById('btn-cancel-edit').classList.remove('hidden');
+                
+                handleModalidadeChange();
+                document.getElementById('admin-tempo').value = r.tempo || ''; 
+                
+                window.scrollTo({ top: document.getElementById('form-container').offsetTop - 100, behavior: 'smooth' });
             }
         }
 
+        function cancelEdit() {
+            document.getElementById('admin-edit-id').value = '';
+            document.getElementById('time-entry-form').reset();
+            document.getElementById('form-title').innerText = 'Registrar Resultado Oficial';
+            document.getElementById('form-container').classList.remove('border-cob-gold', 'border-2');
+            document.getElementById('btn-cancel-edit').classList.add('hidden');
+            handleModalidadeChange();
+        }
+
         async function deleteRecord(id) {
-            const { error } = await _supabase.from('records').delete().eq('id', id);
-            if (!error) {
-                await fetchRecords();
+            if (confirm("Tem certeza que deseja remover este registro permanentemente?")) {
+                const { error } = await _supabase.from('records').delete().eq('id', id);
+                if (!error) {
+                    await fetchRecords();
+                }
             }
         }
 
         function renderAdminRecords() {
             const tbody = document.getElementById('admin-records-tbody');
+            const searchInput = document.getElementById('admin-search-input').value.toLowerCase();
             tbody.innerHTML = '';
-            if (records.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="8" class="py-6 text-center text-slate-400">Nenhum registro cadastrado.</td></tr>`;
+            
+            let displayRecords = records;
+            if (searchInput) {
+                displayRecords = records.filter(r => 
+                    (r.atleta && r.atleta.toLowerCase().includes(searchInput)) || 
+                    (r.credencial && r.credencial.toLowerCase().includes(searchInput))
+                );
+            }
+
+            if (displayRecords.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="8" class="py-6 text-center text-slate-400">Nenhum registro encontrado.</td></tr>`;
                 return;
             }
-            records.forEach(r => {
+            
+            // Ordenar decrescente por data para o Admin ver os mais recentes (simulando pelo id ou array position caso reverse)
+            [...displayRecords].reverse().forEach(r => {
                 let hiddenCredencial = 'N/A';
-                // Máscara mantida como no original: mostra início e fim
                 if (r.credencial && r.credencial.length === 10) {
                     hiddenCredencial = r.credencial.substring(0, 4) + '****-' + r.credencial.substring(9, 10);
                 } else if (r.credencial) {
@@ -874,14 +1017,201 @@
                         <td class="py-3 px-4 text-slate-600">${r.bloco}</td>
                         <td class="py-3 px-4 text-slate-600">${r.modalidade}</td>
                         <td class="py-3 px-4 font-mono font-bold ${r.modalidade === 'Fortnite' ? 'text-purple-600' : 'text-emerald-600'}">${r.tempo}</td>
-                        <td class="py-3 px-4 text-right">
-                            <button onclick="deleteRecord('${r.id}')" class="text-red-500 hover:text-red-700 p-2"><i class="fa-solid fa-trash"></i></button>
+                        <td class="py-3 px-4 text-right flex justify-end space-x-1">
+                            <button onclick="editRecord('${r.id}')" class="text-cob-blue hover:text-cob-cyan p-2" title="Editar"><i class="fa-solid fa-pen"></i></button>
+                            <button onclick="deleteRecord('${r.id}')" class="text-red-500 hover:text-red-700 p-2" title="Excluir"><i class="fa-solid fa-trash"></i></button>
                         </td>
                     </tr>
                 `;
             });
         }
 
+        // --- DASHBOARD E ESTATÍSTICAS ---
+        let dashboardCharts = {};
+
+        function updateDashboard() {
+            if (!isAdminLoggedIn) return;
+            
+            // 1. Número de Participações Totais
+            const totalRecords = records.length;
+            
+            // Cálculos para participantes únicos (usando credencial ou nome como chave)
+            const uniqueMap = new Map();
+            records.forEach(r => {
+                const key = r.credencial || r.atleta;
+                if(!uniqueMap.has(key)) {
+                    uniqueMap.set(key, { naipe: r.naipe || 'MAS', mods: new Set() });
+                }
+                uniqueMap.get(key).mods.add(r.modalidade);
+            });
+            
+            // 8. Participantes únicos
+            const totalUnicos = uniqueMap.size;
+            
+            // 10. Participantes únicos por naipe
+            let unicosMas = 0, unicosFem = 0;
+            // 9 & 11. Mais de uma modalidade (+ por naipe)
+            let multiMod = 0, multiModMas = 0, multiModFem = 0;
+            
+            uniqueMap.forEach(val => {
+                if (val.naipe === 'MAS') unicosMas++;
+                if (val.naipe === 'FEM') unicosFem++;
+                if (val.mods.size > 1) {
+                    multiMod++;
+                    if (val.naipe === 'MAS') multiModMas++;
+                    if (val.naipe === 'FEM') multiModFem++;
+                }
+            });
+
+            document.getElementById('kpi-total').innerText = totalRecords;
+            document.getElementById('kpi-unicos').innerText = totalUnicos;
+            document.getElementById('kpi-unicos-naipe').innerText = `MAS: ${unicosMas} | FEM: ${unicosFem}`;
+            document.getElementById('kpi-multimod').innerText = multiMod;
+            document.getElementById('kpi-multimod-naipe').innerText = `MAS: ${multiModMas} | FEM: ${multiModFem}`;
+
+            // Contagens Agrupadas para os Gráficos
+            let countBlocos = { 'Bloco 1': 0, 'Bloco 2': 0, 'Bloco 3': 0 };
+            let countModNaipe = {
+                'Remo': { MAS: 0, FEM: 0 },
+                'Ciclismo': { MAS: 0, FEM: 0 },
+                'Fortnite': { MAS: 0, FEM: 0 }
+            };
+            let countGeral = {}; // Bloco -> Mod -> Naipe
+
+            records.forEach(r => {
+                // 2. Por Bloco
+                if(countBlocos[r.bloco] !== undefined) countBlocos[r.bloco]++;
+                // 5 & 6. Por Modalidade e Naipe
+                if(countModNaipe[r.modalidade] && r.naipe) countModNaipe[r.modalidade][r.naipe]++;
+                
+                // 4 & 7. Cruzamento Total
+                if(!countGeral[r.bloco]) countGeral[r.bloco] = { 'Remo': {MAS:0, FEM:0}, 'Ciclismo': {MAS:0, FEM:0}, 'Fortnite': {MAS:0, FEM:0} };
+                if(countGeral[r.bloco][r.modalidade] && r.naipe) countGeral[r.bloco][r.modalidade][r.naipe]++;
+            });
+
+            // Atualiza Gráfico 1 (Blocos)
+            drawChart('chartBloco', 'bar', Object.keys(countBlocos), [{
+                label: 'Participações', data: Object.values(countBlocos), backgroundColor: '#0066CC'
+            }]);
+
+            // Atualiza Gráfico 2 (Modalidade x Naipe)
+            drawChart('chartModalidadeNaipe', 'bar', Object.keys(countModNaipe), [
+                { label: 'Masculino', data: Object.values(countModNaipe).map(x => x.MAS), backgroundColor: '#004A80' },
+                { label: 'Feminino', data: Object.values(countModNaipe).map(x => x.FEM), backgroundColor: '#00A859' }
+            ]);
+
+            // Atualiza Gráfico 3 (Cruzamento Total)
+            const labels3 = ['Bloco 1', 'Bloco 2', 'Bloco 3'];
+            const datasets3 = [
+                { label: 'Remo MAS', data: labels3.map(b => countGeral[b]['Remo'].MAS), backgroundColor: '#003366', stack: 'Stack 0' },
+                { label: 'Remo FEM', data: labels3.map(b => countGeral[b]['Remo'].FEM), backgroundColor: '#004A80', stack: 'Stack 0' },
+                { label: 'Ciclismo MAS', data: labels3.map(b => countGeral[b]['Ciclismo'].MAS), backgroundColor: '#008542', stack: 'Stack 1' },
+                { label: 'Ciclismo FEM', data: labels3.map(b => countGeral[b]['Ciclismo'].FEM), backgroundColor: '#00A859', stack: 'Stack 1' },
+                { label: 'Fortnite MAS', data: labels3.map(b => countGeral[b]['Fortnite'].MAS), backgroundColor: '#5c2a9d', stack: 'Stack 2' },
+                { label: 'Fortnite FEM', data: labels3.map(b => countGeral[b]['Fortnite'].FEM), backgroundColor: '#7e3ff2', stack: 'Stack 2' }
+            ];
+            drawChart('chartCompleto', 'bar', labels3, datasets3, true);
+        }
+
+        function drawChart(elementId, type, labels, datasets, stacked = false) {
+            const ctx = document.getElementById(elementId).getContext('2d');
+            if (dashboardCharts[elementId]) {
+                dashboardCharts[elementId].destroy();
+            }
+            dashboardCharts[elementId] = new Chart(ctx, {
+                type: type,
+                data: { labels: labels, datasets: datasets },
+                options: {
+                    responsive: true,
+                    scales: stacked ? { x: { stacked: true }, y: { stacked: true } } : {}
+                }
+            });
+        }
+
+        // --- RELATÓRIOS PDF ---
+        // Função auxiliar para ordernar registros e garantir atletas únicos nos primeiros lugares
+        function getUniqueTopRecords(recs, sortByPoints) {
+            let sorted = [...recs].sort((a, b) => {
+                if(sortByPoints) return parseInt(b.tempo) - parseInt(a.tempo); // Maior para menor
+                return a.tempo.localeCompare(b.tempo); // Menor para maior
+            });
+            
+            let uniqueList = [];
+            let seen = new Set();
+            for(let r of sorted) {
+                let key = r.credencial || r.atleta;
+                if(!seen.has(key)) {
+                    seen.add(key);
+                    uniqueList.push(r);
+                }
+            }
+            return uniqueList;
+        }
+
+        function exportFirstPlacesPDF() {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            doc.text("Campeões por Bloco e Modalidade", 14, 15);
+            
+            let bodyData = [];
+            
+            ['Bloco 1', 'Bloco 2', 'Bloco 3'].forEach(b => {
+                ['Remo', 'Ciclismo', 'Fortnite'].forEach(mod => {
+                    const recs = records.filter(r => r.bloco === b && r.modalidade === mod);
+                    if(recs.length > 0) {
+                        const top = getUniqueTopRecords(recs, mod === 'Fortnite')[0]; // Pega o 1º único
+                        bodyData.push([b, mod, top.credencial || '-', top.atleta, top.naipe || '-', top.tempo]);
+                    }
+                });
+            });
+
+            if(bodyData.length === 0) {
+                showModal('Atenção', 'Não há registros suficientes para gerar o relatório.', 'error');
+                return;
+            }
+
+            doc.autoTable({
+                head: [['Bloco', 'Modalidade', 'Credencial', 'Nome Completo', 'Naipe', 'Resultado']],
+                body: bodyData,
+                startY: 25,
+                theme: 'grid',
+                headStyles: { fillColor: [0, 43, 73] }
+            });
+            doc.save('campeoes_jogos_juventude.pdf');
+        }
+
+        function exportTop3OverallPDF() {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            doc.text("Top 3 Geral por Modalidade", 14, 15);
+            
+            let bodyData = [];
+            
+            ['Remo', 'Ciclismo', 'Fortnite'].forEach(mod => {
+                const recs = records.filter(r => r.modalidade === mod);
+                const tops = getUniqueTopRecords(recs, mod === 'Fortnite').slice(0, 3); // Top 3 únicos
+                
+                tops.forEach((top, index) => {
+                    bodyData.push([mod, `${index + 1}º`, top.credencial || '-', top.atleta, top.naipe || '-', top.tempo, top.bloco]);
+                });
+            });
+
+            if(bodyData.length === 0) {
+                showModal('Atenção', 'Não há registros suficientes para gerar o relatório.', 'error');
+                return;
+            }
+
+            doc.autoTable({
+                head: [['Modalidade', 'Posição', 'Credencial', 'Nome Completo', 'Naipe', 'Resultado', 'Bloco']],
+                body: bodyData,
+                startY: 25,
+                theme: 'grid',
+                headStyles: { fillColor: [0, 153, 255] }
+            });
+            doc.save('top3_geral_jogos_juventude.pdf');
+        }
+
+        // --- RANKING GERAL (VISUALIZAÇÃO) ---
         function renderLeaderboard() {
             const bloco = document.getElementById('filter-bloco').value;
             const modalidade = document.getElementById('filter-modalidade').value;
@@ -890,38 +1220,28 @@
             const tbody = document.getElementById('leaderboard-tbody');
             const thResultado = document.getElementById('th-resultado');
 
-            // Ajusta o cabeçalho dinamicamente
             if (thResultado) {
                 thResultado.innerText = modalidade === 'Fortnite' ? 'Pontuação' : 'Tempo Oficial';
             }
 
             let filtered = records.filter(r => r.modalidade === modalidade);
-            
-            if (bloco !== 'Geral') {
-                filtered = filtered.filter(r => r.bloco === bloco);
-            }
-            if (naipe !== 'Todos') {
-                filtered = filtered.filter(r => r.naipe === naipe);
-            }
+            if (bloco !== 'Geral') filtered = filtered.filter(r => r.bloco === bloco);
+            if (naipe !== 'Todos') filtered = filtered.filter(r => r.naipe === naipe);
 
-            // Ordenação: Fortnite (Pontos Decrescente) vs Demais (Tempo Crescente)
-            if (modalidade === 'Fortnite') {
-                filtered.sort((a, b) => parseInt(b.tempo) - parseInt(a.tempo));
-            } else {
-                filtered.sort((a, b) => a.tempo.localeCompare(b.tempo));
-            }
+            // Ordena todos, mas filtra os melhores de cada atleta de forma única (pede o usuário)
+            let uniqueList = getUniqueTopRecords(filtered, modalidade === 'Fortnite');
 
             tbody.classList.remove('animate-fadeIn');
             void tbody.offsetWidth;
             tbody.classList.add('animate-fadeIn');
             tbody.innerHTML = '';
 
-            if (filtered.length === 0) {
+            if (uniqueList.length === 0) {
                 tbody.innerHTML = `<tr><td colspan="6" class="py-8 text-center text-slate-400">Nenhum resultado registrado para este filtro.</td></tr>`;
                 return;
             }
 
-            filtered.forEach((r, index) => {
+            uniqueList.forEach((r, index) => {
                 let badgeClass = "text-slate-500 font-bold";
                 if (index === 0) badgeClass = "text-amber-700 font-black bg-amber-100 px-3 py-1 rounded-full border border-amber-200";
                 if (index === 1) badgeClass = "text-slate-700 font-black bg-slate-200 px-3 py-1 rounded-full border border-slate-300";
@@ -991,8 +1311,6 @@
         function startTVCycle() {
             tvStateIndex = 0;
             applyTVState();
-            
-            // Ciclo a cada 15 segundos
             tvModeInterval = setInterval(() => {
                 tvStateIndex = (tvStateIndex + 1) % tvStates.length;
                 applyTVState();
@@ -1001,37 +1319,16 @@
 
         async function applyTVState() {
             const state = tvStates[tvStateIndex];
-            
             document.getElementById('filter-modalidade').value = state.mod;
             document.getElementById('filter-naipe').value = state.naipe;
             document.getElementById('filter-bloco').value = state.bloco;
             document.getElementById('tv-title-text').innerText = state.title;
-            
             await fetchRecords(); 
-        }
-
-        function showModal(title, message, type = 'success') {
-            document.getElementById('modal-title').innerText = title;
-            document.getElementById('modal-message').innerText = message;
-            const icon = document.getElementById('modal-icon');
-            if (type === 'success') {
-                icon.className = "w-14 h-14 rounded-full bg-emerald-50 text-cob-green flex items-center justify-center mx-auto text-2xl border border-emerald-100";
-                icon.innerHTML = '<i class="fa-solid fa-check"></i>';
-            } else {
-                icon.className = "w-14 h-14 rounded-full bg-red-50 text-red-600 flex items-center justify-center mx-auto text-2xl border border-red-100";
-                icon.innerHTML = '<i class="fa-solid fa-triangle-exclamation"></i>';
-            }
-            document.getElementById('custom-modal').classList.remove('hidden');
-        }
-
-        function closeModal() {
-            document.getElementById('custom-modal').classList.add('hidden');
         }
 
         document.addEventListener('DOMContentLoaded', async () => {
             if (isAdminLoggedIn) renderAdminBlocks();
             
-            // Loop contínuo a cada 30 segundos
             setInterval(() => {
                 if(isAdminLoggedIn) renderAdminBlocks();
                 if (!tvModeInterval) {
@@ -1048,7 +1345,6 @@
                 })
                 .subscribe();
                 
-            // Prevenção de travamento na Smart TV (Memory Leak) - 2 horas
             setTimeout(() => {
                 window.location.reload();
             }, 7200000);
