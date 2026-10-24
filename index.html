@@ -35,7 +35,7 @@
                         }
                     },
                     animation: {
-                        fadeIn: 'fadeIn 0.5s ease-in-out',
+                        fadeIn: 'fadeIn 0.2s ease-in-out',
                     },
                     keyframes: {
                         fadeIn: {
@@ -86,7 +86,7 @@
     </header>
 
     <!-- Main Content Container -->
-    <main id="main-container" class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 transition-all duration-300">
+    <main id="main-container" class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 transition-all duration-150">
 
         <!-- TAB: INÍCIO -->
         <section id="tab-home" class="space-y-8 animate-fadeIn">
@@ -333,8 +333,8 @@
                         </div>
 
                         <div>
-                            <label class="block text-xs font-bold uppercase text-slate-600 mb-2">Bloco</label>
-                            <select id="admin-bloco" required class="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-3 text-slate-900 focus:outline-none focus:border-cob-blue">
+                            <label class="block text-xs font-bold uppercase text-slate-600 mb-2">Bloco (Ativo)</label>
+                            <select id="admin-bloco" required class="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-3 text-slate-900 font-bold bg-slate-100 cursor-not-allowed">
                                 <option value="Bloco 1">Bloco 1</option>
                                 <option value="Bloco 2">Bloco 2</option>
                                 <option value="Bloco 3">Bloco 3</option>
@@ -561,7 +561,7 @@
             for (let b of blocks) {
                 if (getBlocoStatus(b) === 'Ativo') return b;
             }
-            return 'Geral'; 
+            return 'Bloco 1';
         }
 
         function formatDateTimePtBr(isoString) {
@@ -622,6 +622,11 @@
                     </div>
                 `;
             });
+            
+            const blocoSelect = document.getElementById('admin-bloco');
+            if (blocoSelect && !document.getElementById('admin-edit-id').value) {
+                blocoSelect.value = getActiveBlock();
+            }
         }
 
         function openEditModal(bloco) {
@@ -705,7 +710,13 @@
             if (!html5QrCode) {
                 html5QrCode = new Html5Qrcode("reader");
             }
-            const config = { fps: 10, qrbox: { width: 250, height: 250 } };
+            const config = { 
+                fps: 30, 
+                qrbox: { width: 280, height: 280 },
+                aspectRatio: 1.0,
+                experimentalFeatures: { useBarCodeDetectorIfSupported: true }
+            };
+            
             html5QrCode.start({ facingMode: "environment" }, config, onScanSuccess)
             .catch(err => {
                 showModal('Erro na Câmera', 'Não foi possível acessar a câmera. Verifique as permissões do seu navegador.', 'error');
@@ -728,7 +739,7 @@
             
             const credInput = document.getElementById('admin-credencial');
             credInput.value = v;
-            if (navigator.vibrate) { navigator.vibrate(200); }
+            if (navigator.vibrate) { navigator.vibrate(100); }
 
             if (v.length === 10) {
                 const existingParticipant = records.find(r => r.credencial === v);
@@ -736,14 +747,10 @@
                     document.getElementById('admin-atleta').value = existingParticipant.atleta || '';
                     document.getElementById('admin-subcategoria').value = existingParticipant.subcategoria || '';
                     if(existingParticipant.naipe) document.getElementById('admin-naipe').value = existingParticipant.naipe;
-                    showModal('Atleta Localizado', `Dados de ${existingParticipant.atleta} puxados com sucesso!`, 'success');
                 } else {
                     document.getElementById('admin-atleta').value = '';
                     document.getElementById('admin-subcategoria').value = 'Atleta';
-                    showModal('Nova Credencial', `Código ${v} registrado. Preencha os dados do atleta para o primeiro cadastro.`, 'success');
                 }
-            } else {
-                showModal('Atenção', `O código lido não possui os 9 dígitos padrão da credencial.`, 'error');
             }
         }
         
@@ -783,7 +790,7 @@
             if (activeNav) {
                 activeNav.className = "px-4 py-2 rounded-xl text-sm font-semibold transition-all bg-cob-dark text-white shadow-md";
             }
-            window.scrollTo({ top: 0, behavior: 'smooth' });
+            window.scrollTo({ top: 0, behavior: 'auto' });
             if (tabId === 'rankings') renderLeaderboard();
             if (tabId === 'admin' && isAdminLoggedIn) {
                 renderAdminBlocks();
@@ -864,14 +871,13 @@
             document.getElementById('admin-login-screen').classList.remove('hidden');
         }
 
-        // --- SUBMISSÃO E EDIÇÃO SEM DELAY NOS CAMPOS ---
         async function submitTimeRecord(e) {
             e.preventDefault();
             
             const btn = document.getElementById('btn-save-record');
             const originalHTML = btn.innerHTML;
             btn.disabled = true;
-            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> <span>Processando...</span>';
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> <span>Salvando...</span>';
 
             const editId = document.getElementById('admin-edit-id').value;
             const credencial = document.getElementById('admin-credencial').value.trim();
@@ -879,7 +885,7 @@
             const naipe = document.getElementById('admin-naipe').value;
             const subcategoria = document.getElementById('admin-subcategoria').value;
             const modalidade = document.getElementById('admin-modalidade').value;
-            const bloco = document.getElementById('admin-bloco').value;
+            const bloco = getActiveBlock();
             const tempo = document.getElementById('admin-tempo').value;
 
             if (credencial && credencial.length !== 10) {
@@ -920,6 +926,7 @@
 
                         if (!error) {
                             document.getElementById('time-entry-form').reset();
+                            document.getElementById('admin-bloco').value = getActiveBlock();
                             await fetchRecords();
                             showModal('Sucesso', 'O resultado deste participante foi atualizado!', 'success');
                         } else {
@@ -931,6 +938,7 @@
                         
                         if (!error) {
                             document.getElementById('time-entry-form').reset();
+                            document.getElementById('admin-bloco').value = getActiveBlock();
                             await fetchRecords();
                             showModal('Sucesso', 'Resultado oficial cadastrado com sucesso!', 'success');
                         } else {
@@ -949,7 +957,6 @@
             btn.innerHTML = html;
         }
 
-        // --- CORREÇÃO DA EDIÇÃO PARA PREENCHER CORRETAMENTE OS CAMPOS ---
         function editRecord(id) {
             const r = records.find(rec => rec.id === id);
             if (r) {
@@ -959,7 +966,7 @@
                 document.getElementById('admin-naipe').value = r.naipe || 'MAS';
                 document.getElementById('admin-subcategoria').value = r.subcategoria || 'Atleta';
                 document.getElementById('admin-modalidade').value = r.modalidade || 'Remo';
-                document.getElementById('admin-bloco').value = r.bloco || 'Bloco 1';
+                document.getElementById('admin-bloco').value = r.bloco || getActiveBlock();
                 
                 handleModalidadeChange();
                 document.getElementById('admin-tempo').value = r.tempo || ''; 
@@ -968,13 +975,14 @@
                 document.getElementById('form-container').classList.add('border-cob-gold', 'border-2');
                 document.getElementById('btn-cancel-edit').classList.remove('hidden');
                 
-                window.scrollTo({ top: document.getElementById('form-container').offsetTop - 100, behavior: 'smooth' });
+                window.scrollTo({ top: document.getElementById('form-container').offsetTop - 100, behavior: 'auto' });
             }
         }
 
         function cancelEdit() {
             document.getElementById('admin-edit-id').value = '';
             document.getElementById('time-entry-form').reset();
+            document.getElementById('admin-bloco').value = getActiveBlock();
             document.getElementById('form-title').innerText = 'Registrar Resultado Oficial';
             document.getElementById('form-container').classList.remove('border-cob-gold', 'border-2');
             document.getElementById('btn-cancel-edit').classList.add('hidden');
@@ -1034,7 +1042,6 @@
             });
         }
 
-        // --- DASHBOARD E GRÁFICOS (BARRAS LADO A LADO COM NÚMEROS DENTRO) ---
         let dashboardCharts = {};
 
         function drawChart(elementId, type, labels, datasets, stacked = false) {
@@ -1048,13 +1055,13 @@
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
+                    animation: false,
                     layout: { padding: { top: 20, bottom: 0, left: 0, right: 0 } },
                     plugins: {
                         legend: {
                             position: 'bottom',
                             labels: { boxWidth: 10, font: { size: 10 }, padding: 10 }
                         },
-                        // Plugin para exibir o valor numérico exato centralizado DENTRO da barra vertical
                         datalabels: {
                             anchor: 'center',
                             align: 'center',
@@ -1166,7 +1173,6 @@
             const blocks = ['Bloco 1', 'Bloco 2', 'Bloco 3'];
             const mods = ['Remo', 'Ciclismo', 'Fortnite'];
 
-            // Gráficos lado a lado sem número no título
             drawChart('chartBlocos', 'bar', blocks, [
                 { label: 'Total', data: blocks.map(b => blockStats[b].total), backgroundColor: '#FFB81C' },
                 { label: 'Masc.', data: blocks.map(b => blockStats[b].MAS), backgroundColor: '#004A80' },
@@ -1186,7 +1192,7 @@
             drawChart('chartBlocoModNaipe', 'bar', labelsBlocoMod, [
                 { label: 'Masculino', data: dataBlocoModMAS, backgroundColor: '#004A80' },
                 { label: 'Feminino', data: dataBlocoModFEM, backgroundColor: '#00A859' }
-            ], false); // Lado a lado
+            ], false);
 
             drawChart('chartDiasNaipe', 'bar', sortedDates, [
                 { label: 'Total', data: sortedDates.map(d => dateMap[d].total), backgroundColor: '#FFB81C' },
@@ -1214,7 +1220,6 @@
             ], false);
         }
 
-        // --- RELATÓRIO PDF DOS GRÁFICOS E ESTATÍSTICAS ---
         function exportDashboardPDF() {
             const { jsPDF } = window.jspdf;
             const doc = new jsPDF();
@@ -1234,7 +1239,6 @@
                 headStyles: { fillColor: [0, 43, 73] }
             });
 
-            // Captura as imagens geradas pelos charts e insere no PDF
             let currentY = doc.lastAutoTable.finalY + 10;
             const chartIds = ['chartBlocos', 'chartMods', 'chartBlocoModNaipe', 'chartDiasNaipe', 'chartDiasModsNaipe', 'chartMedias'];
             
@@ -1350,9 +1354,6 @@
 
             let uniqueList = getUniqueTopRecords(filtered, modalidade === 'Fortnite');
 
-            tbody.classList.remove('animate-fadeIn');
-            void tbody.offsetWidth;
-            tbody.classList.add('animate-fadeIn');
             tbody.innerHTML = '';
 
             if (uniqueList.length === 0) {
@@ -1432,7 +1433,7 @@
             tvModeInterval = setInterval(() => {
                 tvStateIndex = (tvStateIndex + 1) % tvStates.length;
                 applyTVState();
-            }, 15000); 
+            }, 10000); 
         }
 
         async function applyTVState() {
@@ -1450,12 +1451,18 @@
         document.addEventListener('DOMContentLoaded', async () => {
             if (isAdminLoggedIn) renderAdminBlocks();
             
+            const blocoSelect = document.getElementById('admin-bloco');
+            if (blocoSelect) {
+                blocoSelect.value = getActiveBlock();
+                blocoSelect.innerHTML = `<option value="${getActiveBlock()}">${getActiveBlock()} (Ativo)</option>`;
+            }
+
             setInterval(() => {
                 if(isAdminLoggedIn) renderAdminBlocks();
                 if (!tvModeInterval) {
                     fetchRecords();
                 }
-            }, 30000); 
+            }, 10000); 
             
             await fetchRecords();
 
@@ -1465,10 +1472,6 @@
                     fetchRecords();
                 })
                 .subscribe();
-                
-            setTimeout(() => {
-                window.location.reload();
-            }, 7200000);
         });
     </script>
 </body>
