@@ -440,27 +440,37 @@
                     <!-- Divisor para Métricas Cronológicas -->
                     <h4 class="text-xl font-bold text-slate-800 mt-10 mb-4 border-b border-slate-200 pb-2 flex items-center"><i class="fa-solid fa-calendar-days text-cob-blue mr-2"></i> Evolução Diária</h4>
 
-                    <!-- Novos Gráficos: Data de Cadastro (Chronological) -->
+                    <!-- Novos Gráficos: Data de Cadastro (Chronological - Compactados) -->
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div class="bg-white border border-slate-200 p-6 rounded-2xl shadow-sm md:col-span-2">
-                            <h4 class="text-sm font-bold text-slate-800 text-center mb-4">Participantes Totais por Dia</h4>
-                            <canvas id="chartParticipantesDia"></canvas>
+                        <div class="bg-white border border-slate-200 p-4 md:p-5 rounded-2xl shadow-sm md:col-span-2 flex flex-col">
+                            <h4 class="text-xs md:text-sm font-bold text-slate-800 text-center mb-2">Participantes Totais por Dia</h4>
+                            <div class="relative h-48 md:h-56 w-full">
+                                <canvas id="chartParticipantesDia"></canvas>
+                            </div>
                         </div>
-                        <div class="bg-white border border-slate-200 p-6 rounded-2xl shadow-sm">
-                            <h4 class="text-sm font-bold text-slate-800 text-center mb-4">Participantes por Dia (por Naipe)</h4>
-                            <canvas id="chartDiaNaipe"></canvas>
+                        <div class="bg-white border border-slate-200 p-4 md:p-5 rounded-2xl shadow-sm flex flex-col">
+                            <h4 class="text-xs md:text-sm font-bold text-slate-800 text-center mb-2">Participantes por Dia (por Naipe)</h4>
+                            <div class="relative h-48 md:h-56 w-full">
+                                <canvas id="chartDiaNaipe"></canvas>
+                            </div>
                         </div>
-                        <div class="bg-white border border-slate-200 p-6 rounded-2xl shadow-sm">
-                            <h4 class="text-sm font-bold text-slate-800 text-center mb-4">Participantes por Dia (por Modalidade)</h4>
-                            <canvas id="chartDiaMod"></canvas>
+                        <div class="bg-white border border-slate-200 p-4 md:p-5 rounded-2xl shadow-sm flex flex-col">
+                            <h4 class="text-xs md:text-sm font-bold text-slate-800 text-center mb-2">Participantes por Dia (por Modalidade)</h4>
+                            <div class="relative h-48 md:h-56 w-full">
+                                <canvas id="chartDiaMod"></canvas>
+                            </div>
                         </div>
-                        <div class="bg-white border border-slate-200 p-6 rounded-2xl shadow-sm md:col-span-2">
-                            <h4 class="text-sm font-bold text-slate-800 text-center mb-4">Participantes por Dia (Cruzamento: Modalidade x Naipe)</h4>
-                            <canvas id="chartDiaNaipeMod" style="max-height: 300px;"></canvas>
+                        <div class="bg-white border border-slate-200 p-4 md:p-5 rounded-2xl shadow-sm md:col-span-2 flex flex-col">
+                            <h4 class="text-xs md:text-sm font-bold text-slate-800 text-center mb-2">Participantes por Dia (Cruzamento: Modalidade x Naipe)</h4>
+                            <div class="relative h-48 md:h-56 w-full">
+                                <canvas id="chartDiaNaipeMod"></canvas>
+                            </div>
                         </div>
-                        <div class="bg-white border border-slate-200 p-6 rounded-2xl shadow-sm md:col-span-2">
-                            <h4 class="text-sm font-bold text-slate-800 text-center mb-4">Média de Participantes Diários (Total e Naipe) por Bloco</h4>
-                            <canvas id="chartMediasBloco"></canvas>
+                        <div class="bg-white border border-slate-200 p-4 md:p-5 rounded-2xl shadow-sm md:col-span-2 flex flex-col">
+                            <h4 class="text-xs md:text-sm font-bold text-slate-800 text-center mb-2">Média de Participantes Diários (Total e Naipe) por Bloco</h4>
+                            <div class="relative h-48 md:h-56 w-full">
+                                <canvas id="chartMediasBloco"></canvas>
+                            </div>
                         </div>
                     </div>
 
@@ -1185,7 +1195,46 @@
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
-                    scales: stacked ? { x: { stacked: true }, y: { stacked: true } } : {}
+                    layout: {
+                        padding: {
+                            top: 10,
+                            bottom: 0,
+                            left: 0,
+                            right: 0
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                boxWidth: 10,
+                                font: {
+                                    size: 10
+                                },
+                                padding: 10
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            stacked: stacked,
+                            ticks: {
+                                font: {
+                                    size: 9
+                                },
+                                maxRotation: 45,
+                                minRotation: 0
+                            }
+                        },
+                        y: {
+                            stacked: stacked,
+                            ticks: {
+                                font: {
+                                    size: 9
+                                }
+                            }
+                        }
+                    }
                 }
             });
         }
