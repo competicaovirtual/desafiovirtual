@@ -419,7 +419,7 @@
                 <div class="space-y-6 mt-12 border-t border-slate-200 pt-10">
                     <h3 class="text-2xl font-black text-slate-900 flex items-center"><i class="fa-solid fa-chart-pie text-cob-blue mr-3"></i> Dashboard & Estatísticas</h3>
                     
-                    <!-- KPI Cards (Métricas 1, 8, 9) -->
+                    <!-- KPI Cards Gerais -->
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                         <div class="bg-white border border-slate-200 p-6 rounded-2xl shadow-sm text-center">
                             <p class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Total de Participações</p>
@@ -437,24 +437,30 @@
                         </div>
                     </div>
 
-                    <!-- Gráficos -->
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <!-- Chart: Participantes Totais por Bloco -->
-                        <div class="bg-white border border-slate-200 p-6 rounded-2xl shadow-sm">
-                            <h4 class="text-sm font-bold text-slate-800 text-center mb-4">Participações por Bloco</h4>
-                            <canvas id="chartBloco"></canvas>
-                        </div>
-                        
-                        <!-- Chart: Participantes por Modalidade e Naipe -->
-                        <div class="bg-white border border-slate-200 p-6 rounded-2xl shadow-sm">
-                            <h4 class="text-sm font-bold text-slate-800 text-center mb-4">Participações por Modalidade & Naipe</h4>
-                            <canvas id="chartModalidadeNaipe"></canvas>
-                        </div>
+                    <!-- Divisor para Métricas Cronológicas -->
+                    <h4 class="text-xl font-bold text-slate-800 mt-10 mb-4 border-b border-slate-200 pb-2 flex items-center"><i class="fa-solid fa-calendar-days text-cob-blue mr-2"></i> Evolução Diária</h4>
 
-                        <!-- Chart: Participantes por Naipe e Bloco -->
+                    <!-- Novos Gráficos: Data de Cadastro (Chronological) -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div class="bg-white border border-slate-200 p-6 rounded-2xl shadow-sm md:col-span-2">
-                            <h4 class="text-sm font-bold text-slate-800 text-center mb-4">Cruzamento: Modalidade x Bloco x Naipe</h4>
-                            <canvas id="chartCompleto" style="max-height: 300px;"></canvas>
+                            <h4 class="text-sm font-bold text-slate-800 text-center mb-4">Participantes Totais por Dia</h4>
+                            <canvas id="chartParticipantesDia"></canvas>
+                        </div>
+                        <div class="bg-white border border-slate-200 p-6 rounded-2xl shadow-sm">
+                            <h4 class="text-sm font-bold text-slate-800 text-center mb-4">Participantes por Dia (por Naipe)</h4>
+                            <canvas id="chartDiaNaipe"></canvas>
+                        </div>
+                        <div class="bg-white border border-slate-200 p-6 rounded-2xl shadow-sm">
+                            <h4 class="text-sm font-bold text-slate-800 text-center mb-4">Participantes por Dia (por Modalidade)</h4>
+                            <canvas id="chartDiaMod"></canvas>
+                        </div>
+                        <div class="bg-white border border-slate-200 p-6 rounded-2xl shadow-sm md:col-span-2">
+                            <h4 class="text-sm font-bold text-slate-800 text-center mb-4">Participantes por Dia (Cruzamento: Modalidade x Naipe)</h4>
+                            <canvas id="chartDiaNaipeMod" style="max-height: 300px;"></canvas>
+                        </div>
+                        <div class="bg-white border border-slate-200 p-6 rounded-2xl shadow-sm md:col-span-2">
+                            <h4 class="text-sm font-bold text-slate-800 text-center mb-4">Média de Participantes Diários (Total e Naipe) por Bloco</h4>
+                            <canvas id="chartMediasBloco"></canvas>
                         </div>
                     </div>
 
@@ -566,6 +572,14 @@
             if (now < start) return 'Aguardando';
             if (now > end) return 'Encerrado';
             return 'Ativo';
+        }
+        
+        function getActiveBlock() {
+            const blocks = ['Bloco 1', 'Bloco 2', 'Bloco 3'];
+            for (let b of blocks) {
+                if (getBlocoStatus(b) === 'Ativo') return b;
+            }
+            return 'Geral'; 
         }
 
         function formatDateTimePtBr(isoString) {
@@ -737,12 +751,12 @@
         let tvModeInterval = null;
         let tvStateIndex = 0;
         const tvStates = [
-            { mod: 'Remo', naipe: 'MAS', bloco: 'Geral', title: 'REMO (500m) - MASCULINO' },
-            { mod: 'Remo', naipe: 'FEM', bloco: 'Geral', title: 'REMO (500m) - FEMININO' },
-            { mod: 'Ciclismo', naipe: 'MAS', bloco: 'Geral', title: 'CICLISMO (300m) - MASCULINO' },
-            { mod: 'Ciclismo', naipe: 'FEM', bloco: 'Geral', title: 'CICLISMO (300m) - FEMININO' },
-            { mod: 'Fortnite', naipe: 'MAS', bloco: 'Geral', title: 'FORTNITE - MASCULINO' },
-            { mod: 'Fortnite', naipe: 'FEM', bloco: 'Geral', title: 'FORTNITE - FEMININO' }
+            { mod: 'Remo', naipe: 'MAS', title: 'REMO (500m) - MASCULINO' },
+            { mod: 'Remo', naipe: 'FEM', title: 'REMO (500m) - FEMININO' },
+            { mod: 'Ciclismo', naipe: 'MAS', title: 'CICLISMO (300m) - MASCULINO' },
+            { mod: 'Ciclismo', naipe: 'FEM', title: 'CICLISMO (300m) - FEMININO' },
+            { mod: 'Fortnite', naipe: 'MAS', title: 'FORTNITE - MASCULINO' },
+            { mod: 'Fortnite', naipe: 'FEM', title: 'FORTNITE - FEMININO' }
         ];
 
         async function fetchRecords() {
@@ -882,12 +896,9 @@
                 return;
             }
 
-            // Atraso artificial solicitado de 1.5s a 2.5s
             const delay = Math.floor(Math.random() * 1000) + 1500;
             
             setTimeout(async () => {
-                
-                // Se existe ID de edição, atualiza diretamente
                 if (editId) {
                     const { error } = await _supabase.from('records')
                         .update({ credencial, atleta, naipe, subcategoria, modalidade, bloco, tempo })
@@ -901,7 +912,6 @@
                         showModal('Erro', 'Não foi possível atualizar o registro.', 'error');
                     }
                 } else {
-                    // Impede cadastro duplicado caso usuário não tenha editado mas tente salvar outro da mesma modalidade
                     let existingRecord = credencial 
                         ? records.find(r => r.credencial === credencial && r.modalidade === modalidade)
                         : records.find(r => r.atleta === atleta && r.modalidade === modalidade);
@@ -999,7 +1009,6 @@
                 return;
             }
             
-            // Ordenar decrescente por data para o Admin ver os mais recentes (simulando pelo id ou array position caso reverse)
             [...displayRecords].reverse().forEach(r => {
                 let hiddenCredencial = 'N/A';
                 if (r.credencial && r.credencial.length === 10) {
@@ -1032,26 +1041,67 @@
         function updateDashboard() {
             if (!isAdminLoggedIn) return;
             
-            // 1. Número de Participações Totais
+            // 1. KPI Gerais
             const totalRecords = records.length;
-            
-            // Cálculos para participantes únicos (usando credencial ou nome como chave)
             const uniqueMap = new Map();
+            
+            // Variáveis para agrupamento por data (created_at)
+            let dateMap = {}; 
+            let blockDaysMap = {}; 
+            let blockCounts = { 'Bloco 1': { total: 0, MAS: 0, FEM: 0 }, 'Bloco 2': { total: 0, MAS: 0, FEM: 0 }, 'Bloco 3': { total: 0, MAS: 0, FEM: 0 } };
+
             records.forEach(r => {
                 const key = r.credencial || r.atleta;
                 if(!uniqueMap.has(key)) {
                     uniqueMap.set(key, { naipe: r.naipe || 'MAS', mods: new Set() });
                 }
                 uniqueMap.get(key).mods.add(r.modalidade);
+
+                // Agrupamento por Data de Cadastro
+                const dateStr = r.created_at ? new Date(r.created_at).toISOString().split('T')[0] : new Date().toISOString().split('T')[0];
+                const d = dateStr.split('-').reverse().join('/'); // Formato DD/MM/YYYY
+
+                if (!dateMap[d]) {
+                    dateMap[d] = {
+                        total: 0, MAS: 0, FEM: 0,
+                        Remo: 0, Ciclismo: 0, Fortnite: 0,
+                        RemoMAS: 0, RemoFEM: 0, CiclismoMAS: 0, CiclismoFEM: 0, FortniteMAS: 0, FortniteFEM: 0
+                    };
+                }
+                
+                dateMap[d].total++;
+                if (r.naipe === 'MAS') dateMap[d].MAS++;
+                if (r.naipe === 'FEM') dateMap[d].FEM++;
+                
+                if (r.modalidade === 'Remo') {
+                    dateMap[d].Remo++;
+                    if (r.naipe === 'MAS') dateMap[d].RemoMAS++;
+                    if (r.naipe === 'FEM') dateMap[d].RemoFEM++;
+                }
+                if (r.modalidade === 'Ciclismo') {
+                    dateMap[d].Ciclismo++;
+                    if (r.naipe === 'MAS') dateMap[d].CiclismoMAS++;
+                    if (r.naipe === 'FEM') dateMap[d].CiclismoFEM++;
+                }
+                if (r.modalidade === 'Fortnite') {
+                    dateMap[d].Fortnite++;
+                    if (r.naipe === 'MAS') dateMap[d].FortniteMAS++;
+                    if (r.naipe === 'FEM') dateMap[d].FortniteFEM++;
+                }
+
+                // Agrupamento de Dias e Totais por Bloco para Cálculo de Média
+                if(r.bloco && blockCounts[r.bloco]) {
+                    if (!blockDaysMap[r.bloco]) blockDaysMap[r.bloco] = new Set();
+                    blockDaysMap[r.bloco].add(d);
+                    
+                    blockCounts[r.bloco].total++;
+                    if (r.naipe === 'MAS') blockCounts[r.bloco].MAS++;
+                    if (r.naipe === 'FEM') blockCounts[r.bloco].FEM++;
+                }
             });
             
-            // 8. Participantes únicos
             const totalUnicos = uniqueMap.size;
-            
-            // 10. Participantes únicos por naipe
-            let unicosMas = 0, unicosFem = 0;
-            // 9 & 11. Mais de uma modalidade (+ por naipe)
-            let multiMod = 0, multiModMas = 0, multiModFem = 0;
+            let unicosMas = 0, unicosFem = 0, multiMod = 0, multiModMas = 0, multiModFem = 0;
             
             uniqueMap.forEach(val => {
                 if (val.naipe === 'MAS') unicosMas++;
@@ -1069,48 +1119,59 @@
             document.getElementById('kpi-multimod').innerText = multiMod;
             document.getElementById('kpi-multimod-naipe').innerText = `MAS: ${multiModMas} | FEM: ${multiModFem}`;
 
-            // Contagens Agrupadas para os Gráficos
-            let countBlocos = { 'Bloco 1': 0, 'Bloco 2': 0, 'Bloco 3': 0 };
-            let countModNaipe = {
-                'Remo': { MAS: 0, FEM: 0 },
-                'Ciclismo': { MAS: 0, FEM: 0 },
-                'Fortnite': { MAS: 0, FEM: 0 }
-            };
-            let countGeral = {}; // Bloco -> Mod -> Naipe
-
-            records.forEach(r => {
-                // 2. Por Bloco
-                if(countBlocos[r.bloco] !== undefined) countBlocos[r.bloco]++;
-                // 5 & 6. Por Modalidade e Naipe
-                if(countModNaipe[r.modalidade] && r.naipe) countModNaipe[r.modalidade][r.naipe]++;
-                
-                // 4 & 7. Cruzamento Total
-                if(!countGeral[r.bloco]) countGeral[r.bloco] = { 'Remo': {MAS:0, FEM:0}, 'Ciclismo': {MAS:0, FEM:0}, 'Fortnite': {MAS:0, FEM:0} };
-                if(countGeral[r.bloco][r.modalidade] && r.naipe) countGeral[r.bloco][r.modalidade][r.naipe]++;
+            // Ordenação Cronológica das Datas
+            const sortedDates = Object.keys(dateMap).sort((a, b) => {
+                const [d1, m1, y1] = a.split('/');
+                const [d2, m2, y2] = b.split('/');
+                return new Date(y1, m1-1, d1) - new Date(y2, m2-1, d2);
             });
 
-            // Atualiza Gráfico 1 (Blocos)
-            drawChart('chartBloco', 'bar', Object.keys(countBlocos), [{
-                label: 'Participações', data: Object.values(countBlocos), backgroundColor: '#0066CC'
+            // Geração dos Gráficos Baseados em Data
+            
+            // 1. Número de Participantes por Dia (Total)
+            drawChart('chartParticipantesDia', 'line', sortedDates, [{
+                label: 'Participações Cadastradas',
+                data: sortedDates.map(d => dateMap[d].total),
+                borderColor: '#0066CC',
+                backgroundColor: 'rgba(0, 102, 204, 0.1)',
+                fill: true,
+                tension: 0.3
             }]);
 
-            // Atualiza Gráfico 2 (Modalidade x Naipe)
-            drawChart('chartModalidadeNaipe', 'bar', Object.keys(countModNaipe), [
-                { label: 'Masculino', data: Object.values(countModNaipe).map(x => x.MAS), backgroundColor: '#004A80' },
-                { label: 'Feminino', data: Object.values(countModNaipe).map(x => x.FEM), backgroundColor: '#00A859' }
-            ]);
+            // 2. Número de Participantes por Dia (por Naipe)
+            drawChart('chartDiaNaipe', 'bar', sortedDates, [
+                { label: 'Masculino', data: sortedDates.map(d => dateMap[d].MAS), backgroundColor: '#004A80' },
+                { label: 'Feminino', data: sortedDates.map(d => dateMap[d].FEM), backgroundColor: '#00A859' }
+            ], true);
 
-            // Atualiza Gráfico 3 (Cruzamento Total)
-            const labels3 = ['Bloco 1', 'Bloco 2', 'Bloco 3'];
-            const datasets3 = [
-                { label: 'Remo MAS', data: labels3.map(b => countGeral[b]['Remo'].MAS), backgroundColor: '#003366', stack: 'Stack 0' },
-                { label: 'Remo FEM', data: labels3.map(b => countGeral[b]['Remo'].FEM), backgroundColor: '#004A80', stack: 'Stack 0' },
-                { label: 'Ciclismo MAS', data: labels3.map(b => countGeral[b]['Ciclismo'].MAS), backgroundColor: '#008542', stack: 'Stack 1' },
-                { label: 'Ciclismo FEM', data: labels3.map(b => countGeral[b]['Ciclismo'].FEM), backgroundColor: '#00A859', stack: 'Stack 1' },
-                { label: 'Fortnite MAS', data: labels3.map(b => countGeral[b]['Fortnite'].MAS), backgroundColor: '#5c2a9d', stack: 'Stack 2' },
-                { label: 'Fortnite FEM', data: labels3.map(b => countGeral[b]['Fortnite'].FEM), backgroundColor: '#7e3ff2', stack: 'Stack 2' }
-            ];
-            drawChart('chartCompleto', 'bar', labels3, datasets3, true);
+            // 3. Número de Participantes por Dia (por Modalidade)
+            drawChart('chartDiaMod', 'bar', sortedDates, [
+                { label: 'Remo', data: sortedDates.map(d => dateMap[d].Remo), backgroundColor: '#003366' },
+                { label: 'Ciclismo', data: sortedDates.map(d => dateMap[d].Ciclismo), backgroundColor: '#008542' },
+                { label: 'Fortnite', data: sortedDates.map(d => dateMap[d].Fortnite), backgroundColor: '#7e3ff2' }
+            ], true);
+
+            // 4. Número de Participantes por Dia (por Naipe x Modalidade)
+            drawChart('chartDiaNaipeMod', 'bar', sortedDates, [
+                { label: 'Remo MAS', data: sortedDates.map(d => dateMap[d].RemoMAS), backgroundColor: '#003366', stack: 'Stack 0' },
+                { label: 'Remo FEM', data: sortedDates.map(d => dateMap[d].RemoFEM), backgroundColor: '#004A80', stack: 'Stack 0' },
+                { label: 'Ciclismo MAS', data: sortedDates.map(d => dateMap[d].CiclismoMAS), backgroundColor: '#008542', stack: 'Stack 1' },
+                { label: 'Ciclismo FEM', data: sortedDates.map(d => dateMap[d].CiclismoFEM), backgroundColor: '#00A859', stack: 'Stack 1' },
+                { label: 'Fortnite MAS', data: sortedDates.map(d => dateMap[d].FortniteMAS), backgroundColor: '#5c2a9d', stack: 'Stack 2' },
+                { label: 'Fortnite FEM', data: sortedDates.map(d => dateMap[d].FortniteFEM), backgroundColor: '#7e3ff2', stack: 'Stack 2' }
+            ], true);
+
+            // 5 e 6. Média de Participantes Totais e Por Naipe Diária (Por Bloco)
+            const blockLabels = ['Bloco 1', 'Bloco 2', 'Bloco 3'];
+            const avgTotal = blockLabels.map(b => blockDaysMap[b] && blockDaysMap[b].size > 0 ? (blockCounts[b].total / blockDaysMap[b].size).toFixed(1) : 0);
+            const avgMAS = blockLabels.map(b => blockDaysMap[b] && blockDaysMap[b].size > 0 ? (blockCounts[b].MAS / blockDaysMap[b].size).toFixed(1) : 0);
+            const avgFEM = blockLabels.map(b => blockDaysMap[b] && blockDaysMap[b].size > 0 ? (blockCounts[b].FEM / blockDaysMap[b].size).toFixed(1) : 0);
+
+            drawChart('chartMediasBloco', 'bar', blockLabels, [
+                { label: 'Média Total/Dia', data: avgTotal, backgroundColor: '#FFB81C' },
+                { label: 'Média Masc./Dia', data: avgMAS, backgroundColor: '#004A80' },
+                { label: 'Média Fem./Dia', data: avgFEM, backgroundColor: '#00A859' }
+            ]);
         }
 
         function drawChart(elementId, type, labels, datasets, stacked = false) {
@@ -1123,17 +1184,17 @@
                 data: { labels: labels, datasets: datasets },
                 options: {
                     responsive: true,
+                    maintainAspectRatio: false,
                     scales: stacked ? { x: { stacked: true }, y: { stacked: true } } : {}
                 }
             });
         }
 
         // --- RELATÓRIOS PDF ---
-        // Função auxiliar para ordernar registros e garantir atletas únicos nos primeiros lugares
         function getUniqueTopRecords(recs, sortByPoints) {
             let sorted = [...recs].sort((a, b) => {
-                if(sortByPoints) return parseInt(b.tempo) - parseInt(a.tempo); // Maior para menor
-                return a.tempo.localeCompare(b.tempo); // Menor para maior
+                if(sortByPoints) return parseInt(b.tempo) - parseInt(a.tempo); 
+                return a.tempo.localeCompare(b.tempo); 
             });
             
             let uniqueList = [];
@@ -1159,7 +1220,7 @@
                 ['Remo', 'Ciclismo', 'Fortnite'].forEach(mod => {
                     const recs = records.filter(r => r.bloco === b && r.modalidade === mod);
                     if(recs.length > 0) {
-                        const top = getUniqueTopRecords(recs, mod === 'Fortnite')[0]; // Pega o 1º único
+                        const top = getUniqueTopRecords(recs, mod === 'Fortnite')[0]; 
                         bodyData.push([b, mod, top.credencial || '-', top.atleta, top.naipe || '-', top.tempo]);
                     }
                 });
@@ -1189,7 +1250,7 @@
             
             ['Remo', 'Ciclismo', 'Fortnite'].forEach(mod => {
                 const recs = records.filter(r => r.modalidade === mod);
-                const tops = getUniqueTopRecords(recs, mod === 'Fortnite').slice(0, 3); // Top 3 únicos
+                const tops = getUniqueTopRecords(recs, mod === 'Fortnite').slice(0, 3); 
                 
                 tops.forEach((top, index) => {
                     bodyData.push([mod, `${index + 1}º`, top.credencial || '-', top.atleta, top.naipe || '-', top.tempo, top.bloco]);
@@ -1228,7 +1289,6 @@
             if (bloco !== 'Geral') filtered = filtered.filter(r => r.bloco === bloco);
             if (naipe !== 'Todos') filtered = filtered.filter(r => r.naipe === naipe);
 
-            // Ordena todos, mas filtra os melhores de cada atleta de forma única (pede o usuário)
             let uniqueList = getUniqueTopRecords(filtered, modalidade === 'Fortnite');
 
             tbody.classList.remove('animate-fadeIn');
@@ -1304,6 +1364,9 @@
                 main.classList.remove('max-w-7xl', 'px-4', 'sm:px-6', 'lg:px-8', 'py-8');
                 main.classList.add('max-w-full', 'px-2', 'py-2');
 
+                // Força o seletor visual iniciar com o bloco ativo
+                document.getElementById('filter-bloco').value = getActiveBlock();
+
                 startTVCycle();
             }
         }
@@ -1319,10 +1382,13 @@
 
         async function applyTVState() {
             const state = tvStates[tvStateIndex];
+            const activeBlock = getActiveBlock(); // Somente bloco ativo
+            
             document.getElementById('filter-modalidade').value = state.mod;
             document.getElementById('filter-naipe').value = state.naipe;
-            document.getElementById('filter-bloco').value = state.bloco;
+            document.getElementById('filter-bloco').value = activeBlock; 
             document.getElementById('tv-title-text').innerText = state.title;
+            
             await fetchRecords(); 
         }
 
