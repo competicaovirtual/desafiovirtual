@@ -277,117 +277,136 @@
                     </button>
                 </div>
 
-                <div id="admin-blocks-container" class="grid grid-cols-1 md:grid-cols-3 gap-6"></div>
+                <!-- SUB-ABAS DO PAINEL ADMIN -->
+                <div class="flex flex-wrap gap-2 border-b border-slate-200 pb-4">
+                    <button onclick="switchAdminSubTab('insercao')" id="subnav-insercao" class="px-5 py-2.5 rounded-xl text-sm font-bold transition-all bg-cob-dark text-white shadow-md">
+                        <i class="fa-solid fa-pen-to-square mr-2"></i>Inserção de Resultados
+                    </button>
+                    <button onclick="switchAdminSubTab('registros')" id="subnav-registros" class="px-5 py-2.5 rounded-xl text-sm font-bold transition-all bg-slate-100 text-slate-600 hover:bg-slate-200">
+                        <i class="fa-solid fa-table-list mr-2"></i>Registros Cadastrados
+                    </button>
+                    <button onclick="switchAdminSubTab('dashboard')" id="subnav-dashboard" class="px-5 py-2.5 rounded-xl text-sm font-bold transition-all bg-slate-100 text-slate-600 hover:bg-slate-200">
+                        <i class="fa-solid fa-chart-pie mr-2"></i>Dashboard & Estatísticas
+                    </button>
+                </div>
 
-                <div class="bg-white border border-slate-200 p-8 rounded-3xl shadow-md space-y-6 relative" id="form-container">
-                    <h4 class="text-xl font-black text-slate-900 flex items-center space-x-2">
-                        <i class="fa-solid fa-stopwatch text-cob-blue"></i>
-                        <span id="form-title">Registrar Resultado Oficial</span>
-                    </h4>
+                <!-- SUB-ABA 1: INSERÇÃO -->
+                <div id="subtab-insercao" class="space-y-8 animate-fadeIn">
+                    <div id="admin-blocks-container" class="grid grid-cols-1 md:grid-cols-3 gap-6"></div>
 
-                    <form id="time-entry-form" onsubmit="submitTimeRecord(event)" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                        <input type="hidden" id="admin-edit-id" value="">
+                    <div class="bg-white border border-slate-200 p-8 rounded-3xl shadow-md space-y-6 relative" id="form-container">
+                        <h4 class="text-xl font-black text-slate-900 flex items-center space-x-2">
+                            <i class="fa-solid fa-stopwatch text-cob-blue"></i>
+                            <span id="form-title">Registrar Resultado Oficial</span>
+                        </h4>
 
-                        <div class="lg:col-span-2 xl:col-span-1">
-                            <label class="block text-xs font-bold uppercase text-slate-600 mb-2">CREDENCIAL <span class="text-slate-400 font-normal lowercase">(00000000-0)</span></label>
-                            <div class="flex space-x-2">
-                                <input type="text" id="admin-credencial" placeholder="Ler código ou digitar" oninput="formatCredencialInput(this)" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-3 text-slate-900 focus:outline-none focus:border-cob-blue">
-                                <button type="button" onclick="openScannerModal()" class="bg-cob-dark hover:bg-cob-blue text-white px-5 rounded-xl shadow-md transition-all flex items-center justify-center border-none cursor-pointer" title="Escanear com Câmera">
-                                    <i class="fa-solid fa-qrcode text-xl"></i>
+                        <form id="time-entry-form" onsubmit="submitTimeRecord(event)" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                            <input type="hidden" id="admin-edit-id" value="">
+
+                            <div class="lg:col-span-2 xl:col-span-1">
+                                <label class="block text-xs font-bold uppercase text-slate-600 mb-2">CREDENCIAL <span class="text-slate-400 font-normal lowercase">(00000000-0)</span></label>
+                                <div class="flex space-x-2">
+                                    <input type="text" id="admin-credencial" placeholder="Ler código ou digitar" oninput="formatCredencialInput(this)" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-3 text-slate-900 focus:outline-none focus:border-cob-blue">
+                                    <button type="button" onclick="openScannerModal()" class="bg-cob-dark hover:bg-cob-blue text-white px-5 rounded-xl shadow-md transition-all flex items-center justify-center border-none cursor-pointer" title="Escanear com Câmera">
+                                        <i class="fa-solid fa-qrcode text-xl"></i>
+                                    </button>
+                                </div>
+                                <span class="text-xs text-slate-500 mt-1 block">Busca automática por leitura ou digitação.</span>
+                            </div>
+
+                            <div>
+                                <label class="block text-xs font-bold uppercase text-slate-600 mb-2">Nome Completo</label>
+                                <input type="text" id="admin-atleta" required placeholder="NOME DO PARTICIPANTE" oninput="this.value = this.value.toUpperCase()" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-3 text-slate-900 uppercase focus:outline-none focus:border-cob-blue">
+                            </div>
+
+                            <div>
+                                <label class="block text-xs font-bold uppercase text-slate-600 mb-2">Naipe</label>
+                                <select id="admin-naipe" required class="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-3 text-slate-900 focus:outline-none focus:border-cob-blue">
+                                    <option value="MAS">Masculino (MAS)</option>
+                                    <option value="FEM">Feminino (FEM)</option>
+                                </select>
+                            </div>
+
+                            <div>
+                                <label class="block text-xs font-bold uppercase text-slate-600 mb-2">Subcategoria / Perfil</label>
+                                <select id="admin-subcategoria" required class="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-3 text-slate-900 focus:outline-none focus:border-cob-blue">
+                                    <option value="Atleta">Atleta</option>
+                                    <option value="Treinador">Treinador</option>
+                                    <option value="Arbitragem">Arbitragem</option>
+                                    <option value="Comitê Organizador">Comitê Organizador</option>
+                                    <option value="Público Geral">Público Geral</option>
+                                </select>
+                            </div>
+
+                            <div>
+                                <label class="block text-xs font-bold uppercase text-slate-600 mb-2">Modalidade</label>
+                                <select id="admin-modalidade" required onchange="handleModalidadeChange()" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-3 text-slate-900 focus:outline-none focus:border-cob-blue">
+                                    <option value="Remo">Remo (500m)</option>
+                                    <option value="Ciclismo">Ciclismo (Sprint 300m)</option>
+                                    <option value="Fortnite">Fortnite (Pontos)</option>
+                                </select>
+                            </div>
+
+                            <div>
+                                <label class="block text-xs font-bold uppercase text-slate-600 mb-2">Bloco (Ativo)</label>
+                                <select id="admin-bloco" required class="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-3 text-slate-900 font-bold bg-slate-100 cursor-not-allowed">
+                                    <option value="Bloco 1">Bloco 1</option>
+                                    <option value="Bloco 2">Bloco 2</option>
+                                    <option value="Bloco 3">Bloco 3</option>
+                                </select>
+                            </div>
+
+                            <div>
+                                <label id="label-tempo-pontos" class="block text-xs font-bold uppercase text-slate-600 mb-2">Tempo (HH:MM:SS)</label>
+                                <input type="text" id="admin-tempo" required placeholder="00:00:00" oninput="formatInputData(this)" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-3 text-slate-900 font-mono text-lg focus:outline-none focus:border-cob-blue">
+                            </div>
+
+                            <div class="lg:col-span-2 flex items-end justify-end space-x-3">
+                                <button type="button" id="btn-cancel-edit" onclick="cancelEdit()" class="hidden px-6 py-3.5 bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold rounded-xl transition-all">
+                                    Cancelar Edição
+                                </button>
+                                <button type="submit" id="btn-save-record" class="px-8 py-3.5 bg-cob-dark hover:bg-cob-blue text-white font-bold rounded-xl shadow-md transition-all flex items-center space-x-2">
+                                    <i class="fa-solid fa-floppy-disk"></i>
+                                    <span>Salvar Registro Oficial</span>
                                 </button>
                             </div>
-                            <span class="text-xs text-slate-500 mt-1 block">Busca automática por leitura ou digitação.</span>
-                        </div>
-
-                        <div>
-                            <label class="block text-xs font-bold uppercase text-slate-600 mb-2">Nome Completo</label>
-                            <input type="text" id="admin-atleta" required placeholder="NOME DO PARTICIPANTE" oninput="this.value = this.value.toUpperCase()" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-3 text-slate-900 uppercase focus:outline-none focus:border-cob-blue">
-                        </div>
-
-                        <div>
-                            <label class="block text-xs font-bold uppercase text-slate-600 mb-2">Naipe</label>
-                            <select id="admin-naipe" required class="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-3 text-slate-900 focus:outline-none focus:border-cob-blue">
-                                <option value="MAS">Masculino (MAS)</option>
-                                <option value="FEM">Feminino (FEM)</option>
-                            </select>
-                        </div>
-
-                        <div>
-                            <label class="block text-xs font-bold uppercase text-slate-600 mb-2">Subcategoria / Perfil</label>
-                            <select id="admin-subcategoria" required class="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-3 text-slate-900 focus:outline-none focus:border-cob-blue">
-                                <option value="Atleta">Atleta</option>
-                                <option value="Treinador">Treinador</option>
-                                <option value="Arbitragem">Arbitragem</option>
-                                <option value="Comitê Organizador">Comitê Organizador</option>
-                                <option value="Público Geral">Público Geral</option>
-                            </select>
-                        </div>
-
-                        <div>
-                            <label class="block text-xs font-bold uppercase text-slate-600 mb-2">Modalidade</label>
-                            <select id="admin-modalidade" required onchange="handleModalidadeChange()" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-3 text-slate-900 focus:outline-none focus:border-cob-blue">
-                                <option value="Remo">Remo (500m)</option>
-                                <option value="Ciclismo">Ciclismo (Sprint 300m)</option>
-                                <option value="Fortnite">Fortnite (Pontos)</option>
-                            </select>
-                        </div>
-
-                        <div>
-                            <label class="block text-xs font-bold uppercase text-slate-600 mb-2">Bloco (Ativo)</label>
-                            <select id="admin-bloco" required class="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-3 text-slate-900 font-bold bg-slate-100 cursor-not-allowed">
-                                <option value="Bloco 1">Bloco 1</option>
-                                <option value="Bloco 2">Bloco 2</option>
-                                <option value="Bloco 3">Bloco 3</option>
-                            </select>
-                        </div>
-
-                        <div>
-                            <label id="label-tempo-pontos" class="block text-xs font-bold uppercase text-slate-600 mb-2">Tempo (HH:MM:SS)</label>
-                            <input type="text" id="admin-tempo" required placeholder="00:00:00" oninput="formatInputData(this)" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-3 text-slate-900 font-mono text-lg focus:outline-none focus:border-cob-blue">
-                        </div>
-
-                        <div class="lg:col-span-2 flex items-end justify-end space-x-3">
-                            <button type="button" id="btn-cancel-edit" onclick="cancelEdit()" class="hidden px-6 py-3.5 bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold rounded-xl transition-all">
-                                Cancelar Edição
-                            </button>
-                            <button type="submit" id="btn-save-record" class="px-8 py-3.5 bg-cob-dark hover:bg-cob-blue text-white font-bold rounded-xl shadow-md transition-all flex items-center space-x-2">
-                                <i class="fa-solid fa-floppy-disk"></i>
-                                <span>Salvar Registro Oficial</span>
-                            </button>
-                        </div>
-                    </form>
-                </div>
-
-                <div class="bg-white border border-slate-200 p-8 rounded-3xl shadow-md space-y-6">
-                    <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-                        <h4 class="text-xl font-black text-slate-900">Registros Cadastrados</h4>
-                        <div class="w-full sm:w-72 relative">
-                            <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400"></i>
-                            <input type="text" id="admin-search-input" oninput="renderAdminRecords()" placeholder="Buscar nome ou credencial..." class="w-full bg-slate-50 border border-slate-300 rounded-xl pl-10 pr-4 py-2.5 text-sm text-slate-900 focus:outline-none focus:border-cob-blue shadow-sm">
-                        </div>
-                    </div>
-                    
-                    <div class="overflow-x-auto">
-                        <table class="w-full text-left border-collapse">
-                            <thead>
-                                <tr class="bg-slate-100 border-b border-slate-200 text-xs font-bold text-slate-600 uppercase tracking-wider">
-                                    <th class="py-3 px-4">Credencial</th>
-                                    <th class="py-3 px-4">Nome Completo</th>
-                                    <th class="py-3 px-4">Naipe</th>
-                                    <th class="py-3 px-4">Perfil</th>
-                                    <th class="py-3 px-4">Bloco</th>
-                                    <th class="py-3 px-4">Modalidade</th>
-                                    <th class="py-3 px-4">Tempo / Pontos</th>
-                                    <th class="py-3 px-4 text-right">Ações</th>
-                                </tr>
-                            </thead>
-                            <tbody id="admin-records-tbody" class="divide-y divide-slate-100 text-sm"></tbody>
-                        </table>
+                        </form>
                     </div>
                 </div>
 
-                <!-- DASHBOARD E GRÁFICOS -->
-                <div class="space-y-6 mt-12 border-t border-slate-200 pt-10">
+                <!-- SUB-ABA 2: REGISTROS CADASTRADOS -->
+                <div id="subtab-registros" class="space-y-6 hidden animate-fadeIn">
+                    <div class="bg-white border border-slate-200 p-8 rounded-3xl shadow-md space-y-6">
+                        <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                            <h4 class="text-xl font-black text-slate-900">Registros Cadastrados</h4>
+                            <div class="w-full sm:w-72 relative">
+                                <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400"></i>
+                                <input type="text" id="admin-search-input" oninput="renderAdminRecords()" placeholder="Buscar nome ou credencial..." class="w-full bg-slate-50 border border-slate-300 rounded-xl pl-10 pr-4 py-2.5 text-sm text-slate-900 focus:outline-none focus:border-cob-blue shadow-sm">
+                            </div>
+                        </div>
+                        
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left border-collapse">
+                                <thead>
+                                    <tr class="bg-slate-100 border-b border-slate-200 text-xs font-bold text-slate-600 uppercase tracking-wider">
+                                        <th class="py-3 px-4">Credencial</th>
+                                        <th class="py-3 px-4">Nome Completo</th>
+                                        <th class="py-3 px-4">Naipe</th>
+                                        <th class="py-3 px-4">Perfil</th>
+                                        <th class="py-3 px-4">Bloco</th>
+                                        <th class="py-3 px-4">Modalidade</th>
+                                        <th class="py-3 px-4">Tempo / Pontos</th>
+                                        <th class="py-3 px-4 text-right">Ações</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="admin-records-tbody" class="divide-y divide-slate-100 text-sm"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SUB-ABA 3: DASHBOARD E GRÁFICOS -->
+                <div id="subtab-dashboard" class="space-y-6 hidden animate-fadeIn">
                     <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                         <h3 class="text-2xl font-black text-slate-900 flex items-center"><i class="fa-solid fa-chart-bar text-cob-blue mr-3"></i> Dashboard Estatístico</h3>
                         <button onclick="exportDashboardPDF()" class="px-5 py-2.5 bg-cob-blue hover:bg-cob-dark text-white font-bold rounded-xl shadow-md transition-all flex items-center space-x-2">
@@ -537,6 +556,7 @@
 
         let records = [];
         let isAdminLoggedIn = false;
+        let currentAdminSubTab = 'insercao';
         
         let blockConfig = JSON.parse(localStorage.getItem('jj2026_block_config')) || {
             'Bloco 1': { mode: 'auto', manualStatus: 'Encerrado', start: '2026-10-18T08:00', end: '2026-10-22T23:59' },
@@ -770,8 +790,8 @@
             if (!error && data) {
                 records = data;
                 if (isAdminLoggedIn) {
-                    renderAdminRecords();
-                    updateDashboard();
+                    if (currentAdminSubTab === 'registros') renderAdminRecords();
+                    if (currentAdminSubTab === 'dashboard') updateDashboard();
                 }
                 renderLeaderboard();
             }
@@ -794,9 +814,28 @@
             if (tabId === 'rankings') renderLeaderboard();
             if (tabId === 'admin' && isAdminLoggedIn) {
                 renderAdminBlocks();
-                renderAdminRecords();
-                updateDashboard();
+                if (currentAdminSubTab === 'registros') renderAdminRecords();
+                if (currentAdminSubTab === 'dashboard') updateDashboard();
             }
+        }
+
+        function switchAdminSubTab(subTabId) {
+            currentAdminSubTab = subTabId;
+            ['insercao', 'registros', 'dashboard'].forEach(st => {
+                const subtabEl = document.getElementById(`subtab-${st}`);
+                const btnEl = document.getElementById(`subnav-${st}`);
+                if (st === subTabId) {
+                    subtabEl.classList.remove('hidden');
+                    btnEl.className = "px-5 py-2.5 rounded-xl text-sm font-bold transition-all bg-cob-dark text-white shadow-md";
+                } else {
+                    subtabEl.classList.add('hidden');
+                    btnEl.className = "px-5 py-2.5 rounded-xl text-sm font-bold transition-all bg-slate-100 text-slate-600 hover:bg-slate-200";
+                }
+            });
+
+            if (subTabId === 'insercao') renderAdminBlocks();
+            if (subTabId === 'registros') renderAdminRecords();
+            if (subTabId === 'dashboard') updateDashboard();
         }
 
         function toggleMobileMenu() {
@@ -856,9 +895,7 @@
                 errorEl.classList.add('hidden');
                 document.getElementById('admin-login-screen').classList.add('hidden');
                 document.getElementById('admin-panel-content').classList.remove('hidden');
-                renderAdminBlocks();
-                renderAdminRecords();
-                updateDashboard();
+                switchAdminSubTab('insercao');
             } else {
                 errorEl.classList.remove('hidden');
             }
@@ -960,6 +997,7 @@
         function editRecord(id) {
             const r = records.find(rec => rec.id === id);
             if (r) {
+                switchAdminSubTab('insercao');
                 document.getElementById('admin-edit-id').value = r.id;
                 document.getElementById('admin-credencial').value = r.credencial || '';
                 document.getElementById('admin-atleta').value = r.atleta || '';
@@ -1045,7 +1083,9 @@
         let dashboardCharts = {};
 
         function drawChart(elementId, type, labels, datasets, stacked = false) {
-            const ctx = document.getElementById(elementId).getContext('2d');
+            const canvasEl = document.getElementById(elementId);
+            if (!canvasEl) return;
+            const ctx = canvasEl.getContext('2d');
             if (dashboardCharts[elementId]) {
                 dashboardCharts[elementId].destroy();
             }
@@ -1083,7 +1123,7 @@
         }
 
         function updateDashboard() {
-            if (!isAdminLoggedIn) return;
+            if (!isAdminLoggedIn || currentAdminSubTab !== 'dashboard') return;
             
             const totalRecords = records.length;
             const uniqueMap = new Map();
@@ -1458,7 +1498,7 @@
             }
 
             setInterval(() => {
-                if(isAdminLoggedIn) renderAdminBlocks();
+                if(isAdminLoggedIn && currentAdminSubTab === 'insercao') renderAdminBlocks();
                 if (!tvModeInterval) {
                     fetchRecords();
                 }
