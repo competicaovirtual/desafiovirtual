@@ -419,6 +419,8 @@
                         <div class="bg-white border border-slate-200 p-6 rounded-2xl shadow-sm text-center">
                             <p class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Total de Participações</p>
                             <h2 class="text-4xl font-black text-cob-blue" id="kpi-total">0</h2>
+                            <!-- CORREÇÃO 2: Adicionado a divisão de naipe também para os participantes totais -->
+                            <p class="text-xs text-slate-500 mt-2 font-semibold" id="kpi-total-naipe">MAS: 0 | FEM: 0</p>
                         </div>
                         <div class="bg-white border border-slate-200 p-6 rounded-2xl shadow-sm text-center">
                             <p class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Participantes Únicos</p>
@@ -539,7 +541,7 @@
         </div>
     </div>
 
-    <!-- NOVO: Modal para Edição do Participante -->
+    <!-- Modal para Edição do Participante -->
     <div id="edit-participant-modal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-[9999] hidden flex items-center justify-center p-4">
         <div class="bg-white border border-slate-200 max-w-3xl w-full p-6 md:p-8 rounded-3xl shadow-2xl space-y-6 overflow-y-auto max-h-[90vh]">
             <div class="flex justify-between items-center border-b border-slate-100 pb-4">
@@ -809,7 +811,6 @@
             }
         }
 
-        // NOVO: Função sem preenchimento automático para o input do modal
         function formatModalCredencialInput(input) {
             let v = input.value.replace(/\D/g, '');
             if (v.length > 9) v = v.slice(0, 9);
@@ -958,7 +959,6 @@
             if(!document.getElementById('admin-edit-id').value) input.value = '';
         }
 
-        // NOVO: Função Change do Modal
         function handleModalModalidadeChange() {
             const mod = document.getElementById('modal-modalidade').value;
             const label = document.getElementById('modal-label-tempo-pontos');
@@ -981,7 +981,6 @@
             }
         }
 
-        // NOVO: Formatador do input do modal
         function formatModalInputData(input) {
             const mod = document.getElementById('modal-modalidade').value;
             if (mod === 'Fortnite') {
@@ -1105,7 +1104,6 @@
             resetSaveBtn(btn, originalHTML);
         }
 
-        // NOVO: Função para Submissão Exclusiva do Modal
         async function submitEditParticipant(e) {
             e.preventDefault();
             
@@ -1152,32 +1150,9 @@
             btn.innerHTML = html;
         }
 
-        function editRecord(id) {
-            const r = records.find(rec => rec.id === id);
-            if (r) {
-                switchAdminSubTab('insercao');
-                document.getElementById('admin-edit-id').value = r.id;
-                document.getElementById('admin-credencial').value = r.credencial || '';
-                document.getElementById('admin-atleta').value = r.atleta || '';
-                document.getElementById('admin-naipe').value = r.naipe || 'MAS';
-                document.getElementById('admin-subcategoria').value = r.subcategoria || 'Atleta';
-                document.getElementById('admin-modalidade').value = r.modalidade || 'Remo';
-                document.getElementById('admin-bloco').value = r.bloco || getActiveBlock();
-                
-                handleModalidadeChange();
-                document.getElementById('admin-tempo').value = r.tempo || ''; 
-                
-                document.getElementById('form-title').innerText = 'Editando Registro';
-                document.getElementById('form-container').classList.add('border-cob-gold', 'border-2');
-                document.getElementById('btn-cancel-edit').classList.remove('hidden');
-                
-                window.scrollTo({ top: document.getElementById('form-container').offsetTop - 100, behavior: 'auto' });
-            }
-        }
-
-        // NOVO: Função para abrir o novo modal de Edição de Participante
         function openEditParticipantModal(id) {
-            const r = records.find(rec => rec.id === id);
+            const r = records.find(rec => String(rec.id) === String(id));
+            
             if (r) {
                 document.getElementById('modal-edit-id').value = r.id;
                 document.getElementById('modal-credencial').value = r.credencial || '';
@@ -1191,10 +1166,11 @@
                 document.getElementById('modal-tempo').value = r.tempo || ''; 
                 
                 document.getElementById('edit-participant-modal').classList.remove('hidden');
+            } else {
+                console.error("Registro não encontrado para o ID:", id);
             }
         }
 
-        // NOVO: Função para fechar o novo modal de Edição de Participante
         function closeEditParticipantModal() {
             document.getElementById('edit-participant-modal').classList.add('hidden');
             document.getElementById('modal-edit-form').reset();
@@ -1256,7 +1232,6 @@
                         <td class="py-3 px-4 text-slate-600">${r.modalidade}</td>
                         <td class="py-3 px-4 font-mono font-bold ${r.modalidade === 'Fortnite' ? 'text-purple-600' : 'text-emerald-600'}">${r.tempo}</td>
                         <td class="py-3 px-4 text-right flex justify-end space-x-1">
-                            <!-- ATUALIZADO: Acionando openEditParticipantModal ao invés de editRecord -->
                             <button onclick="openEditParticipantModal('${r.id}')" class="text-cob-blue hover:text-cob-cyan p-2" title="Editar"><i class="fa-solid fa-pen"></i></button>
                             <button onclick="deleteRecord('${r.id}')" class="text-red-500 hover:text-red-700 p-2" title="Excluir"><i class="fa-solid fa-trash"></i></button>
                         </td>
@@ -1328,10 +1303,19 @@
                 'Fortnite': { total: 0, MAS: 0, FEM: 0 }
             };
 
+            let totalPartMas = 0;
+            let totalPartFem = 0;
+
+            // CORREÇÃO: Higienização forçada para garantir que todo registro recaia exatamente em 'MAS' ou 'FEM'
             records.forEach(r => {
                 const bloco = r.bloco || 'Geral';
                 const mod = r.modalidade;
-                const naipe = r.naipe || 'MAS';
+                
+                let rawNaipe = (r.naipe || 'MAS').toString().toUpperCase();
+                let naipe = (rawNaipe.includes('FEM') || rawNaipe === 'F') ? 'FEM' : 'MAS';
+
+                if (naipe === 'MAS') totalPartMas++;
+                else totalPartFem++;
 
                 const key = r.credencial || r.atleta;
                 if(!uniqueMap.has(key)) {
@@ -1363,8 +1347,8 @@
                 
                 dateMap[d].total++;
                 dateMap[d][naipe]++;
-                dateMap[d][mod]++;
-                dateMap[d][mod + naipe]++;
+                if (dateMap[d][mod] !== undefined) dateMap[d][mod]++;
+                if (dateMap[d][mod + naipe] !== undefined) dateMap[d][mod + naipe]++;
 
                 if(bloco !== 'Geral') {
                     if (!blockDaysMap[bloco]) blockDaysMap[bloco] = new Set();
@@ -1384,8 +1368,12 @@
             });
 
             document.getElementById('kpi-total').innerText = totalRecords;
+            const kpiTotalNaipe = document.getElementById('kpi-total-naipe');
+            if(kpiTotalNaipe) kpiTotalNaipe.innerText = `MAS: ${totalPartMas} | FEM: ${totalPartFem}`;
+
             document.getElementById('kpi-unicos').innerText = uniqueMap.size;
             document.getElementById('kpi-unicos-naipe').innerText = `MAS: ${unicosMas} | FEM: ${unicosFem}`;
+            
             document.getElementById('kpi-multimod').innerText = multiMod;
             document.getElementById('kpi-multimod-naipe').innerText = `MAS: ${multiModMas} | FEM: ${multiModFem}`;
 
@@ -1451,7 +1439,7 @@
             doc.text("Relatório Estatístico e Gráficos | Jogos da Juventude 2026", 14, 15);
 
             let bodyData = [
-                ["Total de Participações", document.getElementById('kpi-total').innerText],
+                ["Total de Participações", document.getElementById('kpi-total').innerText + " (" + document.getElementById('kpi-total-naipe').innerText + ")"],
                 ["Participantes Únicos", document.getElementById('kpi-unicos').innerText + " (" + document.getElementById('kpi-unicos-naipe').innerText + ")"],
                 ["Multi-Modalidades", document.getElementById('kpi-multimod').innerText + " (" + document.getElementById('kpi-multimod-naipe').innerText + ")"]
             ];
