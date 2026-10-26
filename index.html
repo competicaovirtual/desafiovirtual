@@ -472,7 +472,6 @@
                             </div>
                         </div>
 
-                        <!-- ÚLTIMO GRÁFICO - EXCLUSIVO EM LINHAS DIA A DIA -->
                         <div class="bg-white border border-slate-200 p-4 md:p-6 rounded-2xl shadow-sm flex flex-col">
                             <h4 class="text-sm md:text-base font-bold text-slate-800 text-center mb-2 flex items-center justify-center">
                                 <i class="fa-solid fa-chart-line text-cob-blue mr-2"></i>Evolução Diária de Participantes por Modalidade
@@ -691,9 +690,8 @@
         function renderAdminBlocks() {
             const container = document.getElementById('admin-blocks-container');
             if(!container) return;
-            container.innerHTML = '';
             
-            ['Bloco 1', 'Bloco 2', 'Bloco 3'].forEach(b => {
+            const html = ['Bloco 1', 'Bloco 2', 'Bloco 3'].map(b => {
                 const config = blockConfig[b];
                 const status = getBlocoStatus(b);
                 const startStr = formatDateTimePtBr(config.start);
@@ -711,7 +709,7 @@
                     ? `<button onclick="toggleManualStatus('${b}')" class="w-full mt-3 py-2 rounded-xl text-sm font-bold transition-all ${config.manualStatus === 'Ativo' ? 'bg-red-600 hover:bg-red-700 text-white' : 'bg-emerald-600 hover:bg-emerald-700 text-white'}">${config.manualStatus === 'Ativo' ? '<i class="fa-solid fa-stop mr-2"></i>Forçar Encerramento' : '<i class="fa-solid fa-play mr-2"></i>Forçar Início'}</button>` 
                     : ``;
 
-                container.innerHTML += `
+                return `
                     <div class="bg-white border border-slate-200 p-6 rounded-2xl space-y-4 shadow-md flex flex-col">
                         <div class="flex items-center justify-between">
                             <h4 class="font-bold text-slate-900 text-lg">${b}</h4>
@@ -734,7 +732,9 @@
                         </div>
                     </div>
                 `;
-            });
+            }).join('');
+
+            container.innerHTML = html;
             
             const blocoSelect = document.getElementById('admin-bloco');
             if (blocoSelect && !document.getElementById('admin-edit-id').value) {
@@ -1203,10 +1203,11 @@
             }
         }
 
+        /* FUNÇÃO OTIMIZADA PARA RENDERIZAR OS REGISTROS RAPIDAMENTE */
         function renderAdminRecords() {
             const tbody = document.getElementById('admin-records-tbody');
-            const searchInput = document.getElementById('admin-search-input').value.toLowerCase();
-            tbody.innerHTML = '';
+            if (!tbody) return;
+            const searchInput = document.getElementById('admin-search-input').value.toLowerCase().trim();
             
             let displayRecords = records;
             if (searchInput) {
@@ -1221,7 +1222,8 @@
                 return;
             }
             
-            [...displayRecords].reverse().forEach(r => {
+            // Montagem da tabela em lote na memória para evitar travamentos do navegador
+            const htmlRows = [...displayRecords].reverse().map(r => {
                 let hiddenCredencial = 'N/A';
                 if (r.credencial && r.credencial.length === 10) {
                     hiddenCredencial = r.credencial.substring(0, 4) + '****-' + r.credencial.substring(9, 10);
@@ -1229,15 +1231,15 @@
                     hiddenCredencial = r.credencial;
                 }
                 
-                tbody.innerHTML += `
+                return `
                     <tr class="hover:bg-slate-50 transition-colors">
-                        <td class="py-3 px-4 text-slate-500 font-mono text-xs" title="${r.credencial}">${hiddenCredencial}</td>
-                        <td class="py-3 px-4 font-bold text-slate-900">${r.atleta}</td>
+                        <td class="py-3 px-4 text-slate-500 font-mono text-xs" title="${r.credencial || ''}">${hiddenCredencial}</td>
+                        <td class="py-3 px-4 font-bold text-slate-900">${r.atleta || ''}</td>
                         <td class="py-3 px-4 text-slate-600">${r.naipe || '-'}</td>
-                        <td class="py-3 px-4 text-slate-600">${r.subcategoria}</td>
-                        <td class="py-3 px-4 text-slate-600">${r.bloco}</td>
-                        <td class="py-3 px-4 text-slate-600">${r.modalidade}</td>
-                        <td class="py-3 px-4 font-mono font-bold ${r.modalidade === 'Fortnite' ? 'text-purple-600' : 'text-emerald-600'}">${r.tempo}</td>
+                        <td class="py-3 px-4 text-slate-600">${r.subcategoria || ''}</td>
+                        <td class="py-3 px-4 text-slate-600">${r.bloco || ''}</td>
+                        <td class="py-3 px-4 text-slate-600">${r.modalidade || ''}</td>
+                        <td class="py-3 px-4 font-mono font-bold ${r.modalidade === 'Fortnite' ? 'text-purple-600' : 'text-emerald-600'}">${r.tempo || ''}</td>
                         <td class="py-3 px-4 text-right flex justify-end space-x-1">
                             <button onclick="openEditParticipantModal('${r.id}')" class="text-cob-blue hover:text-cob-cyan p-2" title="Editar"><i class="fa-solid fa-pen"></i></button>
                             <button onclick="deleteRecord('${r.id}')" class="text-red-500 hover:text-red-700 p-2" title="Excluir"><i class="fa-solid fa-trash"></i></button>
@@ -1245,6 +1247,8 @@
                     </tr>
                 `;
             });
+
+            tbody.innerHTML = htmlRows.join('');
         }
 
         let dashboardCharts = {};
@@ -1440,7 +1444,7 @@
                 { label: 'Fortnite FEM', data: sortedDates.map(d => dateMap[d].FortniteFEM), backgroundColor: '#7e3ff2' }
             ], false);
 
-            // GRÁFICO 6 (ÚLTIMO GRÁFICO) — GRÁFICO DE LINHAS DIA A DIA POR MODALIDADE
+            // GRÁFICO 6 — GRÁFICO DE LINHAS DIA A DIA POR MODALIDADE
             drawChart('chartEvolucaoDiaria', 'line', sortedDates, [
                 { label: 'Remo', data: sortedDates.map(d => dateMap[d].Remo), borderColor: '#0066CC', backgroundColor: '#0066CC', tension: 0.3, fill: false, borderWidth: 3, pointRadius: 4 },
                 { label: 'Ciclismo', data: sortedDates.map(d => dateMap[d].Ciclismo), borderColor: '#00A859', backgroundColor: '#00A859', tension: 0.3, fill: false, borderWidth: 3, pointRadius: 4 },
@@ -1578,6 +1582,7 @@
             doc.save('top3_geral_jogos_juventude.pdf');
         }
 
+        /* FUNÇÃO OTIMIZADA PARA RENDERIZAR O RANKING */
         function renderLeaderboard() {
             const bloco = document.getElementById('filter-bloco').value;
             const modalidade = document.getElementById('filter-modalidade').value;
@@ -1596,14 +1601,12 @@
 
             let uniqueList = getUniqueTopRecords(filtered, modalidade === 'Fortnite');
 
-            tbody.innerHTML = '';
-
             if (uniqueList.length === 0) {
                 tbody.innerHTML = `<tr><td colspan="6" class="py-8 text-center text-slate-400">Nenhum resultado registrado para este filtro.</td></tr>`;
                 return;
             }
 
-            uniqueList.forEach((r, index) => {
+            const htmlRows = uniqueList.map((r, index) => {
                 let badgeClass = "text-slate-500 font-bold";
                 if (index === 0) badgeClass = "text-amber-700 font-black bg-amber-100 px-3 py-1 rounded-full border border-amber-200";
                 if (index === 1) badgeClass = "text-slate-700 font-black bg-slate-200 px-3 py-1 rounded-full border border-slate-300";
@@ -1612,7 +1615,7 @@
                 const displayResult = modalidade === 'Fortnite' ? `${r.tempo} pts` : r.tempo;
                 const resultColor = modalidade === 'Fortnite' ? 'text-purple-600' : 'text-emerald-600';
 
-                tbody.innerHTML += `
+                return `
                     <tr class="hover:bg-slate-50 transition-colors">
                         <td class="py-4 px-6 text-center font-black ${badgeClass}">#${index + 1}</td>
                         <td class="py-4 px-6 font-bold text-slate-900">${r.atleta}</td>
@@ -1623,6 +1626,8 @@
                     </tr>
                 `;
             });
+
+            tbody.innerHTML = htmlRows.join('');
         }
 
         function toggleTVMode() {
