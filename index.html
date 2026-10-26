@@ -10,7 +10,7 @@
     <!-- Biblioteca Leitor de Código de Barras / QR Code -->
     <script src="https://unpkg.com/html5-qrcode"></script>
     
-    <!-- Chart.js e Plugin ChartDataLabels para exibir números dentro das barras -->
+    <!-- Chart.js e Plugin ChartDataLabels -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-datalabels/2.2.0/chartjs-plugin-datalabels.min.js"></script>
     
@@ -437,7 +437,7 @@
                     </div>
 
                     <h4 class="text-xl font-bold text-slate-800 mt-10 mb-4 border-b border-slate-200 pb-2 flex items-center">
-                        <i class="fa-solid fa-chart-column text-cob-blue mr-2"></i> Análises Detalhadas em Barras Verticais
+                        <i class="fa-solid fa-chart-column text-cob-blue mr-2"></i> Análises Detalhadas do Evento
                     </h4>
 
                     <div class="grid grid-cols-1 gap-8">
@@ -472,8 +472,11 @@
                             </div>
                         </div>
 
+                        <!-- ÚLTIMO GRÁFICO - EXCLUSIVO EM LINHAS DIA A DIA -->
                         <div class="bg-white border border-slate-200 p-4 md:p-6 rounded-2xl shadow-sm flex flex-col">
-                            <h4 class="text-sm md:text-base font-bold text-slate-800 text-center mb-2">Evolução Diária de Participantes por Modalidade</h4>
+                            <h4 class="text-sm md:text-base font-bold text-slate-800 text-center mb-2 flex items-center justify-center">
+                                <i class="fa-solid fa-chart-line text-cob-blue mr-2"></i>Evolução Diária de Participantes por Modalidade
+                            </h4>
                             <div class="relative h-72 md:h-80 w-full overflow-x-auto">
                                 <div class="min-w-[600px] h-full"><canvas id="chartEvolucaoDiaria"></canvas></div>
                             </div>
@@ -1254,7 +1257,7 @@
                 dashboardCharts[elementId].destroy();
             }
             dashboardCharts[elementId] = new Chart(ctx, {
-                type: type, // Modificado para aceitar dinamicamente o tipo passado
+                type: type,
                 data: { labels: labels, datasets: datasets },
                 options: {
                     responsive: true,
@@ -1267,7 +1270,6 @@
                             labels: { boxWidth: 10, font: { size: 10 }, padding: 10 }
                         },
                         datalabels: {
-                            // Ajustes dinâmicos para a cor do rótulo não ficar branco num fundo branco na linha
                             anchor: type === 'line' ? 'end' : 'center',
                             align: type === 'line' ? 'top' : 'center',
                             color: type === 'line' ? function(context) { return context.dataset.borderColor || '#333333'; } : '#ffffff',
@@ -1322,7 +1324,6 @@
                 if (naipe === 'MAS') totalPartMas++;
                 else totalPartFem++;
 
-                // Identificador único robusto para cada pessoa
                 const uniqueKey = r.credencial ? r.credencial.trim() : (r.atleta ? r.atleta.trim().toUpperCase() : null);
                 if (uniqueKey) {
                     uniqueParticipants.add(uniqueKey);
@@ -1348,7 +1349,7 @@
                 if (!dateMap[d]) {
                     dateMap[d] = {
                         total: 0, MAS: 0, FEM: 0,
-                        Remo: 0, Ciclismo: 0, Fortnite: 0, // Campos utilizados para o gráfico de linhas
+                        Remo: 0, Ciclismo: 0, Fortnite: 0,
                         RemoMAS: 0, RemoFEM: 0, CiclismoMAS: 0, CiclismoFEM: 0, FortniteMAS: 0, FortniteFEM: 0
                     };
                 }
@@ -1370,7 +1371,6 @@
                 if (naipeVal === 'FEM') unicosFem++;
             });
 
-            // ATUALIZAÇÃO DOS CARDS COM VALORES EXATOS
             document.getElementById('kpi-total').innerText = totalRecords;
             const kpiTotalNaipe = document.getElementById('kpi-total-naipe');
             if(kpiTotalNaipe) kpiTotalNaipe.innerText = `MAS: ${totalPartMas} | FEM: ${totalPartFem}`;
@@ -1399,18 +1399,21 @@
             const blocks = ['Bloco 1', 'Bloco 2', 'Bloco 3'];
             const mods = ['Remo', 'Ciclismo', 'Fortnite'];
 
+            // Gráfico 1: Barras
             drawChart('chartBlocos', 'bar', blocks, [
                 { label: 'Total', data: blocks.map(b => blockStats[b].total), backgroundColor: '#FFB81C' },
                 { label: 'Masc.', data: blocks.map(b => blockStats[b].MAS), backgroundColor: '#004A80' },
                 { label: 'Fem.', data: blocks.map(b => blockStats[b].FEM), backgroundColor: '#00A859' }
             ], false);
 
+            // Gráfico 2: Barras
             drawChart('chartMods', 'bar', mods, [
                 { label: 'Total', data: mods.map(m => modStats[m].total), backgroundColor: '#0099FF' },
                 { label: 'Masc.', data: mods.map(m => modStats[m].MAS), backgroundColor: '#004A80' },
                 { label: 'Fem.', data: mods.map(m => modStats[m].FEM), backgroundColor: '#00A859' }
             ], false);
 
+            // Gráfico 3: Barras
             const labelsBlocoMod = blocks.flatMap(b => mods.map(m => `${b} - ${m}`));
             const dataBlocoModMAS = blocks.flatMap(b => mods.map(m => blockStats[b][m].MAS));
             const dataBlocoModFEM = blocks.flatMap(b => mods.map(m => blockStats[b][m].FEM));
@@ -1420,12 +1423,14 @@
                 { label: 'Feminino', data: dataBlocoModFEM, backgroundColor: '#00A859' }
             ], false);
 
+            // Gráfico 4: Barras
             drawChart('chartDiasNaipe', 'bar', sortedDates, [
                 { label: 'Total', data: sortedDates.map(d => dateMap[d].total), backgroundColor: '#FFB81C' },
                 { label: 'Masc.', data: sortedDates.map(d => dateMap[d].MAS), backgroundColor: '#004A80' },
                 { label: 'Fem.', data: sortedDates.map(d => dateMap[d].FEM), backgroundColor: '#00A859' }
             ], false);
 
+            // Gráfico 5: Barras
             drawChart('chartDiasModsNaipe', 'bar', sortedDates, [
                 { label: 'Remo MAS', data: sortedDates.map(d => dateMap[d].RemoMAS), backgroundColor: '#003366' },
                 { label: 'Remo FEM', data: sortedDates.map(d => dateMap[d].RemoFEM), backgroundColor: '#0066CC' },
@@ -1435,7 +1440,7 @@
                 { label: 'Fortnite FEM', data: sortedDates.map(d => dateMap[d].FortniteFEM), backgroundColor: '#7e3ff2' }
             ], false);
 
-            // Gráfico de Evolução Diária (Linhas)
+            // GRÁFICO 6 (ÚLTIMO GRÁFICO) — GRÁFICO DE LINHAS DIA A DIA POR MODALIDADE
             drawChart('chartEvolucaoDiaria', 'line', sortedDates, [
                 { label: 'Remo', data: sortedDates.map(d => dateMap[d].Remo), borderColor: '#0066CC', backgroundColor: '#0066CC', tension: 0.3, fill: false, borderWidth: 3, pointRadius: 4 },
                 { label: 'Ciclismo', data: sortedDates.map(d => dateMap[d].Ciclismo), borderColor: '#00A859', backgroundColor: '#00A859', tension: 0.3, fill: false, borderWidth: 3, pointRadius: 4 },
@@ -1464,10 +1469,9 @@
             });
 
             let currentY = doc.lastAutoTable.finalY + 10;
-            // Modificado para capturar a exportação do novo gráfico
             const chartIds = ['chartBlocos', 'chartMods', 'chartBlocoModNaipe', 'chartDiasNaipe', 'chartDiasModsNaipe', 'chartEvolucaoDiaria'];
             
-            chartIds.forEach((id, index) => {
+            chartIds.forEach((id) => {
                 const canvas = document.getElementById(id);
                 if (canvas) {
                     const imgData = canvas.toDataURL('image/png');
@@ -1507,7 +1511,6 @@
             doc.text("Campeões por Bloco e Geral (1 MAS e 1 FEM por Modalidade)", 14, 15);
             let bodyData = [];
             
-            // Ordem solicitada: Blocos primeiro, e por último o Geral
             const blocos = ['Bloco 1', 'Bloco 2', 'Bloco 3', 'Geral'];
             const mods = ['Remo', 'Ciclismo', 'Fortnite'];
             const naipes = ['MAS', 'FEM'];
@@ -1683,7 +1686,6 @@
             document.getElementById('filter-naipe').value = state.naipe;
             document.getElementById('filter-bloco').value = activeBlock; 
             
-            // Injeta o nome da modalidade e o naipe separadamente nas linhas do layout
             document.getElementById('tv-title-mod').innerText = state.modName;
             document.getElementById('tv-title-naipe').innerText = state.naipeName;
             
