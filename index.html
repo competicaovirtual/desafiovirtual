@@ -653,7 +653,7 @@
         let blockConfig = JSON.parse(localStorage.getItem('jj2026_block_config')) || {
             'Bloco 1': { mode: 'auto', manualStatus: 'Encerrado', start: '2026-10-19T08:00', end: '2026-10-22T23:59' },
             'Bloco 2': { mode: 'auto', manualStatus: 'Encerrado', start: '2026-10-23T08:00', end: '2026-10-28T23:59' },
-            'Bloco 3': { mode: 'auto', manualStatus: 'Encerrado', start: '2026-10-29T08:00', end: '2026-11-03T23:59' }
+            'Bloco 3': { mode: 'auto', manualStatus: 'Encerrado', start: '2026-10-29T08:00', end: '2026-11-04T23:59' }
         };
 
         function getBlocoStatus(blocoName) {
@@ -1301,11 +1301,11 @@
             let dateMap = {}; 
             let blockDaysMap = {}; 
 
-            // Define a data inicial fixa do Bloco 1 (19/10/2026)
-            const startDate = new Date(2026, 9, 19); // Mês 9 = Outubro (0-indexed)
-            let endDate = new Date(); // Hoje
+            // Configuração da janela do evento: do dia 19/10/2026 até 04/11/2026
+            const startDate = new Date(2026, 9, 19); // 19/10/2026
+            let endDate = new Date(2026, 10, 4);    // 04/11/2026
 
-            // Se houver registros em datas futuras, expande até a maior data encontrada
+            // Se houver registros em datas posteriores a 04/11, expande a janela
             records.forEach(r => {
                 if (r.created_at) {
                     const rd = new Date(r.created_at);
@@ -1316,7 +1316,7 @@
             startDate.setHours(0,0,0,0);
             endDate.setHours(0,0,0,0);
 
-            // Preenche previamente todas as datas do período (19/10/2026 até hoje/data máxima)
+            // Pré-preenche todos os dias no intervalo (19/10/2026 a 04/11/2026)
             for (let cur = new Date(startDate); cur <= endDate; cur.setDate(cur.getDate() + 1)) {
                 const day = String(cur.getDate()).padStart(2, '0');
                 const month = String(cur.getMonth() + 1).padStart(2, '0');
@@ -1376,9 +1376,28 @@
                     modStats[mod][naipe]++;
                 }
 
-                // Obtém a data local do registro
-                let recDate = r.created_at ? new Date(r.created_at) : new Date();
-                if (isNaN(recDate.getTime())) recDate = new Date();
+                // OPÇÃO B: Trata registros cadastrados retroativamente ou em lote
+                let recDate;
+                let createdDate = r.created_at ? new Date(r.created_at) : new Date();
+                if (isNaN(createdDate.getTime())) createdDate = new Date();
+
+                if (r.data_prova) {
+                    recDate = new Date(r.data_prova + 'T00:00:00');
+                } else {
+                    const config = blockConfig[bloco];
+                    if (config) {
+                        const bStart = new Date(config.start);
+                        const bEnd = new Date(config.end);
+                        // Se o registro foi feito fora do período do seu bloco (ex: Bloco 1 cadastrado no dia 26/10)
+                        if (createdDate > bEnd || createdDate < bStart) {
+                            recDate = new Date(bStart);
+                        } else {
+                            recDate = createdDate;
+                        }
+                    } else {
+                        recDate = createdDate;
+                    }
+                }
 
                 const day = String(recDate.getDate()).padStart(2, '0');
                 const month = String(recDate.getMonth() + 1).padStart(2, '0');
