@@ -473,8 +473,10 @@
                         </div>
 
                         <div class="bg-white border border-slate-200 p-4 md:p-6 rounded-2xl shadow-sm flex flex-col">
-                            <h4 class="text-sm md:text-base font-bold text-slate-800 text-center mb-2">Média de Participantes/Dia por Bloco (Total e Naipe)</h4>
-                            <div class="relative h-64 md:h-72 w-full"><canvas id="chartMedias"></canvas></div>
+                            <h4 class="text-sm md:text-base font-bold text-slate-800 text-center mb-2">Evolução Diária de Participantes por Modalidade</h4>
+                            <div class="relative h-72 md:h-80 w-full overflow-x-auto">
+                                <div class="min-w-[600px] h-full"><canvas id="chartEvolucaoDiaria"></canvas></div>
+                            </div>
                         </div>
                     </div>
 
@@ -1252,7 +1254,7 @@
                 dashboardCharts[elementId].destroy();
             }
             dashboardCharts[elementId] = new Chart(ctx, {
-                type: 'bar',
+                type: type, // Modificado para aceitar dinamicamente o tipo passado
                 data: { labels: labels, datasets: datasets },
                 options: {
                     responsive: true,
@@ -1265,9 +1267,10 @@
                             labels: { boxWidth: 10, font: { size: 10 }, padding: 10 }
                         },
                         datalabels: {
-                            anchor: 'center',
-                            align: 'center',
-                            color: '#ffffff',
+                            // Ajustes dinâmicos para a cor do rótulo não ficar branco num fundo branco na linha
+                            anchor: type === 'line' ? 'end' : 'center',
+                            align: type === 'line' ? 'top' : 'center',
+                            color: type === 'line' ? function(context) { return context.dataset.borderColor || '#333333'; } : '#ffffff',
                             font: { weight: 'bold', size: 11 },
                             formatter: (value) => {
                                 const num = parseFloat(value);
@@ -1345,7 +1348,7 @@
                 if (!dateMap[d]) {
                     dateMap[d] = {
                         total: 0, MAS: 0, FEM: 0,
-                        Remo: 0, Ciclismo: 0, Fortnite: 0,
+                        Remo: 0, Ciclismo: 0, Fortnite: 0, // Campos utilizados para o gráfico de linhas
                         RemoMAS: 0, RemoFEM: 0, CiclismoMAS: 0, CiclismoFEM: 0, FortniteMAS: 0, FortniteFEM: 0
                     };
                 }
@@ -1432,14 +1435,11 @@
                 { label: 'Fortnite FEM', data: sortedDates.map(d => dateMap[d].FortniteFEM), backgroundColor: '#7e3ff2' }
             ], false);
 
-            const avgTotal = blocks.map(b => blockDaysMap[b] && blockDaysMap[b].size > 0 ? (blockStats[b].total / blockDaysMap[b].size).toFixed(1) : 0);
-            const avgMAS = blocks.map(b => blockDaysMap[b] && blockDaysMap[b].size > 0 ? (blockStats[b].MAS / blockDaysMap[b].size).toFixed(1) : 0);
-            const avgFEM = blocks.map(b => blockDaysMap[b] && blockDaysMap[b].size > 0 ? (blockStats[b].FEM / blockDaysMap[b].size).toFixed(1) : 0);
-
-            drawChart('chartMedias', 'bar', blocks, [
-                { label: 'Média Total/Dia', data: avgTotal, backgroundColor: '#FFB81C' },
-                { label: 'Média Masc./Dia', data: avgMAS, backgroundColor: '#004A80' },
-                { label: 'Média Fem./Dia', data: avgFEM, backgroundColor: '#00A859' }
+            // Gráfico de Evolução Diária (Linhas)
+            drawChart('chartEvolucaoDiaria', 'line', sortedDates, [
+                { label: 'Remo', data: sortedDates.map(d => dateMap[d].Remo), borderColor: '#0066CC', backgroundColor: '#0066CC', tension: 0.3, fill: false, borderWidth: 3, pointRadius: 4 },
+                { label: 'Ciclismo', data: sortedDates.map(d => dateMap[d].Ciclismo), borderColor: '#00A859', backgroundColor: '#00A859', tension: 0.3, fill: false, borderWidth: 3, pointRadius: 4 },
+                { label: 'Fortnite', data: sortedDates.map(d => dateMap[d].Fortnite), borderColor: '#7e3ff2', backgroundColor: '#7e3ff2', tension: 0.3, fill: false, borderWidth: 3, pointRadius: 4 }
             ], false);
         }
 
@@ -1464,7 +1464,8 @@
             });
 
             let currentY = doc.lastAutoTable.finalY + 10;
-            const chartIds = ['chartBlocos', 'chartMods', 'chartBlocoModNaipe', 'chartDiasNaipe', 'chartDiasModsNaipe', 'chartMedias'];
+            // Modificado para capturar a exportação do novo gráfico
+            const chartIds = ['chartBlocos', 'chartMods', 'chartBlocoModNaipe', 'chartDiasNaipe', 'chartDiasModsNaipe', 'chartEvolucaoDiaria'];
             
             chartIds.forEach((id, index) => {
                 const canvas = document.getElementById(id);
