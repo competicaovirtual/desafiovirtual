@@ -219,7 +219,7 @@
                         <i class="fa-solid fa-tv mr-2"></i>Modo TV
                     </button>
 
-                    <!-- MODO TV ESPECIAL COMITÊ ORGANIZADOR (02/11/2026) -->
+                    <!-- MODO TV ESPECIAL COMITÊ ORGANIZADOR -->
                     <button onclick="toggleTVMode(true)" class="px-5 py-2.5 bg-purple-700 hover:bg-purple-800 text-white font-bold rounded-xl shadow-md transition-all flex items-center border border-purple-400">
                         <i class="fa-solid fa-users-gear mr-2"></i>TV Comitê (02/11)
                     </button>
@@ -344,7 +344,8 @@
                                     <option value="Público Geral">Público Geral</option>
                                 </select>
                             </div>
-
+                            
+                            <!-- Modalidade sempre visível, mas o Tempo some se for Ativação -->
                             <div>
                                 <label class="block text-xs font-bold uppercase text-slate-600 mb-2">Modalidade / Tipo</label>
                                 <select id="admin-modalidade" required onchange="handleModalidadeChange()" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-3 text-slate-900 focus:outline-none focus:border-cob-blue">
@@ -365,18 +366,19 @@
                                 </select>
                             </div>
 
-                            <div>
+                            <!-- Container do Tempo/Pontos que será escondido quando não for um desafio ativo -->
+                            <div id="container-tempo-pontos">
                                 <label id="label-tempo-pontos" class="block text-xs font-bold uppercase text-slate-600 mb-2">Tempo (HH:MM:SS)</label>
                                 <input type="text" id="admin-tempo" placeholder="00:00:00" oninput="formatInputData(this)" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-3 text-slate-900 font-mono text-lg focus:outline-none focus:border-cob-blue">
                             </div>
 
-                            <div class="lg:col-span-2 flex items-end justify-end space-x-3">
+                            <div class="lg:col-span-2 xl:col-span-3 flex items-end justify-end space-x-3 mt-2">
                                 <button type="button" id="btn-cancel-edit" onclick="cancelEdit()" class="hidden px-6 py-3.5 bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold rounded-xl transition-all">
                                     Cancelar Edição
                                 </button>
                                 <button type="submit" id="btn-save-record" class="px-8 py-3.5 bg-cob-dark hover:bg-cob-blue text-white font-bold rounded-xl shadow-md transition-all flex items-center space-x-2">
                                     <i class="fa-solid fa-floppy-disk"></i>
-                                    <span>Salvar Registro Oficial</span>
+                                    <span>Salvar Registro / Check-in</span>
                                 </button>
                             </div>
                         </form>
@@ -421,36 +423,41 @@
                         <h3 class="text-2xl font-black text-slate-900 flex items-center"><i class="fa-solid fa-chart-bar text-cob-blue mr-3"></i> Dashboard Estatístico Consolidado</h3>
                         <button onclick="exportDashboardPDF()" class="px-5 py-2.5 bg-cob-blue hover:bg-cob-dark text-white font-bold rounded-xl shadow-md transition-all flex items-center space-x-2">
                             <i class="fa-solid fa-file-pdf"></i>
-                            <span>Gerar Relatório em PDF dos Gráficos</span>
+                            <span>Gerar Relatório em PDF</span>
                         </button>
                     </div>
                     
-                    <!-- KPI CARDS APRIMORADOS -->
                     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
-                        <div class="bg-white border border-slate-200 p-5 rounded-2xl shadow-sm text-center flex flex-col justify-center">
-                            <p class="text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1">Total de Ativações / Interações</p>
-                            <h2 class="text-3xl font-black text-cob-blue" id="kpi-total-interacoes">0</h2>
-                            <p class="text-[10px] text-slate-500 mt-2 font-semibold" id="kpi-interacoes-naipe">MAS: 0 | FEM: 0</p>
+                        <!-- Volume Bruto Total -->
+                        <div class="bg-white border border-slate-200 p-5 rounded-2xl shadow-sm text-center flex flex-col justify-center relative overflow-hidden">
+                            <div class="absolute -right-4 -top-4 w-16 h-16 bg-cob-blue/10 rounded-full"></div>
+                            <p class="text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1 z-10">Vol. Bruto de Ativações MKT</p>
+                            <h2 class="text-3xl font-black text-cob-blue z-10" id="kpi-total-interacoes">0</h2>
+                            <p class="text-[10px] text-slate-500 mt-2 font-semibold z-10" id="kpi-interacoes-naipe">MAS: 0 | FEM: 0</p>
                         </div>
-                        <div class="bg-white border border-slate-200 p-5 rounded-2xl shadow-sm text-center flex flex-col justify-center">
-                            <p class="text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1">Inscritos no Desafio Virtual</p>
-                            <h2 class="text-3xl font-black text-amber-600" id="kpi-total-desafio">0</h2>
-                            <p class="text-[10px] text-slate-500 mt-2 font-semibold" id="kpi-desafio-naipe">MAS: 0 | FEM: 0</p>
+                        <div class="bg-white border border-slate-200 p-5 rounded-2xl shadow-sm text-center flex flex-col justify-center relative overflow-hidden">
+                            <div class="absolute -right-4 -top-4 w-16 h-16 bg-amber-500/10 rounded-full"></div>
+                            <p class="text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1 z-10">Competidores Oficiais (Desafio)</p>
+                            <h2 class="text-3xl font-black text-amber-600 z-10" id="kpi-total-desafio">0</h2>
+                            <p class="text-[10px] text-slate-500 mt-2 font-semibold z-10" id="kpi-desafio-naipe">MAS: 0 | FEM: 0</p>
                         </div>
-                        <div class="bg-white border border-slate-200 p-5 rounded-2xl shadow-sm text-center flex flex-col justify-center">
-                            <p class="text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1">Apenas Presença / Ativação</p>
-                            <h2 class="text-3xl font-black text-cyan-600" id="kpi-total-presenca">0</h2>
-                            <p class="text-[10px] text-slate-500 mt-2 font-semibold" id="kpi-presenca-naipe">MAS: 0 | FEM: 0</p>
+                        <div class="bg-white border border-slate-200 p-5 rounded-2xl shadow-sm text-center flex flex-col justify-center relative overflow-hidden">
+                            <div class="absolute -right-4 -top-4 w-16 h-16 bg-cyan-500/10 rounded-full"></div>
+                            <p class="text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1 z-10">Apenas Presença / Ativação</p>
+                            <h2 class="text-3xl font-black text-cyan-600 z-10" id="kpi-total-presenca">0</h2>
+                            <p class="text-[10px] text-slate-500 mt-2 font-semibold z-10" id="kpi-presenca-naipe">MAS: 0 | FEM: 0</p>
                         </div>
-                        <div class="bg-white border border-slate-200 p-5 rounded-2xl shadow-sm text-center flex flex-col justify-center">
-                            <p class="text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1">Participantes Únicos</p>
-                            <h2 class="text-3xl font-black text-cob-green" id="kpi-unicos">0</h2>
-                            <p class="text-[10px] text-slate-500 mt-2 font-semibold" id="kpi-unicos-naipe">MAS: 0 | FEM: 0</p>
+                        <div class="bg-white border border-slate-200 p-5 rounded-2xl shadow-sm text-center flex flex-col justify-center relative overflow-hidden">
+                            <div class="absolute -right-4 -top-4 w-16 h-16 bg-emerald-500/10 rounded-full"></div>
+                            <p class="text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1 z-10">Participantes Únicos (CPFs)</p>
+                            <h2 class="text-3xl font-black text-cob-green z-10" id="kpi-unicos">0</h2>
+                            <p class="text-[10px] text-slate-500 mt-2 font-semibold z-10" id="kpi-unicos-naipe">MAS: 0 | FEM: 0</p>
                         </div>
-                        <div class="bg-white border border-slate-200 p-5 rounded-2xl shadow-sm text-center flex flex-col justify-center">
-                            <p class="text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1">Multi-Modalidades</p>
-                            <h2 class="text-3xl font-black text-purple-600" id="kpi-multimodal">0</h2>
-                            <p class="text-[10px] text-purple-600 mt-2 font-semibold">Fizeram >1 prova</p>
+                        <div class="bg-white border border-slate-200 p-5 rounded-2xl shadow-sm text-center flex flex-col justify-center relative overflow-hidden">
+                            <div class="absolute -right-4 -top-4 w-16 h-16 bg-purple-500/10 rounded-full"></div>
+                            <p class="text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1 z-10">Engajamento Multi-Modal</p>
+                            <h2 class="text-3xl font-black text-purple-600 z-10" id="kpi-multimodal">0</h2>
+                            <p class="text-[10px] text-purple-600 mt-2 font-semibold z-10">Fizeram >1 modalidade</p>
                         </div>
                     </div>
 
@@ -460,12 +467,12 @@
 
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
                         <div class="bg-white border border-slate-200 p-4 md:p-6 rounded-2xl shadow-sm flex flex-col">
-                            <h4 class="text-sm md:text-base font-bold text-slate-800 text-center mb-2">Participações nos Desafios por Bloco e Naipe</h4>
+                            <h4 class="text-sm md:text-base font-bold text-slate-800 text-center mb-2">Desafios vs Presença (Por Bloco)</h4>
                             <div class="relative h-64 md:h-72 w-full"><canvas id="chartBlocos"></canvas></div>
                         </div>
 
                         <div class="bg-white border border-slate-200 p-4 md:p-6 rounded-2xl shadow-sm flex flex-col">
-                            <h4 class="text-sm md:text-base font-bold text-slate-800 text-center mb-2">Participações por Modalidade (Incluindo Ativação)</h4>
+                            <h4 class="text-sm md:text-base font-bold text-slate-800 text-center mb-2">Volume Bruto de Ativações por Modalidade</h4>
                             <div class="relative h-64 md:h-72 w-full"><canvas id="chartMods"></canvas></div>
                         </div>
 
@@ -484,15 +491,8 @@
                         </div>
 
                         <div class="bg-white border border-slate-200 p-4 md:p-6 rounded-2xl shadow-sm flex flex-col md:col-span-2">
-                            <h4 class="text-sm md:text-base font-bold text-slate-800 text-center mb-2">Comparativo Diário: Desafio Virtual vs. Apenas Presença</h4>
-                            <div class="relative h-72 md:h-80 w-full overflow-x-auto">
-                                <div class="min-w-[600px] h-full"><canvas id="chartDiasDesafioPresenca"></canvas></div>
-                            </div>
-                        </div>
-
-                        <div class="bg-white border border-slate-200 p-4 md:p-6 rounded-2xl shadow-sm flex flex-col md:col-span-2">
                             <h4 class="text-sm md:text-base font-bold text-slate-800 text-center mb-2 flex items-center justify-center">
-                                <i class="fa-solid fa-chart-line text-cob-blue mr-2"></i>Evolução Diária de Participantes por Modalidade
+                                <i class="fa-solid fa-chart-line text-cob-blue mr-2"></i>Evolução Diária de Participações (Por Dia do Mês)
                             </h4>
                             <div class="relative h-72 md:h-80 w-full overflow-x-auto">
                                 <div class="min-w-[600px] h-full"><canvas id="chartEvolucaoDiaria"></canvas></div>
@@ -610,6 +610,7 @@
                     </select>
                 </div>
 
+                <!-- Modalidade sempre visível na edição também -->
                 <div>
                     <label class="block text-xs font-bold uppercase text-slate-600 mb-2">Modalidade</label>
                     <select id="modal-modalidade" required onchange="handleModalModalidadeChange()" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-3 text-slate-900 focus:outline-none focus:border-cob-blue">
@@ -630,7 +631,8 @@
                     </select>
                 </div>
 
-                <div>
+                <!-- Campo de Tempo do modal escondido de forma inteligente -->
+                <div id="container-modal-tempo-pontos">
                     <label id="modal-label-tempo-pontos" class="block text-xs font-bold uppercase text-slate-600 mb-2">Tempo (HH:MM:SS)</label>
                     <input type="text" id="modal-tempo" placeholder="00:00:00" oninput="formatModalInputData(this)" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-3 text-slate-900 font-mono text-lg focus:outline-none focus:border-cob-blue">
                 </div>
@@ -688,12 +690,20 @@
             return 'Ativo';
         }
         
-        function getActiveBlock() {
+        function getCurrentOrLastActiveBlock() {
             const blocks = ['Bloco 1', 'Bloco 2', 'Bloco 3'];
+            let lastActive = 'Bloco 1';
+            let isActiveNow = false;
+
             for (let b of blocks) {
-                if (getBlocoStatus(b) === 'Ativo') return b;
+                const status = getBlocoStatus(b);
+                if (status === 'Ativo') {
+                    return { name: b, active: true };
+                } else if (status === 'Encerrado') {
+                    lastActive = b; 
+                }
             }
-            return 'Bloco 1';
+            return { name: lastActive, active: false };
         }
 
         // Determina se a data do registro está dentro da janela oficial de um bloco do Desafio
@@ -701,7 +711,7 @@
             if (r.modalidade === 'Presença / Ativação' || r.tempo === 'PRESENÇA') return false;
             
             let dt = r.created_at ? new Date(r.created_at) : null;
-            if (!dt || isNaN(dt.getTime())) return true; // Fallback para manter o registro se sem data
+            if (!dt || isNaN(dt.getTime())) return true; 
 
             const blocoConfig = blockConfig[r.bloco];
             if (!blocoConfig) return true;
@@ -772,8 +782,17 @@
             container.innerHTML = html;
             
             const blocoSelect = document.getElementById('admin-bloco');
+            const modSelect = document.getElementById('admin-modalidade');
+            
             if (blocoSelect && !document.getElementById('admin-edit-id').value) {
-                blocoSelect.value = getActiveBlock();
+                const activeBlockInfo = getCurrentOrLastActiveBlock();
+                blocoSelect.value = activeBlockInfo.name;
+                
+                // Se nenhum bloco estiver ativo, foca na presença ocultando o campo tempo
+                if (!activeBlockInfo.active) {
+                    modSelect.value = 'Presença / Ativação';
+                }
+                handleModalidadeChange();
             }
         }
 
@@ -989,36 +1008,47 @@
             }
         }
 
+        // Modificado estrategicamente: Esconde container de tempo, mas mantém modalidade
         function handleModalidadeChange() {
             const mod = document.getElementById('admin-modalidade').value;
+            const tempoContainer = document.getElementById('container-tempo-pontos');
             const label = document.getElementById('label-tempo-pontos');
             const input = document.getElementById('admin-tempo');
-            if (mod === 'Fortnite') {
-                label.innerText = 'Pontos';
-                input.placeholder = 'Ex: 1500';
-            } else if (mod === 'Presença / Ativação') {
-                label.innerText = 'Presença';
+            
+            if (mod === 'Presença / Ativação') {
+                tempoContainer.classList.add('hidden');
                 input.value = 'PRESENÇA';
             } else {
-                label.innerText = 'Tempo (HH:MM:SS)';
-                input.placeholder = '00:00:00';
+                tempoContainer.classList.remove('hidden');
+                if (mod === 'Fortnite') {
+                    label.innerText = 'Pontos';
+                    input.placeholder = 'Ex: 1500';
+                } else {
+                    label.innerText = 'Tempo (HH:MM:SS)';
+                    input.placeholder = '00:00:00';
+                }
+                if(!document.getElementById('admin-edit-id').value) input.value = '';
             }
-            if(!document.getElementById('admin-edit-id').value && mod !== 'Presença / Ativação') input.value = '';
         }
 
         function handleModalModalidadeChange() {
             const mod = document.getElementById('modal-modalidade').value;
+            const tempoContainer = document.getElementById('container-modal-tempo-pontos');
             const label = document.getElementById('modal-label-tempo-pontos');
             const input = document.getElementById('modal-tempo');
-            if (mod === 'Fortnite') {
-                label.innerText = 'Pontos';
-                input.placeholder = 'Ex: 1500';
-            } else if (mod === 'Presença / Ativação') {
-                label.innerText = 'Presença';
+            
+            if (mod === 'Presença / Ativação') {
+                tempoContainer.classList.add('hidden');
                 input.value = 'PRESENÇA';
             } else {
-                label.innerText = 'Tempo (HH:MM:SS)';
-                input.placeholder = '00:00:00';
+                tempoContainer.classList.remove('hidden');
+                if (mod === 'Fortnite') {
+                    label.innerText = 'Pontos';
+                    input.placeholder = 'Ex: 1500';
+                } else {
+                    label.innerText = 'Tempo (HH:MM:SS)';
+                    input.placeholder = '00:00:00';
+                }
             }
         }
 
@@ -1125,7 +1155,7 @@
 
                         if (!error) {
                             document.getElementById('time-entry-form').reset();
-                            document.getElementById('admin-bloco').value = getActiveBlock();
+                            document.getElementById('admin-bloco').value = getCurrentOrLastActiveBlock().name;
                             await fetchRecords();
                             showModal('Sucesso', 'O resultado deste participante foi atualizado!', 'success');
                         } else {
@@ -1137,7 +1167,7 @@
                         
                         if (!error) {
                             document.getElementById('time-entry-form').reset();
-                            document.getElementById('admin-bloco').value = getActiveBlock();
+                            document.getElementById('admin-bloco').value = getCurrentOrLastActiveBlock().name;
                             await fetchRecords();
                             showModal('Sucesso', 'Registro oficial / Presença cadastrado com sucesso!', 'success');
                         } else {
@@ -1209,7 +1239,7 @@
                 document.getElementById('modal-naipe').value = r.naipe || 'MAS';
                 document.getElementById('modal-subcategoria').value = r.subcategoria || 'Atleta';
                 document.getElementById('modal-modalidade').value = r.modalidade || 'Remo';
-                document.getElementById('modal-bloco').value = r.bloco || getActiveBlock();
+                document.getElementById('modal-bloco').value = r.bloco || getCurrentOrLastActiveBlock().name;
                 
                 handleModalModalidadeChange();
                 document.getElementById('modal-tempo').value = r.tempo || ''; 
@@ -1229,7 +1259,7 @@
         function cancelEdit() {
             document.getElementById('admin-edit-id').value = '';
             document.getElementById('time-entry-form').reset();
-            document.getElementById('admin-bloco').value = getActiveBlock();
+            document.getElementById('admin-bloco').value = getCurrentOrLastActiveBlock().name;
             document.getElementById('form-title').innerText = 'Registrar Resultado Oficial ou Check-in Presença';
             document.getElementById('btn-cancel-edit').classList.add('hidden');
             handleModalidadeChange();
@@ -1340,7 +1370,7 @@
             
             const totalRecords = records.length;
             const uniqueParticipants = new Set();
-            const participantModalitiesMap = new Map(); // Para rastrear multi-modalidades
+            const participantModalitiesMap = new Map();
 
             let totalDesafio = 0, totalDesafioMas = 0, totalDesafioFem = 0;
             let totalPresenca = 0, totalPresencaMas = 0, totalPresencaFem = 0;
@@ -1348,14 +1378,12 @@
             let dateMap = {}; 
             let hourlyMap = Array(24).fill(0).map(() => ({ total: 0, MAS: 0, FEM: 0 }));
 
-            // Perfis por Gênero
             const perfisList = ['Atleta', 'Treinador', 'Arbitragem', 'Comitê Organizador', 'Público Geral'];
             let perfilStats = {};
             perfisList.forEach(p => perfilStats[p] = { MAS: 0, FEM: 0 });
 
-            // Janela do evento
-            const startDate = new Date(2026, 9, 19); // 19/10/2026
-            let endDate = new Date(2026, 10, 4);    // 04/11/2026
+            const startDate = new Date(2026, 9, 19); 
+            let endDate = new Date(2026, 10, 4);    
 
             records.forEach(r => {
                 if (r.created_at) {
@@ -1384,6 +1412,12 @@
                 'Bloco 2': { total: 0, MAS: 0, FEM: 0 },
                 'Bloco 3': { total: 0, MAS: 0, FEM: 0 }
             };
+            
+            let blockPresencaStats = {
+                'Bloco 1': { total: 0 },
+                'Bloco 2': { total: 0 },
+                'Bloco 3': { total: 0 }
+            };
 
             let modStats = {
                 'Remo': { total: 0, MAS: 0, FEM: 0 },
@@ -1402,7 +1436,6 @@
                 let rawNaipe = (r.naipe || 'MAS').toString().toUpperCase();
                 let naipe = (rawNaipe.includes('FEM') || rawNaipe === 'F') ? 'FEM' : 'MAS';
 
-                // Classificação Desafio vs. Presença
                 const inChallengeWindow = isRecordInChallengeWindow(r);
                 if (inChallengeWindow && mod !== 'Presença / Ativação') {
                     totalDesafio++;
@@ -1412,14 +1445,12 @@
                     if (naipe === 'MAS') totalPresencaMas++; else totalPresencaFem++;
                 }
 
-                // Subcategoria / Perfil
                 if (perfilStats[perf]) {
                     perfilStats[perf][naipe]++;
                 } else {
                     perfilStats['Público Geral'][naipe]++;
                 }
 
-                // Participantes Únicos & Multi-modalidades
                 const uniqueKey = r.credencial ? r.credencial.trim() : (r.atleta ? r.atleta.trim().toUpperCase() : null);
                 if (uniqueKey) {
                     uniqueParticipants.add(uniqueKey);
@@ -1436,6 +1467,8 @@
                 if (blockStats[bloco] && inChallengeWindow && mod !== 'Presença / Ativação') {
                     blockStats[bloco].total++;
                     blockStats[bloco][naipe]++;
+                } else if (blockPresencaStats[bloco] && (!inChallengeWindow || mod === 'Presença / Ativação')) {
+                    blockPresencaStats[bloco].total++;
                 }
                 
                 if (modStats[mod]) {
@@ -1443,7 +1476,6 @@
                     modStats[mod][naipe]++;
                 }
 
-                // Horário de Escaneamento (Pico por Hora via created_at)
                 let recDate = r.created_at ? new Date(r.created_at) : new Date();
                 if (isNaN(recDate.getTime())) recDate = new Date();
 
@@ -1480,7 +1512,6 @@
                 if (mod === 'Presença / Ativação') dateMap[d].PresencaAtivacao++;
             });
 
-            // Múltiplas modalidades
             let multiModalCount = 0;
             participantModalitiesMap.forEach((modsSet) => {
                 if (modsSet.size > 1) multiModalCount++;
@@ -1492,7 +1523,6 @@
                 if (naipeVal === 'FEM') unicosFem++;
             });
 
-            // Atualização dos Cards KPIs
             document.getElementById('kpi-total-interacoes').innerText = totalRecords;
             document.getElementById('kpi-interacoes-naipe').innerText = `MAS: ${totalDesafioMas + totalPresencaMas} | FEM: ${totalDesafioFem + totalPresencaFem}`;
 
@@ -1516,28 +1546,24 @@
             const blocks = ['Bloco 1', 'Bloco 2', 'Bloco 3'];
             const mods = ['Remo', 'Ciclismo', 'Fortnite', 'Presença / Ativação'];
 
-            // Gráfico 1: Desafios por Bloco
+            // Desafios vs Presença por Bloco
             drawChart('chartBlocos', 'bar', blocks, [
-                { label: 'Total Desafio', data: blocks.map(b => blockStats[b].total), backgroundColor: '#FFB81C' },
-                { label: 'Masc.', data: blocks.map(b => blockStats[b].MAS), backgroundColor: '#004A80' },
-                { label: 'Fem.', data: blocks.map(b => blockStats[b].FEM), backgroundColor: '#00A859' }
+                { label: 'Desafios (Oficial)', data: blocks.map(b => blockStats[b].total), backgroundColor: '#FFB81C' },
+                { label: 'Apenas Presença (MKT)', data: blocks.map(b => blockPresencaStats[b].total), backgroundColor: '#0099FF' }
             ], false);
 
-            // Gráfico 2: Por Modalidade + Ativação
             drawChart('chartMods', 'bar', mods, [
-                { label: 'Total', data: mods.map(m => modStats[m].total), backgroundColor: '#0099FF' },
+                { label: 'Total MKT Bruto', data: mods.map(m => modStats[m].total), backgroundColor: '#0066CC' },
                 { label: 'Masc.', data: mods.map(m => modStats[m].MAS), backgroundColor: '#004A80' },
                 { label: 'Fem.', data: mods.map(m => modStats[m].FEM), backgroundColor: '#00A859' }
             ], false);
 
-            // Gráfico 3: Perfil por Gênero (Subcategoria)
             drawChart('chartPerfisNaipe', 'bar', perfisList, [
                 { label: 'Masculino', data: perfisList.map(p => perfilStats[p].MAS), backgroundColor: '#004A80' },
                 { label: 'Feminino', data: perfisList.map(p => perfilStats[p].FEM), backgroundColor: '#00A859' }
             ], false);
 
-            // Gráfico 4: Horários Mais Acessados (Pico por Hora)
-            const hoursLabels = Array.from({length: 15}, (_, i) => `${String(i + 8).padStart(2, '0')}:00h`); // 08h às 22h
+            const hoursLabels = Array.from({length: 15}, (_, i) => `${String(i + 8).padStart(2, '0')}:00h`);
             const hoursDataMas = hoursLabels.map((_, i) => hourlyMap[i + 8].MAS);
             const hoursDataFem = hoursLabels.map((_, i) => hourlyMap[i + 8].FEM);
 
@@ -1546,18 +1572,11 @@
                 { label: 'Acessos Fem.', data: hoursDataFem, backgroundColor: '#00A859' }
             ], false);
 
-            // Gráfico 5: Comparativo Diário Desafio vs. Presença
-            drawChart('chartDiasDesafioPresenca', 'bar', sortedDates, [
-                { label: 'Competidores Desafio', data: sortedDates.map(d => dateMap[d].desafio), backgroundColor: '#FFB81C' },
-                { label: 'Apenas Presença/Ativação', data: sortedDates.map(d => dateMap[d].presenca), backgroundColor: '#0099FF' }
-            ], false);
-
-            // Gráfico 6: Evolução Diária por Modalidade
             drawChart('chartEvolucaoDiaria', 'line', sortedDates, [
                 { label: 'Remo', data: sortedDates.map(d => dateMap[d].Remo), borderColor: '#0066CC', backgroundColor: '#0066CC', tension: 0.3, fill: false, borderWidth: 3, pointRadius: 4 },
                 { label: 'Ciclismo', data: sortedDates.map(d => dateMap[d].Ciclismo), borderColor: '#00A859', backgroundColor: '#00A859', tension: 0.3, fill: false, borderWidth: 3, pointRadius: 4 },
                 { label: 'Fortnite', data: sortedDates.map(d => dateMap[d].Fortnite), borderColor: '#7e3ff2', backgroundColor: '#7e3ff2', tension: 0.3, fill: false, borderWidth: 3, pointRadius: 4 },
-                { label: 'Presença', data: sortedDates.map(d => dateMap[d].PresencaAtivacao), borderColor: '#0099FF', backgroundColor: '#0099FF', tension: 0.3, fill: false, borderWidth: 2, pointRadius: 3 }
+                { label: 'Presença Pura', data: sortedDates.map(d => dateMap[d].PresencaAtivacao), borderColor: '#0099FF', backgroundColor: '#0099FF', tension: 0.3, fill: false, borderWidth: 2, pointRadius: 3 }
             ], false);
         }
 
@@ -1567,8 +1586,8 @@
             doc.text("Relatório Estatístico de Presença e Desafios | Jogos da Juventude 2026", 14, 15);
 
             let bodyData = [
-                ["Total de Interações", document.getElementById('kpi-total-interacoes').innerText],
-                ["Participantes no Desafio", document.getElementById('kpi-total-desafio').innerText],
+                ["Volume Bruto de Ativações (MKT)", document.getElementById('kpi-total-interacoes').innerText],
+                ["Participantes Oficiais (Desafio)", document.getElementById('kpi-total-desafio').innerText],
                 ["Apenas Presença / Ativação", document.getElementById('kpi-total-presenca').innerText],
                 ["Participantes Únicos", document.getElementById('kpi-unicos').innerText],
                 ["Multi-Modalidades", document.getElementById('kpi-multimodal').innerText]
@@ -1583,7 +1602,7 @@
             });
 
             let currentY = doc.lastAutoTable.finalY + 10;
-            const chartIds = ['chartBlocos', 'chartMods', 'chartPerfisNaipe', 'chartEvolucaoHoraria', 'chartDiasDesafioPresenca', 'chartEvolucaoDiaria'];
+            const chartIds = ['chartBlocos', 'chartMods', 'chartPerfisNaipe', 'chartEvolucaoHoraria', 'chartEvolucaoDiaria'];
             
             chartIds.forEach((id) => {
                 const canvas = document.getElementById(id);
@@ -1706,7 +1725,6 @@
 
             let filtered = records.filter(r => r.modalidade === modalidade);
             
-            // Caso estejamos no Modo TV Especial Comitê Organizador
             if (isComiteTVMode) {
                 filtered = records.filter(r => r.subcategoria === 'Comitê Organizador');
             } else {
@@ -1745,7 +1763,6 @@
             tbody.innerHTML = htmlRows.join('');
         }
 
-        // MODO TV (Com opção para Comitê Organizador - 02/11/2026)
         function toggleTVMode(isComite = false) {
             isComiteTVMode = isComite;
 
@@ -1777,7 +1794,7 @@
             } else {
                 document.getElementById('tv-subtitle').innerText = "DESAFIO VIRTUAL";
                 document.getElementById('tv-badge').innerText = "RANKING OFICIAL ATUALIZADO";
-                document.getElementById('filter-bloco').value = getActiveBlock();
+                document.getElementById('filter-bloco').value = getCurrentOrLastActiveBlock().name;
                 startTVCycle();
             }
         }
@@ -1825,7 +1842,7 @@
         async function applyTVState() {
             if (isComiteTVMode) return;
             const state = tvStatesNormal[tvStateIndex];
-            const activeBlock = getActiveBlock(); 
+            const activeBlock = getCurrentOrLastActiveBlock().name; 
             
             document.getElementById('filter-modalidade').value = state.mod;
             document.getElementById('filter-naipe').value = state.naipe;
@@ -1842,7 +1859,7 @@
             
             const blocoSelect = document.getElementById('admin-bloco');
             if (blocoSelect) {
-                blocoSelect.value = getActiveBlock();
+                blocoSelect.value = getCurrentOrLastActiveBlock().name;
             }
 
             setInterval(() => {
