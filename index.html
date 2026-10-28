@@ -351,7 +351,6 @@
                                     <option value="Remo">Remo (500m)</option>
                                     <option value="Ciclismo">Ciclismo (Sprint 300m)</option>
                                     <option value="Fortnite">Fortnite (Pontos)</option>
-                                    <option value="Presença / Ativação">Apenas Presença / Ativação</option>
                                 </select>
                             </div>
 
@@ -365,7 +364,7 @@
                                 </select>
                             </div>
 
-                            <!-- Container do Tempo/Pontos que será escondido quando o bloco selecionado não estiver ativo -->
+                            <!-- Container do Tempo/Pontos que será escondido automaticamente quando o bloco não estiver ativo -->
                             <div id="container-tempo-pontos">
                                 <label id="label-tempo-pontos" class="block text-xs font-bold uppercase text-slate-600 mb-2">Tempo (HH:MM:SS)</label>
                                 <input type="text" id="admin-tempo" placeholder="00:00:00" oninput="formatInputData(this)" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-3 text-slate-900 font-mono text-lg focus:outline-none focus:border-cob-blue">
@@ -460,7 +459,7 @@
                     </div>
 
                     <h4 class="text-xl font-bold text-slate-800 mt-10 mb-4 border-b border-slate-200 pb-2 flex items-center">
-                        <i class="fa-solid fa-chart-column text-cob-blue mr-2"></i> Análises Detalhadas do Evento (Barras Horizontais)
+                        <i class="fa-solid fa-chart-column text-cob-blue mr-2"></i> Análises Detalhadas do Evento (Barras Verticais Lado a Lado)
                     </h4>
 
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
@@ -619,7 +618,6 @@
                         <option value="Remo">Remo (500m)</option>
                         <option value="Ciclismo">Ciclismo (Sprint 300m)</option>
                         <option value="Fortnite">Fortnite (Pontos)</option>
-                        <option value="Presença / Ativação">Apenas Presença / Ativação</option>
                     </select>
                 </div>
 
@@ -706,31 +704,34 @@
             return { name: lastActive, active: false };
         }
 
-        // Verifica se o bloco selecionado no formulário está ativo para permitir desafios
         function checkBlocoActivityForForm() {
             const selectedBloco = document.getElementById('admin-bloco').value;
             const status = getBlocoStatus(selectedBloco);
-            const modSelect = document.getElementById('admin-modalidade');
+            const tempoContainer = document.getElementById('container-tempo-pontos');
+            const isBlocoActive = (status === 'Ativo' && selectedBloco !== 'Ativação Extra');
             
-            if (selectedBloco === 'Ativação Extra' || status !== 'Ativo') {
-                if (modSelect.value !== 'Presença / Ativação') {
-                    modSelect.value = 'Presença / Ativação';
-                }
+            if (!isBlocoActive) {
+                tempoContainer.classList.add('hidden');
+                document.getElementById('admin-tempo').value = 'PRESENÇA';
+            } else {
+                tempoContainer.classList.remove('hidden');
+                handleModalidadeChange();
             }
-            handleModalidadeChange();
         }
 
         function checkBlocoActivityForModal() {
             const selectedBloco = document.getElementById('modal-bloco').value;
             const status = getBlocoStatus(selectedBloco);
-            const modSelect = document.getElementById('modal-modalidade');
+            const tempoContainer = document.getElementById('container-modal-tempo-pontos');
+            const isBlocoActive = (status === 'Ativo' && selectedBloco !== 'Ativação Extra');
             
-            if (selectedBloco === 'Ativação Extra' || status !== 'Ativo') {
-                if (modSelect.value !== 'Presença / Ativação') {
-                    modSelect.value = 'Presença / Ativação';
-                }
+            if (!isBlocoActive) {
+                tempoContainer.classList.add('hidden');
+                document.getElementById('modal-tempo').value = 'PRESENÇA';
+            } else {
+                tempoContainer.classList.remove('hidden');
+                handleModalModalidadeChange();
             }
-            handleModalModalidadeChange();
         }
 
         function isRecordInChallengeWindow(r) {
@@ -1032,10 +1033,7 @@
             const blocoStatus = getBlocoStatus(bloco);
             const isBlocoActive = (blocoStatus === 'Ativo' && bloco !== 'Ativação Extra');
 
-            if (mod === 'Presença / Ativação' || !isBlocoActive) {
-                if (!isBlocoActive && mod !== 'Presença / Ativação') {
-                    document.getElementById('admin-modalidade').value = 'Presença / Ativação';
-                }
+            if (!isBlocoActive) {
                 tempoContainer.classList.add('hidden');
                 input.value = 'PRESENÇA';
             } else {
@@ -1061,10 +1059,7 @@
             const blocoStatus = getBlocoStatus(bloco);
             const isBlocoActive = (blocoStatus === 'Ativo' && bloco !== 'Ativação Extra');
 
-            if (mod === 'Presença / Ativação' || !isBlocoActive) {
-                if (!isBlocoActive && mod !== 'Presença / Ativação') {
-                    document.getElementById('modal-modalidade').value = 'Presença / Ativação';
-                }
+            if (!isBlocoActive) {
                 tempoContainer.classList.add('hidden');
                 input.value = 'PRESENÇA';
             } else {
@@ -1083,7 +1078,7 @@
             const mod = document.getElementById('admin-modalidade').value;
             if (mod === 'Fortnite') {
                 input.value = input.value.replace(/\D/g, ''); 
-            } else if (mod !== 'Presença / Ativação') {
+            } else {
                 formatTimeInput(input);
             }
         }
@@ -1092,7 +1087,7 @@
             const mod = document.getElementById('modal-modalidade').value;
             if (mod === 'Fortnite') {
                 input.value = input.value.replace(/\D/g, ''); 
-            } else if (mod !== 'Presença / Ativação') {
+            } else {
                 formatTimeInput(input);
             }
         }
@@ -1127,7 +1122,7 @@
             isAdminLoggedIn = false;
             document.getElementById('admin-pin-input').value = '';
             document.getElementById('admin-panel-content').classList.add('hidden');
-            document.getElementById('admin-login-screen').classList.remove('hidden');
+            document.getElementById('admin-login-screen').classList.add('hidden');
         }
 
         async function submitTimeRecord(e) {
@@ -1150,8 +1145,7 @@
             const blocoStatus = getBlocoStatus(bloco);
             const isBlocoActive = (blocoStatus === 'Ativo' && bloco !== 'Ativação Extra');
 
-            if (!isBlocoActive || modalidade === 'Presença / Ativação') {
-                modalidade = 'Presença / Ativação';
+            if (!isBlocoActive) {
                 tempo = 'PRESENÇA';
             }
 
@@ -1179,7 +1173,7 @@
                         ? records.find(r => r.credencial === credencial && r.modalidade === modalidade)
                         : records.find(r => r.atleta === atleta && r.modalidade === modalidade);
 
-                    if (existingRecord && modalidade !== 'Presença / Ativação') {
+                    if (existingRecord && tempo !== 'PRESENÇA') {
                         const { error } = await _supabase.from('records')
                             .update({ tempo: tempo, bloco: bloco, atleta: atleta, subcategoria: subcategoria, naipe: naipe, credencial: credencial })
                             .eq('id', existingRecord.id);
@@ -1232,8 +1226,7 @@
             const blocoStatus = getBlocoStatus(bloco);
             const isBlocoActive = (blocoStatus === 'Ativo' && bloco !== 'Ativação Extra');
 
-            if (!isBlocoActive || modalidade === 'Presença / Ativação') {
-                modalidade = 'Presença / Ativação';
+            if (!isBlocoActive) {
                 tempo = 'PRESENÇA';
             }
 
@@ -1275,7 +1268,7 @@
                 document.getElementById('modal-atleta').value = r.atleta || '';
                 document.getElementById('modal-naipe').value = r.naipe || 'MAS';
                 document.getElementById('modal-subcategoria').value = r.subcategoria || 'Atleta';
-                document.getElementById('modal-modalidade').value = r.modalidade || 'Remo';
+                document.getElementById('modal-modalidade').value = r.modalidade && r.modalidade !== 'Presença / Ativação' ? r.modalidade : 'Remo';
                 document.getElementById('modal-bloco').value = r.bloco || getCurrentOrLastActiveBlock().name;
                 
                 handleModalModalidadeChange();
@@ -1338,6 +1331,7 @@
                 }
                 
                 const dtStr = r.created_at ? formatDateTimePtBr(r.created_at) : '--/--/--';
+                const isPresenca = (r.tempo === 'PRESENÇA' || r.modalidade === 'Presença / Ativação');
 
                 return `
                     <tr class="hover:bg-slate-50 transition-colors">
@@ -1347,8 +1341,8 @@
                         <td class="py-3 px-4 text-slate-600">${r.naipe || '-'}</td>
                         <td class="py-3 px-4 text-slate-600">${r.subcategoria || ''}</td>
                         <td class="py-3 px-4 text-slate-600">${r.bloco || ''}</td>
-                        <td class="py-3 px-4 text-slate-600">${r.modalidade || ''}</td>
-                        <td class="py-3 px-4 font-mono font-bold ${r.modalidade === 'Fortnite' ? 'text-purple-600' : (r.modalidade === 'Presença / Ativação' ? 'text-cyan-600' : 'text-emerald-600')}">${r.tempo || ''}</td>
+                        <td class="py-3 px-4 text-slate-600">${isPresenca ? 'Presença / Ativação' : (r.modalidade || '')}</td>
+                        <td class="py-3 px-4 font-mono font-bold ${r.modalidade === 'Fortnite' ? 'text-purple-600' : (isPresenca ? 'text-cyan-600' : 'text-emerald-600')}">${r.tempo || ''}</td>
                         <td class="py-3 px-4 text-right flex justify-end space-x-1">
                             <button onclick="openEditParticipantModal('${r.id}')" class="text-cob-blue hover:text-cob-cyan p-2" title="Editar"><i class="fa-solid fa-pen"></i></button>
                             <button onclick="deleteRecord('${r.id}')" class="text-red-500 hover:text-red-700 p-2" title="Excluir"><i class="fa-solid fa-trash"></i></button>
@@ -1362,8 +1356,8 @@
 
         let dashboardCharts = {};
 
-        // Função universal forçada para barras horizontais lado a lado
-        function drawHorizontalBarChart(elementId, labels, datasets, stacked = false) {
+        // Função universal para gráficos de BARRAS VERTICAIS lado a lado (indexAxis: 'x')
+        function drawVerticalBarChart(elementId, labels, datasets, stacked = false) {
             const canvasEl = document.getElementById(elementId);
             if (!canvasEl) return;
             const ctx = canvasEl.getContext('2d');
@@ -1374,11 +1368,11 @@
                 type: 'bar',
                 data: { labels: labels, datasets: datasets },
                 options: {
-                    indexAxis: 'y', // FORÇA BARRA HORIZONTAL
+                    indexAxis: 'x', // FORÇA BARRA VERTICAL
                     responsive: true,
                     maintainAspectRatio: false,
                     animation: false,
-                    layout: { padding: { top: 10, bottom: 10, left: 10, right: 30 } },
+                    layout: { padding: { top: 20, bottom: 0, left: 0, right: 0 } },
                     plugins: {
                         legend: {
                             position: 'bottom',
@@ -1386,9 +1380,9 @@
                         },
                         datalabels: {
                             anchor: 'end',
-                            align: 'right',
+                            align: 'top',
                             color: '#333333',
-                            font: { weight: 'bold', size: 11 },
+                            font: { weight: 'bold', size: 10 },
                             formatter: (value) => {
                                 const num = parseFloat(value);
                                 return (!isNaN(num) && num > 0) ? num : '';
@@ -1396,8 +1390,8 @@
                         }
                     },
                     scales: {
-                        x: { stacked: stacked, ticks: { font: { size: 10 } } },
-                        y: { stacked: stacked, ticks: { font: { size: 11, weight: 'bold' } } }
+                        x: { stacked: stacked, ticks: { font: { size: 10 }, maxRotation: 45, minRotation: 0 } },
+                        y: { stacked: stacked, ticks: { font: { size: 10 } } }
                     }
                 },
                 plugins: [ChartDataLabels]
@@ -1455,20 +1449,19 @@
             let modStats = {
                 'Remo': { desafioMas: 0, desafioFem: 0, presencaMas: 0, presencaFem: 0 },
                 'Ciclismo': { desafioMas: 0, desafioFem: 0, presencaMas: 0, presencaFem: 0 },
-                'Fortnite': { desafioMas: 0, desafioFem: 0, presencaMas: 0, presencaFem: 0 },
-                'Presença / Ativação': { desafioMas: 0, desafioFem: 0, presencaMas: 0, presencaFem: 0 }
+                'Fortnite': { desafioMas: 0, desafioFem: 0, presencaMas: 0, presencaFem: 0 }
             };
 
             records.forEach(r => {
                 const bloco = r.bloco || 'Bloco 1';
-                const mod = r.modalidade || 'Presença / Ativação';
+                const mod = r.modalidade || 'Remo';
                 const perf = r.subcategoria || 'Público Geral';
                 
                 let rawNaipe = (r.naipe || 'MAS').toString().toUpperCase();
                 let naipe = (rawNaipe.includes('FEM') || rawNaipe === 'F') ? 'FEM' : 'MAS';
 
                 const inChallengeWindow = isRecordInChallengeWindow(r);
-                const isDesafio = inChallengeWindow && mod !== 'Presença / Ativação';
+                const isDesafio = inChallengeWindow && r.tempo !== 'PRESENÇA' && r.modalidade !== 'Presença / Ativação';
 
                 if (isDesafio) {
                     totalDesafio++;
@@ -1538,10 +1531,10 @@
                     dateMap[d].presenca++;
                 }
 
-                if (mod === 'Remo') dateMap[d].Remo++;
-                if (mod === 'Ciclismo') dateMap[d].Ciclismo++;
-                if (mod === 'Fortnite') dateMap[d].Fortnite++;
-                if (mod === 'Presença / Ativação') dateMap[d].PresencaAtivacao++;
+                if (mod === 'Remo') { if(isDesafio) dateMap[d].Remo++; else dateMap[d].PresencaAtivacao++; }
+                if (mod === 'Ciclismo') { if(isDesafio) dateMap[d].Ciclismo++; else dateMap[d].PresencaAtivacao++; }
+                if (mod === 'Fortnite') { if(isDesafio) dateMap[d].Fortnite++; else dateMap[d].PresencaAtivacao++; }
+                if (r.modalidade === 'Presença / Ativação') dateMap[d].PresencaAtivacao++;
             });
 
             let unicosMas = 0, unicosFem = 0;
@@ -1573,26 +1566,26 @@
             });
 
             const blocks = ['Bloco 1', 'Bloco 2', 'Bloco 3'];
-            const mods = ['Remo', 'Ciclismo', 'Fortnite', 'Presença / Ativação'];
+            const mods = ['Remo', 'Ciclismo', 'Fortnite'];
 
-            // 1. Gráfico de Modalidades (TODOS EM BARRAS HORIZONTAIS LADO A LADO)
-            drawHorizontalBarChart('chartMods', mods, [
+            // 1. Gráfico de Modalidades (BARRAS VERTICAIS LADO A LADO)
+            drawVerticalBarChart('chartMods', mods, [
                 { label: 'Desafio (MAS)', data: mods.map(m => modStats[m].desafioMas), backgroundColor: '#004A80' },
                 { label: 'Desafio (FEM)', data: mods.map(m => modStats[m].desafioFem), backgroundColor: '#0099FF' },
                 { label: 'Presença (MAS)', data: mods.map(m => modStats[m].presencaMas), backgroundColor: '#00A859' },
                 { label: 'Presença (FEM)', data: mods.map(m => modStats[m].presencaFem), backgroundColor: '#FFB81C' }
             ], false);
 
-            // 2. Gráfico de Blocos (TODOS EM BARRAS HORIZONTAIS LADO A LADO)
-            drawHorizontalBarChart('chartBlocos', blocks, [
+            // 2. Gráfico de Blocos (BARRAS VERTICAIS LADO A LADO)
+            drawVerticalBarChart('chartBlocos', blocks, [
                 { label: 'Desafio (MAS)', data: blocks.map(b => blockStats[b].desafioMas), backgroundColor: '#004A80' },
                 { label: 'Desafio (FEM)', data: blocks.map(b => blockStats[b].desafioFem), backgroundColor: '#0099FF' },
                 { label: 'Presença (MAS)', data: blocks.map(b => blockStats[b].presencaMas), backgroundColor: '#00A859' },
                 { label: 'Presença (FEM)', data: blocks.map(b => blockStats[b].presencaFem), backgroundColor: '#FFB81C' }
             ], false);
 
-            // 3. Perfil por Naipe (Barras Horizontais)
-            drawHorizontalBarChart('chartPerfisNaipe', perfisList, [
+            // 3. Perfil por Naipe (BARRAS VERTICAIS)
+            drawVerticalBarChart('chartPerfisNaipe', perfisList, [
                 { label: 'Masculino', data: perfisList.map(p => perfilStats[p].MAS), backgroundColor: '#004A80' },
                 { label: 'Feminino', data: perfisList.map(p => perfilStats[p].FEM), backgroundColor: '#00A859' }
             ], false);
@@ -1601,14 +1594,14 @@
             const hoursDataMas = hoursLabels.map((_, i) => hourlyMap[i + 8].MAS);
             const hoursDataFem = hoursLabels.map((_, i) => hourlyMap[i + 8].FEM);
 
-            // 4. Evolução Horária (Barras Horizontais)
-            drawHorizontalBarChart('chartEvolucaoHoraria', hoursLabels, [
+            // 4. Evolução Horária (BARRAS VERTICAIS)
+            drawVerticalBarChart('chartEvolucaoHoraria', hoursLabels, [
                 { label: 'Acessos Masc.', data: hoursDataMas, backgroundColor: '#004A80' },
                 { label: 'Acessos Fem.', data: hoursDataFem, backgroundColor: '#00A859' }
             ], false);
 
-            // 5. Evolução Diária (Barras Horizontais)
-            drawHorizontalBarChart('chartEvolucaoDiaria', sortedDates, [
+            // 5. Evolução Diária (BARRAS VERTICAIS)
+            drawVerticalBarChart('chartEvolucaoDiaria', sortedDates, [
                 { label: 'Remo', data: sortedDates.map(d => dateMap[d].Remo), backgroundColor: '#0066CC' },
                 { label: 'Ciclismo', data: sortedDates.map(d => dateMap[d].Ciclismo), backgroundColor: '#00A859' },
                 { label: 'Fortnite', data: sortedDates.map(d => dateMap[d].Fortnite), backgroundColor: '#7e3ff2' },
@@ -1657,7 +1650,8 @@
         }
 
         function getUniqueTopRecords(recs, sortByPoints) {
-            let sorted = [...recs].sort((a, b) => {
+            let filteredValid = recs.filter(r => r.tempo !== 'PRESENÇA' && r.modalidade !== 'Presença / Ativação');
+            let sorted = [...filteredValid].sort((a, b) => {
                 if(sortByPoints) return parseInt(b.tempo) - parseInt(a.tempo); 
                 return a.tempo.localeCompare(b.tempo); 
             });
