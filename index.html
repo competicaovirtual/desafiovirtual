@@ -364,7 +364,7 @@
                                 </select>
                             </div>
 
-                            <!-- Container do Tempo/Pontos que será escondido automaticamente quando o bloco não estiver ativo -->
+                            <!-- Container do Tempo/Pontos ocultado se o bloco não estiver ativo -->
                             <div id="container-tempo-pontos">
                                 <label id="label-tempo-pontos" class="block text-xs font-bold uppercase text-slate-600 mb-2">Tempo (HH:MM:SS)</label>
                                 <input type="text" id="admin-tempo" placeholder="00:00:00" oninput="formatInputData(this)" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-3 text-slate-900 font-mono text-lg focus:outline-none focus:border-cob-blue">
@@ -415,7 +415,7 @@
                     </div>
                 </div>
 
-                <!-- SUB-ABA 3: DASHBOARD E GRÁFICOS -->
+                <!-- SUB-ABA 3: DASHBOARD E GRÁFICOS SOLICITADOS -->
                 <div id="subtab-dashboard" class="space-y-6 hidden animate-fadeIn">
                     <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                         <h3 class="text-2xl font-black text-slate-900 flex items-center"><i class="fa-solid fa-chart-bar text-cob-blue mr-3"></i> Dashboard Estatístico Consolidado</h3>
@@ -459,29 +459,40 @@
                     </div>
 
                     <h4 class="text-xl font-bold text-slate-800 mt-10 mb-4 border-b border-slate-200 pb-2 flex items-center">
-                        <i class="fa-solid fa-chart-column text-cob-blue mr-2"></i> Análises Detalhadas do Evento (Barras Verticais Lado a Lado)
+                        <i class="fa-solid fa-chart-column text-cob-blue mr-2"></i> Gráficos Analíticos Detalhados (Barras Verticais Lado a Lado)
                     </h4>
 
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-                        <!-- Gráfico 1: Acessos por Modalidade, Naipe e Bloco -->
-                        <div class="bg-white border border-slate-200 p-4 md:p-6 rounded-2xl shadow-sm flex flex-col md:col-span-2">
-                            <h4 class="text-sm md:text-base font-bold text-slate-800 text-center mb-2">Acessos por Modalidade e Naipe (Desafio vs. Presença)</h4>
-                            <div class="relative h-72 md:h-80 w-full"><canvas id="chartMods"></canvas></div>
+                        <!-- GRÁFICO 1: Por Modalidade -->
+                        <div class="bg-white border border-slate-200 p-4 md:p-6 rounded-2xl shadow-sm flex flex-col">
+                            <h4 class="text-sm md:text-base font-bold text-slate-800 text-center mb-2">1. Acessos por Modalidade</h4>
+                            <div class="relative h-72 w-full"><canvas id="chartModalidadePura"></canvas></div>
                         </div>
 
-                        <!-- Gráfico 2: Desafios vs Presença por Bloco e Naipe -->
-                        <div class="bg-white border border-slate-200 p-4 md:p-6 rounded-2xl shadow-sm flex flex-col md:col-span-2">
-                            <h4 class="text-sm md:text-base font-bold text-slate-800 text-center mb-2">Engajamento por Bloco e Naipe (Desafio vs. Presença)</h4>
-                            <div class="relative h-72 md:h-80 w-full"><canvas id="chartBlocos"></canvas></div>
+                        <!-- GRÁFICO 2: Por Naipe por Modalidade -->
+                        <div class="bg-white border border-slate-200 p-4 md:p-6 rounded-2xl shadow-sm flex flex-col">
+                            <h4 class="text-sm md:text-base font-bold text-slate-800 text-center mb-2">2. Por Naipe por Modalidade</h4>
+                            <div class="relative h-72 w-full"><canvas id="chartNaipePorModalidade"></canvas></div>
                         </div>
 
-                        <!-- Gráfico 3: Perfil por Naipe -->
+                        <!-- GRÁFICO 3: Por Modalidade por Bloco -->
+                        <div class="bg-white border border-slate-200 p-4 md:p-6 rounded-2xl shadow-sm flex flex-col">
+                            <h4 class="text-sm md:text-base font-bold text-slate-800 text-center mb-2">3. Por Modalidade por Bloco</h4>
+                            <div class="relative h-72 w-full"><canvas id="chartModalidadePorBloco"></canvas></div>
+                        </div>
+
+                        <!-- GRÁFICO 4: Por Naipe, por Modalidade, por Bloco -->
+                        <div class="bg-white border border-slate-200 p-4 md:p-6 rounded-2xl shadow-sm flex flex-col">
+                            <h4 class="text-sm md:text-base font-bold text-slate-800 text-center mb-2">4. Por Naipe, por Modalidade, por Bloco</h4>
+                            <div class="relative h-72 w-full"><canvas id="chartNaipeModBloco"></canvas></div>
+                        </div>
+
+                        <!-- Demais gráficos complementares -->
                         <div class="bg-white border border-slate-200 p-4 md:p-6 rounded-2xl shadow-sm flex flex-col md:col-span-2">
                             <h4 class="text-sm md:text-base font-bold text-slate-800 text-center mb-2">Distribuição de Participantes por Perfil (Subcategoria) e Naipe</h4>
                             <div class="relative h-72 md:h-80 w-full"><canvas id="chartPerfisNaipe"></canvas></div>
                         </div>
 
-                        <!-- Gráfico 4: Evolução Horária -->
                         <div class="bg-white border border-slate-200 p-4 md:p-6 rounded-2xl shadow-sm flex flex-col md:col-span-2">
                             <h4 class="text-sm md:text-base font-bold text-slate-800 text-center mb-2 flex items-center justify-center">
                                 <i class="fa-solid fa-clock text-cob-blue mr-2"></i>Horários Mais Acessados (Pico de Acesso Por Hora do Dia)
@@ -491,7 +502,6 @@
                             </div>
                         </div>
 
-                        <!-- Gráfico 5: Evolução Diária -->
                         <div class="bg-white border border-slate-200 p-4 md:p-6 rounded-2xl shadow-sm flex flex-col md:col-span-2">
                             <h4 class="text-sm md:text-base font-bold text-slate-800 text-center mb-2 flex items-center justify-center">
                                 <i class="fa-solid fa-chart-line text-cob-blue mr-2"></i>Evolução Diária de Participações (Por Dia do Mês)
@@ -1356,7 +1366,6 @@
 
         let dashboardCharts = {};
 
-        // Função universal para gráficos de BARRAS VERTICAIS lado a lado (indexAxis: 'x')
         function drawVerticalBarChart(elementId, labels, datasets, stacked = false) {
             const canvasEl = document.getElementById(elementId);
             if (!canvasEl) return;
@@ -1368,7 +1377,7 @@
                 type: 'bar',
                 data: { labels: labels, datasets: datasets },
                 options: {
-                    indexAxis: 'x', // FORÇA BARRA VERTICAL
+                    indexAxis: 'x',
                     responsive: true,
                     maintainAspectRatio: false,
                     animation: false,
@@ -1440,21 +1449,34 @@
                 };
             }
 
-            let blockStats = {
-                'Bloco 1': { desafioMas: 0, desafioFem: 0, presencaMas: 0, presencaFem: 0 },
-                'Bloco 2': { desafioMas: 0, desafioFem: 0, presencaMas: 0, presencaFem: 0 },
-                'Bloco 3': { desafioMas: 0, desafioFem: 0, presencaMas: 0, presencaFem: 0 }
+            // Contadores para os novos gráficos solicitados
+            // 1. Por Modalidade
+            let modPuraCount = { 'Remo': 0, 'Ciclismo': 0, 'Fortnite': 0 };
+
+            // 2. Por Naipe por Modalidade
+            let naipePorMod = {
+                'Remo': { MAS: 0, FEM: 0 },
+                'Ciclismo': { MAS: 0, FEM: 0 },
+                'Fortnite': { MAS: 0, FEM: 0 }
             };
 
-            let modStats = {
-                'Remo': { desafioMas: 0, desafioFem: 0, presencaMas: 0, presencaFem: 0 },
-                'Ciclismo': { desafioMas: 0, desafioFem: 0, presencaMas: 0, presencaFem: 0 },
-                'Fortnite': { desafioMas: 0, desafioFem: 0, presencaMas: 0, presencaFem: 0 }
+            // 3. Por Modalidade por Bloco
+            let modPorBloco = {
+                'Bloco 1': { 'Remo': 0, 'Ciclismo': 0, 'Fortnite': 0 },
+                'Bloco 2': { 'Remo': 0, 'Ciclismo': 0, 'Fortnite': 0 },
+                'Bloco 3': { 'Remo': 0, 'Ciclismo': 0, 'Fortnite': 0 }
+            };
+
+            // 4. Por Naipe, por Modalidade, por Bloco
+            let naipeModBloco = {
+                'Bloco 1': { 'Remo': { MAS: 0, FEM: 0 }, 'Ciclismo': { MAS: 0, FEM: 0 }, 'Fortnite': { MAS: 0, FEM: 0 } },
+                'Bloco 2': { 'Remo': { MAS: 0, FEM: 0 }, 'Ciclismo': { MAS: 0, FEM: 0 }, 'Fortnite': { MAS: 0, FEM: 0 } },
+                'Bloco 3': { 'Remo': { MAS: 0, FEM: 0 }, 'Ciclismo': { MAS: 0, FEM: 0 }, 'Fortnite': { MAS: 0, FEM: 0 } }
             };
 
             records.forEach(r => {
-                const bloco = r.bloco || 'Bloco 1';
-                const mod = r.modalidade || 'Remo';
+                const bloco = r.bloco && modPorBloco[r.bloco] ? r.bloco : 'Bloco 1';
+                const mod = r.modalidade && modPuraCount[r.modalidade] !== undefined ? r.modalidade : 'Remo';
                 const perf = r.subcategoria || 'Público Geral';
                 
                 let rawNaipe = (r.naipe || 'MAS').toString().toUpperCase();
@@ -1471,6 +1493,14 @@
                     if (naipe === 'MAS') totalPresencaMas++; else totalPresencaFem++;
                 }
 
+                // Alimentando dados dos 4 gráficos específicos
+                modPuraCount[mod]++;
+                naipePorMod[mod][naipe]++;
+                modPorBloco[bloco][mod]++;
+                if (naipeModBloco[bloco] && naipeModBloco[bloco][mod]) {
+                    naipeModBloco[bloco][mod][naipe]++;
+                }
+
                 if (perfilStats[perf]) {
                     perfilStats[perf][naipe]++;
                 } else {
@@ -1481,24 +1511,6 @@
                 if (uniqueKey) {
                     uniqueParticipants.add(uniqueKey);
                     if (!uniqueMap.has(uniqueKey)) uniqueMap.set(uniqueKey, naipe);
-                }
-
-                // Estatísticas de Blocos
-                if (blockStats[bloco]) {
-                    if (isDesafio) {
-                        if (naipe === 'MAS') blockStats[bloco].desafioMas++; else blockStats[bloco].desafioFem++;
-                    } else {
-                        if (naipe === 'MAS') blockStats[bloco].presencaMas++; else blockStats[bloco].presencaFem++;
-                    }
-                }
-                
-                // Estatísticas de Modalidades
-                if (modStats[mod]) {
-                    if (isDesafio) {
-                        if (naipe === 'MAS') modStats[mod].desafioMas++; else modStats[mod].desafioFem++;
-                    } else {
-                        if (naipe === 'MAS') modStats[mod].presencaMas++; else modStats[mod].presencaFem++;
-                    }
                 }
 
                 let recDate = r.created_at ? new Date(r.created_at) : new Date();
@@ -1565,42 +1577,49 @@
                 return new Date(y1, m1-1, d1) - new Date(y2, m2-1, d2);
             });
 
-            const blocks = ['Bloco 1', 'Bloco 2', 'Bloco 3'];
             const mods = ['Remo', 'Ciclismo', 'Fortnite'];
+            const blocks = ['Bloco 1', 'Bloco 2', 'Bloco 3'];
 
-            // 1. Gráfico de Modalidades (BARRAS VERTICAIS LADO A LADO)
-            drawVerticalBarChart('chartMods', mods, [
-                { label: 'Desafio (MAS)', data: mods.map(m => modStats[m].desafioMas), backgroundColor: '#004A80' },
-                { label: 'Desafio (FEM)', data: mods.map(m => modStats[m].desafioFem), backgroundColor: '#0099FF' },
-                { label: 'Presença (MAS)', data: mods.map(m => modStats[m].presencaMas), backgroundColor: '#00A859' },
-                { label: 'Presença (FEM)', data: mods.map(m => modStats[m].presencaFem), backgroundColor: '#FFB81C' }
+            // 1. GRÁFICO: Por Modalidade
+            drawVerticalBarChart('chartModalidadePura', mods, [
+                { label: 'Total de Acessos', data: mods.map(m => modPuraCount[m]), backgroundColor: '#004A80' }
             ], false);
 
-            // 2. Gráfico de Blocos (BARRAS VERTICAIS LADO A LADO)
-            drawVerticalBarChart('chartBlocos', blocks, [
-                { label: 'Desafio (MAS)', data: blocks.map(b => blockStats[b].desafioMas), backgroundColor: '#004A80' },
-                { label: 'Desafio (FEM)', data: blocks.map(b => blockStats[b].desafioFem), backgroundColor: '#0099FF' },
-                { label: 'Presença (MAS)', data: blocks.map(b => blockStats[b].presencaMas), backgroundColor: '#00A859' },
-                { label: 'Presença (FEM)', data: blocks.map(b => blockStats[b].presencaFem), backgroundColor: '#FFB81C' }
+            // 2. GRÁFICO: Por Naipe por Modalidade (Barras verticais lado a lado)
+            drawVerticalBarChart('chartNaipePorModalidade', mods, [
+                { label: 'Masculino (MAS)', data: mods.map(m => naipePorMod[m].MAS), backgroundColor: '#004A80' },
+                { label: 'Feminino (FEM)', data: mods.map(m => naipePorMod[m].FEM), backgroundColor: '#00A859' }
             ], false);
 
-            // 3. Perfil por Naipe (BARRAS VERTICAIS)
+            // 3. GRÁFICO: Por Modalidade por Bloco (Barras verticais lado a lado)
+            drawVerticalBarChart('chartModalidadePorBloco', blocks, [
+                { label: 'Remo', data: blocks.map(b => modPorBloco[b].Remo), backgroundColor: '#0066CC' },
+                { label: 'Ciclismo', data: blocks.map(b => modPorBloco[b].Ciclismo), backgroundColor: '#00A859' },
+                { label: 'Fortnite', data: blocks.map(b => modPorBloco[b].Fortnite), backgroundColor: '#7e3ff2' }
+            ], false);
+
+            // 4. GRÁFICO: Por Naipe, por Modalidade, por Bloco (Cruzamento completo)
+            drawVerticalBarChart('chartNaipeModBloco', blocks, [
+                { label: 'Remo (MAS)', data: blocks.map(b => naipeModBloco[b].Remo.MAS), backgroundColor: '#002B49' },
+                { label: 'Remo (FEM)', data: blocks.map(b => naipeModBloco[b].Remo.FEM), backgroundColor: '#0099FF' },
+                { label: 'Ciclismo (MAS)', data: blocks.map(b => naipeModBloco[b].Ciclismo.MAS), backgroundColor: '#006622' },
+                { label: 'Ciclismo (FEM)', data: blocks.map(b => naipeModBloco[b].Ciclismo.FEM), backgroundColor: '#00A859' },
+                { label: 'Fortnite (MAS)', data: blocks.map(b => naipeModBloco[b].Fortnite.MAS), backgroundColor: '#4a159f' },
+                { label: 'Fortnite (FEM)', data: blocks.map(b => naipeModBloco[b].Fortnite.FEM), backgroundColor: '#b673ff' }
+            ], false);
+
+            // Demais gráficos auxiliares
             drawVerticalBarChart('chartPerfisNaipe', perfisList, [
                 { label: 'Masculino', data: perfisList.map(p => perfilStats[p].MAS), backgroundColor: '#004A80' },
                 { label: 'Feminino', data: perfisList.map(p => perfilStats[p].FEM), backgroundColor: '#00A859' }
             ], false);
 
             const hoursLabels = Array.from({length: 15}, (_, i) => `${String(i + 8).padStart(2, '0')}:00h`);
-            const hoursDataMas = hoursLabels.map((_, i) => hourlyMap[i + 8].MAS);
-            const hoursDataFem = hoursLabels.map((_, i) => hourlyMap[i + 8].FEM);
-
-            // 4. Evolução Horária (BARRAS VERTICAIS)
             drawVerticalBarChart('chartEvolucaoHoraria', hoursLabels, [
-                { label: 'Acessos Masc.', data: hoursDataMas, backgroundColor: '#004A80' },
-                { label: 'Acessos Fem.', data: hoursDataFem, backgroundColor: '#00A859' }
+                { label: 'Acessos Masc.', data: hoursLabels.map((_, i) => hourlyMap[i + 8].MAS), backgroundColor: '#004A80' },
+                { label: 'Acessos Fem.', data: hoursLabels.map((_, i) => hourlyMap[i + 8].FEM), backgroundColor: '#00A859' }
             ], false);
 
-            // 5. Evolução Diária (BARRAS VERTICAIS)
             drawVerticalBarChart('chartEvolucaoDiaria', sortedDates, [
                 { label: 'Remo', data: sortedDates.map(d => dateMap[d].Remo), backgroundColor: '#0066CC' },
                 { label: 'Ciclismo', data: sortedDates.map(d => dateMap[d].Ciclismo), backgroundColor: '#00A859' },
@@ -1631,7 +1650,7 @@
             });
 
             let currentY = doc.lastAutoTable.finalY + 10;
-            const chartIds = ['chartMods', 'chartBlocos', 'chartPerfisNaipe', 'chartEvolucaoHoraria', 'chartEvolucaoDiaria'];
+            const chartIds = ['chartModalidadePura', 'chartNaipePorModalidade', 'chartModalidadePorBloco', 'chartNaipeModBloco', 'chartPerfisNaipe', 'chartEvolucaoHoraria', 'chartEvolucaoDiaria'];
             
             chartIds.forEach((id) => {
                 const canvas = document.getElementById(id);
