@@ -431,7 +431,7 @@
                         <!-- Volume Bruto Total -->
                         <div class="bg-white border border-slate-200 p-5 rounded-2xl shadow-sm text-center flex flex-col justify-center relative overflow-hidden">
                             <div class="absolute -right-4 -top-4 w-16 h-16 bg-cob-blue/10 rounded-full"></div>
-                            <p class="text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1 z-10">Vol. Bruto de Ativações MKT</p>
+                            <p class="text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1 z-10">Total de Ativações / Interações</p>
                             <h2 class="text-3xl font-black text-cob-blue z-10" id="kpi-total-interacoes">0</h2>
                             <p class="text-[10px] text-slate-500 mt-2 font-semibold z-10" id="kpi-interacoes-naipe">MAS: 0 | FEM: 0</p>
                         </div>
@@ -455,9 +455,9 @@
                         </div>
                         <div class="bg-white border border-slate-200 p-5 rounded-2xl shadow-sm text-center flex flex-col justify-center relative overflow-hidden">
                             <div class="absolute -right-4 -top-4 w-16 h-16 bg-purple-500/10 rounded-full"></div>
-                            <p class="text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1 z-10">Engajamento Multi-Modal</p>
+                            <p class="text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1 z-10">Multi-Modalidades / Repetições</p>
                             <h2 class="text-3xl font-black text-purple-600 z-10" id="kpi-multimodal">0</h2>
-                            <p class="text-[10px] text-purple-600 mt-2 font-semibold z-10">Fizeram >1 modalidade</p>
+                            <p class="text-[10px] text-purple-600 mt-2 font-semibold z-10">Participações Extras</p>
                         </div>
                     </div>
 
@@ -466,21 +466,25 @@
                     </h4>
 
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-                        <div class="bg-white border border-slate-200 p-4 md:p-6 rounded-2xl shadow-sm flex flex-col">
-                            <h4 class="text-sm md:text-base font-bold text-slate-800 text-center mb-2">Desafios vs Presença (Por Bloco)</h4>
-                            <div class="relative h-64 md:h-72 w-full"><canvas id="chartBlocos"></canvas></div>
+                        <!-- Grafico de Blocos Detalhado -->
+                        <div class="bg-white border border-slate-200 p-4 md:p-6 rounded-2xl shadow-sm flex flex-col md:col-span-2">
+                            <h4 class="text-sm md:text-base font-bold text-slate-800 text-center mb-2">Engajamento por Bloco: Desafios vs. Presença (Por Sexo)</h4>
+                            <div class="relative h-72 md:h-80 w-full"><canvas id="chartBlocos"></canvas></div>
                         </div>
 
-                        <div class="bg-white border border-slate-200 p-4 md:p-6 rounded-2xl shadow-sm flex flex-col">
-                            <h4 class="text-sm md:text-base font-bold text-slate-800 text-center mb-2">Volume Bruto de Ativações por Modalidade</h4>
-                            <div class="relative h-64 md:h-72 w-full"><canvas id="chartMods"></canvas></div>
+                        <!-- Grafico de Modalidades Detalhado -->
+                        <div class="bg-white border border-slate-200 p-4 md:p-6 rounded-2xl shadow-sm flex flex-col md:col-span-2">
+                            <h4 class="text-sm md:text-base font-bold text-slate-800 text-center mb-2">Volume Bruto por Modalidade: Desafios vs. Presença (Por Sexo)</h4>
+                            <div class="relative h-72 md:h-80 w-full"><canvas id="chartMods"></canvas></div>
                         </div>
 
+                        <!-- Perfil por Naipe -->
                         <div class="bg-white border border-slate-200 p-4 md:p-6 rounded-2xl shadow-sm flex flex-col md:col-span-2">
                             <h4 class="text-sm md:text-base font-bold text-slate-800 text-center mb-2">Distribuição de Participantes por Perfil (Subcategoria) e Naipe</h4>
                             <div class="relative h-72 md:h-80 w-full"><canvas id="chartPerfisNaipe"></canvas></div>
                         </div>
 
+                        <!-- Evolução Horária -->
                         <div class="bg-white border border-slate-200 p-4 md:p-6 rounded-2xl shadow-sm flex flex-col md:col-span-2">
                             <h4 class="text-sm md:text-base font-bold text-slate-800 text-center mb-2 flex items-center justify-center">
                                 <i class="fa-solid fa-clock text-cob-blue mr-2"></i>Horários Mais Acessados (Pico de Acesso Por Hora do Dia)
@@ -490,6 +494,7 @@
                             </div>
                         </div>
 
+                        <!-- Evolução Diária -->
                         <div class="bg-white border border-slate-200 p-4 md:p-6 rounded-2xl shadow-sm flex flex-col md:col-span-2">
                             <h4 class="text-sm md:text-base font-bold text-slate-800 text-center mb-2 flex items-center justify-center">
                                 <i class="fa-solid fa-chart-line text-cob-blue mr-2"></i>Evolução Diária de Participações (Por Dia do Mês)
@@ -610,7 +615,6 @@
                     </select>
                 </div>
 
-                <!-- Modalidade sempre visível na edição também -->
                 <div>
                     <label class="block text-xs font-bold uppercase text-slate-600 mb-2">Modalidade</label>
                     <select id="modal-modalidade" required onchange="handleModalModalidadeChange()" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-3 text-slate-900 focus:outline-none focus:border-cob-blue">
@@ -788,7 +792,6 @@
                 const activeBlockInfo = getCurrentOrLastActiveBlock();
                 blocoSelect.value = activeBlockInfo.name;
                 
-                // Se nenhum bloco estiver ativo, foca na presença ocultando o campo tempo
                 if (!activeBlockInfo.active) {
                     modSelect.value = 'Presença / Ativação';
                 }
@@ -1008,7 +1011,6 @@
             }
         }
 
-        // Modificado estrategicamente: Esconde container de tempo, mas mantém modalidade
         function handleModalidadeChange() {
             const mod = document.getElementById('admin-modalidade').value;
             const tempoContainer = document.getElementById('container-tempo-pontos');
@@ -1370,7 +1372,7 @@
             
             const totalRecords = records.length;
             const uniqueParticipants = new Set();
-            const participantModalitiesMap = new Map();
+            const uniqueMap = new Map();
 
             let totalDesafio = 0, totalDesafioMas = 0, totalDesafioFem = 0;
             let totalPresenca = 0, totalPresencaMas = 0, totalPresencaFem = 0;
@@ -1408,25 +1410,17 @@
             }
 
             let blockStats = {
-                'Bloco 1': { total: 0, MAS: 0, FEM: 0 },
-                'Bloco 2': { total: 0, MAS: 0, FEM: 0 },
-                'Bloco 3': { total: 0, MAS: 0, FEM: 0 }
-            };
-            
-            let blockPresencaStats = {
-                'Bloco 1': { total: 0 },
-                'Bloco 2': { total: 0 },
-                'Bloco 3': { total: 0 }
+                'Bloco 1': { total: 0, desafioMas: 0, desafioFem: 0, presencaMas: 0, presencaFem: 0 },
+                'Bloco 2': { total: 0, desafioMas: 0, desafioFem: 0, presencaMas: 0, presencaFem: 0 },
+                'Bloco 3': { total: 0, desafioMas: 0, desafioFem: 0, presencaMas: 0, presencaFem: 0 }
             };
 
             let modStats = {
-                'Remo': { total: 0, MAS: 0, FEM: 0 },
-                'Ciclismo': { total: 0, MAS: 0, FEM: 0 },
-                'Fortnite': { total: 0, MAS: 0, FEM: 0 },
-                'Presença / Ativação': { total: 0, MAS: 0, FEM: 0 }
+                'Remo': { total: 0, desafioMas: 0, desafioFem: 0, presencaMas: 0, presencaFem: 0 },
+                'Ciclismo': { total: 0, desafioMas: 0, desafioFem: 0, presencaMas: 0, presencaFem: 0 },
+                'Fortnite': { total: 0, desafioMas: 0, desafioFem: 0, presencaMas: 0, presencaFem: 0 },
+                'Presença / Ativação': { total: 0, desafioMas: 0, desafioFem: 0, presencaMas: 0, presencaFem: 0 }
             };
-
-            let uniqueMap = new Map();
 
             records.forEach(r => {
                 const bloco = r.bloco || 'Bloco 1';
@@ -1437,7 +1431,9 @@
                 let naipe = (rawNaipe.includes('FEM') || rawNaipe === 'F') ? 'FEM' : 'MAS';
 
                 const inChallengeWindow = isRecordInChallengeWindow(r);
-                if (inChallengeWindow && mod !== 'Presença / Ativação') {
+                const isDesafio = inChallengeWindow && mod !== 'Presença / Ativação';
+
+                if (isDesafio) {
                     totalDesafio++;
                     if (naipe === 'MAS') totalDesafioMas++; else totalDesafioFem++;
                 } else {
@@ -1455,25 +1451,26 @@
                 if (uniqueKey) {
                     uniqueParticipants.add(uniqueKey);
                     if (!uniqueMap.has(uniqueKey)) uniqueMap.set(uniqueKey, naipe);
-
-                    if (!participantModalitiesMap.has(uniqueKey)) {
-                        participantModalitiesMap.set(uniqueKey, new Set());
-                    }
-                    if (mod !== 'Presença / Ativação') {
-                        participantModalitiesMap.get(uniqueKey).add(mod);
-                    }
                 }
 
-                if (blockStats[bloco] && inChallengeWindow && mod !== 'Presença / Ativação') {
+                // Estatísticas de Blocos
+                if (blockStats[bloco]) {
                     blockStats[bloco].total++;
-                    blockStats[bloco][naipe]++;
-                } else if (blockPresencaStats[bloco] && (!inChallengeWindow || mod === 'Presença / Ativação')) {
-                    blockPresencaStats[bloco].total++;
+                    if (isDesafio) {
+                        if (naipe === 'MAS') blockStats[bloco].desafioMas++; else blockStats[bloco].desafioFem++;
+                    } else {
+                        if (naipe === 'MAS') blockStats[bloco].presencaMas++; else blockStats[bloco].presencaFem++;
+                    }
                 }
                 
+                // Estatísticas de Modalidades
                 if (modStats[mod]) {
                     modStats[mod].total++;
-                    modStats[mod][naipe]++;
+                    if (isDesafio) {
+                        if (naipe === 'MAS') modStats[mod].desafioMas++; else modStats[mod].desafioFem++;
+                    } else {
+                        if (naipe === 'MAS') modStats[mod].presencaMas++; else modStats[mod].presencaFem++;
+                    }
                 }
 
                 let recDate = r.created_at ? new Date(r.created_at) : new Date();
@@ -1500,7 +1497,7 @@
                 dateMap[d].total++;
                 dateMap[d][naipe]++;
 
-                if (inChallengeWindow && mod !== 'Presença / Ativação') {
+                if (isDesafio) {
                     dateMap[d].desafio++;
                 } else {
                     dateMap[d].presenca++;
@@ -1512,16 +1509,14 @@
                 if (mod === 'Presença / Ativação') dateMap[d].PresencaAtivacao++;
             });
 
-            let multiModalCount = 0;
-            participantModalitiesMap.forEach((modsSet) => {
-                if (modsSet.size > 1) multiModalCount++;
-            });
-
             let unicosMas = 0, unicosFem = 0;
             uniqueMap.forEach((naipeVal) => {
                 if (naipeVal === 'MAS') unicosMas++;
                 if (naipeVal === 'FEM') unicosFem++;
             });
+
+            // A MÁGICA: Total Exato = Únicos + Participações Extras (Multimodal/Repetições)
+            const repeticoesExatas = totalRecords - uniqueParticipants.size;
 
             document.getElementById('kpi-total-interacoes').innerText = totalRecords;
             document.getElementById('kpi-interacoes-naipe').innerText = `MAS: ${totalDesafioMas + totalPresencaMas} | FEM: ${totalDesafioFem + totalPresencaFem}`;
@@ -1535,7 +1530,7 @@
             document.getElementById('kpi-unicos').innerText = uniqueParticipants.size;
             document.getElementById('kpi-unicos-naipe').innerText = `MAS: ${unicosMas} | FEM: ${unicosFem}`;
 
-            document.getElementById('kpi-multimodal').innerText = multiModalCount;
+            document.getElementById('kpi-multimodal').innerText = repeticoesExatas;
 
             const sortedDates = Object.keys(dateMap).sort((a, b) => {
                 const [d1, m1, y1] = a.split('/');
@@ -1546,18 +1541,23 @@
             const blocks = ['Bloco 1', 'Bloco 2', 'Bloco 3'];
             const mods = ['Remo', 'Ciclismo', 'Fortnite', 'Presença / Ativação'];
 
-            // Desafios vs Presença por Bloco
+            // Gráfico 1: Desafios vs Presença por Bloco (Dividido por Sexo)
             drawChart('chartBlocos', 'bar', blocks, [
-                { label: 'Desafios (Oficial)', data: blocks.map(b => blockStats[b].total), backgroundColor: '#FFB81C' },
-                { label: 'Apenas Presença (MKT)', data: blocks.map(b => blockPresencaStats[b].total), backgroundColor: '#0099FF' }
-            ], false);
+                { label: 'Desafio (MAS)', data: blocks.map(b => blockStats[b].desafioMas), backgroundColor: '#004A80' },
+                { label: 'Desafio (FEM)', data: blocks.map(b => blockStats[b].desafioFem), backgroundColor: '#0099FF' },
+                { label: 'Presença (MAS)', data: blocks.map(b => blockStats[b].presencaMas), backgroundColor: '#00A859' },
+                { label: 'Presença (FEM)', data: blocks.map(b => blockStats[b].presencaFem), backgroundColor: '#FFB81C' }
+            ], true); // Stacked = true para somar a mesma barra
 
+            // Gráfico 2: Desafios vs Presença por Modalidade (Dividido por Sexo)
             drawChart('chartMods', 'bar', mods, [
-                { label: 'Total MKT Bruto', data: mods.map(m => modStats[m].total), backgroundColor: '#0066CC' },
-                { label: 'Masc.', data: mods.map(m => modStats[m].MAS), backgroundColor: '#004A80' },
-                { label: 'Fem.', data: mods.map(m => modStats[m].FEM), backgroundColor: '#00A859' }
-            ], false);
+                { label: 'Desafio (MAS)', data: mods.map(m => modStats[m].desafioMas), backgroundColor: '#004A80' },
+                { label: 'Desafio (FEM)', data: mods.map(m => modStats[m].desafioFem), backgroundColor: '#0099FF' },
+                { label: 'Presença (MAS)', data: mods.map(m => modStats[m].presencaMas), backgroundColor: '#00A859' },
+                { label: 'Presença (FEM)', data: mods.map(m => modStats[m].presencaFem), backgroundColor: '#FFB81C' }
+            ], true);
 
+            // Gráfico 3: Perfil por Naipe
             drawChart('chartPerfisNaipe', 'bar', perfisList, [
                 { label: 'Masculino', data: perfisList.map(p => perfilStats[p].MAS), backgroundColor: '#004A80' },
                 { label: 'Feminino', data: perfisList.map(p => perfilStats[p].FEM), backgroundColor: '#00A859' }
@@ -1590,7 +1590,7 @@
                 ["Participantes Oficiais (Desafio)", document.getElementById('kpi-total-desafio').innerText],
                 ["Apenas Presença / Ativação", document.getElementById('kpi-total-presenca').innerText],
                 ["Participantes Únicos", document.getElementById('kpi-unicos').innerText],
-                ["Multi-Modalidades", document.getElementById('kpi-multimodal').innerText]
+                ["Repetições / Multi-Modalidades", document.getElementById('kpi-multimodal').innerText]
             ];
 
             doc.autoTable({
