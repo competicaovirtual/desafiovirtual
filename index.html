@@ -360,7 +360,7 @@
                                     <option value="Bloco 1">Bloco 1</option>
                                     <option value="Bloco 2">Bloco 2</option>
                                     <option value="Bloco 3">Bloco 3</option>
-                                    <option value="Ativação Extra">Ativação Extra</option>
+                                    <option value="Ativação">Ativação</option>
                                 </select>
                             </div>
 
@@ -637,7 +637,7 @@
                         <option value="Bloco 1">Bloco 1</option>
                         <option value="Bloco 2">Bloco 2</option>
                         <option value="Bloco 3">Bloco 3</option>
-                        <option value="Ativação Extra">Ativação Extra</option>
+                        <option value="Ativação">Ativação</option>
                     </select>
                 </div>
 
@@ -701,35 +701,22 @@
         
         function getCurrentOrLastActiveBlock() {
             const blocks = ['Bloco 1', 'Bloco 2', 'Bloco 3'];
-            let lastActive = 'Bloco 1';
-            const now = new Date();
-
+            
             for (let b of blocks) {
-                const status = getBlocoStatus(b);
-                if (status === 'Ativo') {
+                if (getBlocoStatus(b) === 'Ativo') {
                     return { name: b, active: true };
-                } else if (status === 'Encerrado') {
-                    lastActive = b; 
-                } else if (status === 'Aguardando') {
-                    // Verifica se o bloco começa nas próximas 24 horas para autoseleção em modo checkin
-                    const config = blockConfig[b];
-                    if (config && config.mode !== 'manual') {
-                        const start = new Date(config.start);
-                        const diffHours = (start - now) / (1000 * 60 * 60);
-                        if (diffHours > 0 && diffHours <= 24) {
-                            return { name: b, active: false }; // active false força o modo check-in
-                        }
-                    }
                 }
             }
-            return { name: lastActive, active: false };
+            
+            // Se nenhum bloco estiver ativo, retorna "Ativação" como padrão
+            return { name: 'Ativação', active: false };
         }
 
         function checkBlocoActivityForForm() {
             const selectedBloco = document.getElementById('admin-bloco').value;
-            const status = getBlocoStatus(selectedBloco);
+            const status = selectedBloco === 'Ativação' ? 'Encerrado' : getBlocoStatus(selectedBloco);
             const tempoContainer = document.getElementById('container-tempo-pontos');
-            const isBlocoActive = (status === 'Ativo' && selectedBloco !== 'Ativação Extra');
+            const isBlocoActive = (status === 'Ativo' && selectedBloco !== 'Ativação');
             
             if (!isBlocoActive) {
                 tempoContainer.classList.add('hidden');
@@ -742,9 +729,9 @@
 
         function checkBlocoActivityForModal() {
             const selectedBloco = document.getElementById('modal-bloco').value;
-            const status = getBlocoStatus(selectedBloco);
+            const status = selectedBloco === 'Ativação' ? 'Encerrado' : getBlocoStatus(selectedBloco);
             const tempoContainer = document.getElementById('container-modal-tempo-pontos');
-            const isBlocoActive = (status === 'Ativo' && selectedBloco !== 'Ativação Extra');
+            const isBlocoActive = (status === 'Ativo' && selectedBloco !== 'Ativação');
             
             if (!isBlocoActive) {
                 tempoContainer.classList.add('hidden');
@@ -756,7 +743,7 @@
         }
 
         function isRecordInChallengeWindow(r) {
-            if (r.modalidade === 'Presença / Ativação' || r.tempo === 'PRESENÇA') return false;
+            if (r.modalidade === 'Presença / Ativação' || r.tempo === 'PRESENÇA' || r.bloco === 'Ativação') return false;
             const status = getBlocoStatus(r.bloco || 'Bloco 1');
             return status === 'Ativo';
         }
@@ -1051,8 +1038,8 @@
             const label = document.getElementById('label-tempo-pontos');
             const input = document.getElementById('admin-tempo');
             
-            const blocoStatus = getBlocoStatus(bloco);
-            const isBlocoActive = (blocoStatus === 'Ativo' && bloco !== 'Ativação Extra');
+            const status = bloco === 'Ativação' ? 'Encerrado' : getBlocoStatus(bloco);
+            const isBlocoActive = (status === 'Ativo' && bloco !== 'Ativação');
 
             if (!isBlocoActive) {
                 tempoContainer.classList.add('hidden');
@@ -1077,8 +1064,8 @@
             const label = document.getElementById('modal-label-tempo-pontos');
             const input = document.getElementById('modal-tempo');
             
-            const blocoStatus = getBlocoStatus(bloco);
-            const isBlocoActive = (blocoStatus === 'Ativo' && bloco !== 'Ativação Extra');
+            const status = bloco === 'Ativação' ? 'Encerrado' : getBlocoStatus(bloco);
+            const isBlocoActive = (status === 'Ativo' && bloco !== 'Ativação');
 
             if (!isBlocoActive) {
                 tempoContainer.classList.add('hidden');
@@ -1163,8 +1150,8 @@
             let bloco = document.getElementById('admin-bloco').value;
             let tempo = document.getElementById('admin-tempo').value;
 
-            const blocoStatus = getBlocoStatus(bloco);
-            const isBlocoActive = (blocoStatus === 'Ativo' && bloco !== 'Ativação Extra');
+            const status = bloco === 'Ativação' ? 'Encerrado' : getBlocoStatus(bloco);
+            const isBlocoActive = (status === 'Ativo' && bloco !== 'Ativação');
 
             if (!isBlocoActive) {
                 tempo = 'PRESENÇA';
@@ -1244,8 +1231,8 @@
             const bloco = document.getElementById('modal-bloco').value;
             let tempo = document.getElementById('modal-tempo').value;
 
-            const blocoStatus = getBlocoStatus(bloco);
-            const isBlocoActive = (blocoStatus === 'Ativo' && bloco !== 'Ativação Extra');
+            const status = bloco === 'Ativação' ? 'Encerrado' : getBlocoStatus(bloco);
+            const isBlocoActive = (status === 'Ativo' && bloco !== 'Ativação');
 
             if (!isBlocoActive) {
                 tempo = 'PRESENÇA';
@@ -1852,9 +1839,6 @@
                 document.getElementById('tv-badge').innerText = "PARTICIPAÇÃO DA ORGANIZAÇÃO";
                 renderLeaderboard();
             } else {
-                document.getElementById('tv-subtitle').innerText = "DESAFIO VIRTUAL";
-                document.getElementById('tv-badge').innerText = "RANKING OFICIAL ATUALIZADO";
-                document.getElementById('filter-bloco').value = getCurrentOrLastActiveBlock().name;
                 startTVCycle();
             }
         }
@@ -1902,11 +1886,18 @@
         async function applyTVState() {
             if (isComiteTVMode) return;
             const state = tvStatesNormal[tvStateIndex];
-            const activeBlock = getCurrentOrLastActiveBlock().name; 
+            const activeBlockInfo = getCurrentOrLastActiveBlock();
             
             document.getElementById('filter-modalidade').value = state.mod;
             document.getElementById('filter-naipe').value = state.naipe;
-            document.getElementById('filter-bloco').value = activeBlock; 
+
+            if (activeBlockInfo.active) {
+                document.getElementById('filter-bloco').value = activeBlockInfo.name;
+                document.getElementById('tv-subtitle').innerText = "DESAFIO VIRTUAL - " + activeBlockInfo.name.toUpperCase();
+            } else {
+                document.getElementById('filter-bloco').value = "Geral";
+                document.getElementById('tv-subtitle').innerText = "DESAFIO VIRTUAL - RANKING GERAL";
+            }
             
             document.getElementById('tv-title-mod').innerText = state.modName;
             document.getElementById('tv-title-naipe').innerText = state.naipeName;
