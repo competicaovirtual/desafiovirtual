@@ -572,7 +572,7 @@
                     <label class="block text-xs font-bold uppercase text-slate-600 mb-1">Término</label>
                     <input type="datetime-local" id="edit-end-date" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-2 text-slate-900 focus:outline-none focus:border-cob-blue">
                 </div>
-                <button onclick="saveBlockDates()" class="w-full py-2.5 bg-cob-dark hover:bg-cob-blue text-white font-bold rounded-xl text-sm transition-all">Salvar Configuração</button>
+                <button onclick="saveBlockDates()" class="w-full py-2.5 bg-cob-dark hover:bg-cob-blue text-white font-bold rounded-xl text-sm transition-all">Salvar Configuração (Global)</button>
             </div>
         </div>
     </div>
@@ -681,11 +681,40 @@
         let isAdminLoggedIn = false;
         let currentAdminSubTab = 'insercao';
         
+        // Mantém como fallback temporário inicial até a conexão com Supabase terminar (milissegundos)
         let blockConfig = JSON.parse(localStorage.getItem('jj2026_block_config')) || {
             'Bloco 1': { mode: 'auto', manualStatus: 'Encerrado', start: '2026-10-19T08:00', end: '2026-10-22T23:59' },
             'Bloco 2': { mode: 'auto', manualStatus: 'Encerrado', start: '2026-10-23T08:00', end: '2026-10-28T23:59' },
             'Bloco 3': { mode: 'auto', manualStatus: 'Encerrado', start: '2026-10-29T08:00', end: '2026-11-04T23:59' }
         };
+
+        // Função de Atualização Global da Configuração na Nuvem
+        async function saveConfigToDB() {
+            localStorage.setItem('jj2026_block_config', JSON.stringify(blockConfig)); // Mantém cache local atualizado por garantia
+            
+            try {
+                // Busca se já tem a config do sistema salva
+                const { data, error } = await _supabase.from('records').select('id').eq('modalidade', 'SYSTEM_CONFIG').maybeSingle();
+                
+                const payload = { 
+                    credencial: 'CONFIG_SYS', 
+                    modalidade: 'SYSTEM_CONFIG', 
+                    atleta: JSON.stringify(blockConfig), // Salvamos os dados aqui para esconder do painel!
+                    naipe: 'MAS',
+                    subcategoria: 'Sistema',
+                    bloco: 'Sistema',
+                    tempo: 'CONFIG'
+                };
+                
+                if (data && data.id) {
+                    await _supabase.from('records').update(payload).eq('id', data.id);
+                } else {
+                    await _supabase.from('records').insert([payload]);
+                }
+            } catch(e) {
+                console.error("Erro ao salvar configuração global:", e);
+            }
+        }
 
         function getBlocoStatus(blocoName) {
             const config = blockConfig[blocoName];
@@ -834,17 +863,17 @@
             if (start && end) {
                 blockConfig[bloco].start = start;
                 blockConfig[bloco].end = end;
-                localStorage.setItem('jj2026_block_config', JSON.stringify(blockConfig));
+                saveConfigToDB(); // Chamando a nova função global em nuvem
                 closeEditModal();
                 renderAdminBlocks();
                 checkBlocoActivityForForm();
-                showModal('Sucesso', `As datas do ${bloco} foram atualizadas!`, 'success');
+                showModal('Sucesso', `As configurações do ${bloco} foram sincronizadas em todos os dispositivos!`, 'success');
             }
         }
 
         function setBlockMode(bloco, mode) {
             blockConfig[bloco].mode = mode;
-            localStorage.setItem('jj2026_block_config', JSON.stringify(blockConfig));
+            saveConfigToDB(); // Chamando a nova função global em nuvem
             renderAdminBlocks();
             checkBlocoActivityForForm();
         }
@@ -852,7 +881,7 @@
         function toggleManualStatus(bloco) {
             const current = blockConfig[bloco].manualStatus;
             blockConfig[bloco].manualStatus = current === 'Ativo' ? 'Encerrado' : 'Ativo';
-            localStorage.setItem('jj2026_block_config', JSON.stringify(blockConfig));
+            saveConfigToDB(); // Chamando a nova função global em nuvem
             renderAdminBlocks();
             checkBlocoActivityForForm();
         }
@@ -966,8 +995,21 @@
         async function fetchRecords() {
             const { data, error } = await _supabase.from('records').select('*');
             if (!error && data) {
-                records = data;
+                
+                // Extrai e separa nosso objeto secreto de configuração na nuvem
+                const configRecord = data.find(r => r.modalidade === 'SYSTEM_CONFIG');
+                if (configRecord && configRecord.atleta) {
+                    try {
+                        blockConfig = JSON.parse(configRecord.atleta);
+                        localStorage.setItem('jj2026_block_config', JSON.stringify(blockConfig)); // Mantém cache local saudável
+                    } catch(e) {}
+                }
+
+                // Carrega os registros normais limpando o objeto de configuração para não aparecer em listas
+                records = data.filter(r => r.modalidade !== 'SYSTEM_CONFIG');
+
                 if (isAdminLoggedIn) {
+                    if (currentAdminSubTab === 'insercao') renderAdminBlocks(); // Real-time nas configurações visuais também!
                     if (currentAdminSubTab === 'registros') renderAdminRecords();
                     if (currentAdminSubTab === 'dashboard') updateDashboard();
                 }
@@ -1447,24 +1489,20 @@
             }
 
             // Contadores para os novos gráficos solicitados
-            // 1. Por Modalidade
             let modPuraCount = { 'Remo': 0, 'Ciclismo': 0, 'Fortnite': 0 };
 
-            // 2. Por Naipe por Modalidade
             let naipePorMod = {
                 'Remo': { MAS: 0, FEM: 0 },
                 'Ciclismo': { MAS: 0, FEM: 0 },
                 'Fortnite': { MAS: 0, FEM: 0 }
             };
 
-            // 3. Por Modalidade por Bloco
             let modPorBloco = {
                 'Bloco 1': { 'Remo': 0, 'Ciclismo': 0, 'Fortnite': 0 },
                 'Bloco 2': { 'Remo': 0, 'Ciclismo': 0, 'Fortnite': 0 },
                 'Bloco 3': { 'Remo': 0, 'Ciclismo': 0, 'Fortnite': 0 }
             };
 
-            // 4. Por Naipe, por Modalidade, por Bloco
             let naipeModBloco = {
                 'Bloco 1': { 'Remo': { MAS: 0, FEM: 0 }, 'Ciclismo': { MAS: 0, FEM: 0 }, 'Fortnite': { MAS: 0, FEM: 0 } },
                 'Bloco 2': { 'Remo': { MAS: 0, FEM: 0 }, 'Ciclismo': { MAS: 0, FEM: 0 }, 'Fortnite': { MAS: 0, FEM: 0 } },
@@ -1490,7 +1528,6 @@
                     if (naipe === 'MAS') totalPresencaMas++; else totalPresencaFem++;
                 }
 
-                // Alimentando dados dos 4 gráficos específicos
                 modPuraCount[mod]++;
                 naipePorMod[mod][naipe]++;
                 modPorBloco[bloco][mod]++;
@@ -1577,25 +1614,21 @@
             const mods = ['Remo', 'Ciclismo', 'Fortnite'];
             const blocks = ['Bloco 1', 'Bloco 2', 'Bloco 3'];
 
-            // 1. GRÁFICO: Por Modalidade
             drawVerticalBarChart('chartModalidadePura', mods, [
                 { label: 'Total de Acessos', data: mods.map(m => modPuraCount[m]), backgroundColor: '#004A80' }
             ], false);
 
-            // 2. GRÁFICO: Por Naipe por Modalidade (Barras verticais lado a lado)
             drawVerticalBarChart('chartNaipePorModalidade', mods, [
                 { label: 'Masculino (MAS)', data: mods.map(m => naipePorMod[m].MAS), backgroundColor: '#004A80' },
                 { label: 'Feminino (FEM)', data: mods.map(m => naipePorMod[m].FEM), backgroundColor: '#00A859' }
             ], false);
 
-            // 3. GRÁFICO: Por Modalidade por Bloco (Barras verticais lado a lado)
             drawVerticalBarChart('chartModalidadePorBloco', blocks, [
                 { label: 'Remo', data: blocks.map(b => modPorBloco[b].Remo), backgroundColor: '#0066CC' },
                 { label: 'Ciclismo', data: blocks.map(b => modPorBloco[b].Ciclismo), backgroundColor: '#00A859' },
                 { label: 'Fortnite', data: blocks.map(b => modPorBloco[b].Fortnite), backgroundColor: '#7e3ff2' }
             ], false);
 
-            // 4. GRÁFICO: Por Naipe, por Modalidade, por Bloco (Cruzamento completo)
             drawVerticalBarChart('chartNaipeModBloco', blocks, [
                 { label: 'Remo (MAS)', data: blocks.map(b => naipeModBloco[b].Remo.MAS), backgroundColor: '#002B49' },
                 { label: 'Remo (FEM)', data: blocks.map(b => naipeModBloco[b].Remo.FEM), backgroundColor: '#0099FF' },
@@ -1605,7 +1638,6 @@
                 { label: 'Fortnite (FEM)', data: blocks.map(b => naipeModBloco[b].Fortnite.FEM), backgroundColor: '#b673ff' }
             ], false);
 
-            // Demais gráficos auxiliares
             drawVerticalBarChart('chartPerfisNaipe', perfisList, [
                 { label: 'Masculino', data: perfisList.map(p => perfilStats[p].MAS), backgroundColor: '#004A80' },
                 { label: 'Feminino', data: perfisList.map(p => perfilStats[p].FEM), backgroundColor: '#00A859' }
@@ -1820,7 +1852,6 @@
             const btnExit = document.getElementById('btn-exit-tv');
             const tvTitle = document.getElementById('tv-title-display');
 
-            // Proteção contra Smart TVs que não suportam requestFullscreen
             if (document.documentElement.requestFullscreen) {
                 document.documentElement.requestFullscreen().catch(e => console.log("Fullscreen API error:", e));
             } else if (document.documentElement.webkitRequestFullscreen) {
@@ -1847,7 +1878,6 @@
             }
             isComiteTVMode = false;
 
-            // Proteção contra Smart TVs no Exit
             if (document.fullscreenElement && document.exitFullscreen) {
                 document.exitFullscreen().catch(e => console.log("Exit Fullscreen API error:", e));
             } else if (document.webkitFullscreenElement && document.webkitExitFullscreen) {
@@ -1912,7 +1942,6 @@
             document.getElementById('tv-title-mod').innerText = state.modName;
             document.getElementById('tv-title-naipe').innerText = state.naipeName;
             
-            // Busca diretamente a atualização e desenha tudo instantaneamente sem depender do timer genérico
             await fetchRecords(); 
         }
 
@@ -1925,9 +1954,7 @@
                 checkBlocoActivityForForm();
             }
 
-            // Polling genérico fica restrito apenas para atualizar quando o painel de TV não está controlando a tela (Evita conflitos/flicker na TV)
             setInterval(() => {
-                if(isAdminLoggedIn && currentAdminSubTab === 'insercao') renderAdminBlocks();
                 if (!tvModeInterval) {
                     fetchRecords();
                 }
