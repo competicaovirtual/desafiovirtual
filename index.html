@@ -702,6 +702,7 @@
         function getCurrentOrLastActiveBlock() {
             const blocks = ['Bloco 1', 'Bloco 2', 'Bloco 3'];
             let lastActive = 'Bloco 1';
+            const now = new Date();
 
             for (let b of blocks) {
                 const status = getBlocoStatus(b);
@@ -709,6 +710,16 @@
                     return { name: b, active: true };
                 } else if (status === 'Encerrado') {
                     lastActive = b; 
+                } else if (status === 'Aguardando') {
+                    // Verifica se o bloco começa nas próximas 24 horas para autoseleção em modo checkin
+                    const config = blockConfig[b];
+                    if (config && config.mode !== 'manual') {
+                        const start = new Date(config.start);
+                        const diffHours = (start - now) / (1000 * 60 * 60);
+                        if (diffHours > 0 && diffHours <= 24) {
+                            return { name: b, active: false }; // active false força o modo check-in
+                        }
+                    }
                 }
             }
             return { name: lastActive, active: false };
