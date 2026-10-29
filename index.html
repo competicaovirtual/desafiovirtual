@@ -427,31 +427,31 @@
                     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
                         <div class="bg-white border border-slate-200 p-5 rounded-2xl shadow-sm text-center flex flex-col justify-center relative overflow-hidden">
                             <div class="absolute -right-4 -top-4 w-16 h-16 bg-cob-blue/10 rounded-full"></div>
-                            <p class="text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1 z-10">Total de Ativações / Interações</p>
+                            <p class="text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1 z-10">PARTICIPANTES</p>
                             <h2 class="text-3xl font-black text-cob-blue z-10" id="kpi-total-interacoes">0</h2>
                             <p class="text-[10px] text-slate-500 mt-2 font-semibold z-10" id="kpi-interacoes-naipe">MAS: 0 | FEM: 0</p>
                         </div>
                         <div class="bg-white border border-slate-200 p-5 rounded-2xl shadow-sm text-center flex flex-col justify-center relative overflow-hidden">
                             <div class="absolute -right-4 -top-4 w-16 h-16 bg-amber-500/10 rounded-full"></div>
-                            <p class="text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1 z-10">Competidores Oficiais (Desafio)</p>
+                            <p class="text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1 z-10">DESAFIO VIRTUAL</p>
                             <h2 class="text-3xl font-black text-amber-600 z-10" id="kpi-total-desafio">0</h2>
                             <p class="text-[10px] text-slate-500 mt-2 font-semibold z-10" id="kpi-desafio-naipe">MAS: 0 | FEM: 0</p>
                         </div>
                         <div class="bg-white border border-slate-200 p-5 rounded-2xl shadow-sm text-center flex flex-col justify-center relative overflow-hidden">
                             <div class="absolute -right-4 -top-4 w-16 h-16 bg-cyan-500/10 rounded-full"></div>
-                            <p class="text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1 z-10">Apenas Presença / Ativação</p>
+                            <p class="text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1 z-10">ATIVAÇÃO</p>
                             <h2 class="text-3xl font-black text-cyan-600 z-10" id="kpi-total-presenca">0</h2>
                             <p class="text-[10px] text-slate-500 mt-2 font-semibold z-10" id="kpi-presenca-naipe">MAS: 0 | FEM: 0</p>
                         </div>
                         <div class="bg-white border border-slate-200 p-5 rounded-2xl shadow-sm text-center flex flex-col justify-center relative overflow-hidden">
                             <div class="absolute -right-4 -top-4 w-16 h-16 bg-emerald-500/10 rounded-full"></div>
-                            <p class="text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1 z-10">Participantes Únicos (CPFs)</p>
+                            <p class="text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1 z-10">PARTICIPANTES ÚNICOS (CPFS)</p>
                             <h2 class="text-3xl font-black text-cob-green z-10" id="kpi-unicos">0</h2>
                             <p class="text-[10px] text-slate-500 mt-2 font-semibold z-10" id="kpi-unicos-naipe">MAS: 0 | FEM: 0</p>
                         </div>
                         <div class="bg-white border border-slate-200 p-5 rounded-2xl shadow-sm text-center flex flex-col justify-center relative overflow-hidden">
                             <div class="absolute -right-4 -top-4 w-16 h-16 bg-purple-500/10 rounded-full"></div>
-                            <p class="text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1 z-10">Multi-Modalidades / Repetições</p>
+                            <p class="text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1 z-10">REPETIÇÕES</p>
                             <h2 class="text-3xl font-black text-purple-600 z-10" id="kpi-multimodal">0</h2>
                             <p class="text-[10px] text-purple-600 mt-2 font-semibold z-10">Participações Extras</p>
                         </div>
@@ -1441,26 +1441,29 @@
 
             let dateMap = {}; 
             let hourlyRawMap = Array(24).fill(0).map(() => ({ MAS: 0, FEM: 0 }));
-            let activeDaysSet = new Set(); // Para calcular a média correta por dia nos horários de pico
+            let activeDaysSet = new Set(); 
 
             const perfisList = ['Atleta', 'Treinador', 'Arbitragem', 'Comitê Organizador', 'Público Geral'];
             let perfilStats = {};
             perfisList.forEach(p => perfilStats[p] = { MAS: 0, FEM: 0 });
 
-            const startDate = new Date(2026, 9, 19); 
-            let endDate = new Date(2026, 10, 4);    
+            // Identificar dinamicamente as datas limite com base apenas em registros válidos (reais) para evitar bugs de calendário
+            let minDate = null;
+            let maxDate = null;
 
             records.forEach(r => {
-                if (r.created_at) {
-                    const rd = new Date(r.created_at);
-                    if (rd > endDate) endDate = rd;
-                }
+                if (!r.created_at) return;
+                let rd = new Date(r.created_at);
+                if (isNaN(rd.getTime())) return;
+                rd.setHours(0,0,0,0);
+                if (!minDate || rd < minDate) minDate = new Date(rd);
+                if (!maxDate || rd > maxDate) maxDate = new Date(rd);
             });
 
-            startDate.setHours(0,0,0,0);
-            endDate.setHours(0,0,0,0);
+            if (!minDate) minDate = new Date(2026, 9, 19);
+            if (!maxDate) maxDate = new Date(2026, 10, 4);
 
-            for (let cur = new Date(startDate); cur <= endDate; cur.setDate(cur.getDate() + 1)) {
+            for (let cur = new Date(minDate); cur <= maxDate; cur.setDate(cur.getDate() + 1)) {
                 const day = String(cur.getDate()).padStart(2, '0');
                 const month = String(cur.getMonth() + 1).padStart(2, '0');
                 const year = cur.getFullYear();
@@ -1468,7 +1471,7 @@
 
                 dateMap[d] = {
                     total: 0, desafio: 0, presenca: 0, MAS: 0, FEM: 0,
-                    Remo: 0, Ciclismo: 0, Fortnite: 0, PresencaAtivacao: 0
+                    Remo: 0, Ciclismo: 0, Fortnite: 0
                 };
             }
 
@@ -1493,8 +1496,18 @@
             };
 
             records.forEach(r => {
+                if (!r.created_at) return; // Força apenas registros com data existente no BD para não vazar a hora local atual
+                let recDate = new Date(r.created_at);
+                if (isNaN(recDate.getTime())) return;
+
                 const bloco = r.bloco && modPorBloco[r.bloco] ? r.bloco : 'Bloco 1';
-                const mod = r.modalidade && modPuraCount[r.modalidade] !== undefined ? r.modalidade : 'Remo';
+                const modStr = r.modalidade || 'Outros';
+                
+                // Mapeamento tolerante de modalidade para evitar falhas em dados de legado
+                let mod = 'Remo';
+                if (modStr.includes('Ciclismo')) mod = 'Ciclismo';
+                if (modStr.includes('Fortnite')) mod = 'Fortnite';
+                
                 const perf = r.subcategoria || 'Público Geral';
                 
                 let rawNaipe = (r.naipe || 'MAS').toString().toUpperCase();
@@ -1511,11 +1524,13 @@
                     if (naipe === 'MAS') totalPresencaMas++; else totalPresencaFem++;
                 }
 
-                modPuraCount[mod]++;
-                naipePorMod[mod][naipe]++;
-                modPorBloco[bloco][mod]++;
-                if (naipeModBloco[bloco] && naipeModBloco[bloco][mod]) {
-                    naipeModBloco[bloco][mod][naipe]++;
+                if (modPuraCount[mod] !== undefined) {
+                    modPuraCount[mod]++;
+                    naipePorMod[mod][naipe]++;
+                    modPorBloco[bloco][mod]++;
+                    if (naipeModBloco[bloco] && naipeModBloco[bloco][mod]) {
+                        naipeModBloco[bloco][mod][naipe]++;
+                    }
                 }
 
                 if (perfilStats[perf]) {
@@ -1530,15 +1545,12 @@
                     if (!uniqueMap.has(uniqueKey)) uniqueMap.set(uniqueKey, naipe);
                 }
 
-                let recDate = r.created_at ? new Date(r.created_at) : new Date();
-                if (isNaN(recDate.getTime())) recDate = new Date();
-
                 const day = String(recDate.getDate()).padStart(2, '0');
                 const month = String(recDate.getMonth() + 1).padStart(2, '0');
                 const year = recDate.getFullYear();
                 const d = `${day}/${month}/${year}`;
 
-                activeDaysSet.add(d); // Registra dias ativos para cálculo da média
+                activeDaysSet.add(d); // Computa para tirar a média de horários depois
 
                 const hour = recDate.getHours();
                 if (hour >= 0 && hour < 24) {
@@ -1546,10 +1558,7 @@
                 }
 
                 if (!dateMap[d]) {
-                    dateMap[d] = {
-                        total: 0, desafio: 0, presenca: 0, MAS: 0, FEM: 0,
-                        Remo: 0, Ciclismo: 0, Fortnite: 0, PresencaAtivacao: 0
-                    };
+                    dateMap[d] = { total: 0, desafio: 0, presenca: 0, MAS: 0, FEM: 0, Remo: 0, Ciclismo: 0, Fortnite: 0 };
                 }
                 
                 dateMap[d].total++;
@@ -1561,11 +1570,10 @@
                     dateMap[d].presenca++;
                 }
 
-                // CORREÇÃO: Atribuição exata por dia da modalidade correspondente
-                if (mod === 'Remo') { dateMap[d].Remo++; }
-                else if (mod === 'Ciclismo') { dateMap[d].Ciclismo++; }
-                else if (mod === 'Fortnite') { dateMap[d].Fortnite++; }
-                else { dateMap[d].PresencaAtivacao++; }
+                // Conta exata diária por modalidade, independente de ser 'desafio' ou 'presença'
+                if (mod === 'Remo') dateMap[d].Remo++;
+                if (mod === 'Ciclismo') dateMap[d].Ciclismo++;
+                if (mod === 'Fortnite') dateMap[d].Fortnite++;
             });
 
             let unicosMas = 0, unicosFem = 0;
@@ -1629,19 +1637,16 @@
                 { label: 'Feminino', data: perfisList.map(p => perfilStats[p].FEM), backgroundColor: '#00A859' }
             ], false);
 
-            // CORREÇÃO: Horários de pico mostrando a média por dia (total na hora / total de dias ativos)
             const hoursLabels = Array.from({length: 15}, (_, i) => `${String(i + 8).padStart(2, '0')}:00h`);
             drawVerticalBarChart('chartEvolucaoHoraria', hoursLabels, [
                 { label: 'Média Masc. / Dia', data: hoursLabels.map((_, i) => Number((hourlyRawMap[i + 8].MAS / totalDaysCount).toFixed(1))), backgroundColor: '#004A80' },
                 { label: 'Média Fem. / Dia', data: hoursLabels.map((_, i) => Number((hourlyRawMap[i + 8].FEM / totalDaysCount).toFixed(1))), backgroundColor: '#00A859' }
             ], false);
 
-            // CORREÇÃO: Evolução Diária exata por modalidade a cada dia do mês
             drawVerticalBarChart('chartEvolucaoDiaria', sortedDates, [
                 { label: 'Remo', data: sortedDates.map(d => dateMap[d].Remo), backgroundColor: '#0066CC' },
                 { label: 'Ciclismo', data: sortedDates.map(d => dateMap[d].Ciclismo), backgroundColor: '#00A859' },
-                { label: 'Fortnite', data: sortedDates.map(d => dateMap[d].Fortnite), backgroundColor: '#7e3ff2' },
-                { label: 'Presença / Outros', data: sortedDates.map(d => dateMap[d].PresencaAtivacao), backgroundColor: '#0099FF' }
+                { label: 'Fortnite', data: sortedDates.map(d => dateMap[d].Fortnite), backgroundColor: '#7e3ff2' }
             ], false);
         }
 
@@ -1651,11 +1656,11 @@
             doc.text("Relatório Estatístico de Presença e Desafios | Jogos da Juventude 2026", 14, 15);
 
             let bodyData = [
-                ["Volume Bruto de Ativações (MKT)", document.getElementById('kpi-total-interacoes').innerText],
-                ["Participantes Oficiais (Desafio)", document.getElementById('kpi-total-desafio').innerText],
-                ["Apenas Presença / Ativação", document.getElementById('kpi-total-presenca').innerText],
-                ["Participantes Únicos", document.getElementById('kpi-unicos').innerText],
-                ["Repetições / Multi-Modalidades", document.getElementById('kpi-multimodal').innerText]
+                ["PARTICIPANTES", document.getElementById('kpi-total-interacoes').innerText],
+                ["DESAFIO VIRTUAL", document.getElementById('kpi-total-desafio').innerText],
+                ["ATIVAÇÃO", document.getElementById('kpi-total-presenca').innerText],
+                ["PARTICIPANTES ÚNICOS (CPFS)", document.getElementById('kpi-unicos').innerText],
+                ["REPETIÇÕES", document.getElementById('kpi-multimodal').innerText]
             ];
 
             doc.autoTable({
