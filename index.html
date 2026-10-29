@@ -192,7 +192,7 @@
             <div id="ranking-header" class="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white border border-slate-200 p-6 rounded-2xl shadow-md">
                 <div>
                     <h2 class="text-2xl font-black text-slate-900">Ranking Oficial</h2>
-                    <p class="text-sm text-slate-500">Consulte os tempos e pontos homologados pela equipe técnica.</p>
+                    <p class="text-sm text-slate-500">Consulte os melhores tempos e pontos de cada participante (último registrado).</p>
                 </div>
                 
                 <div class="flex flex-wrap items-center gap-3">
@@ -455,19 +455,6 @@
                             <p class="text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1 z-10">REPETIÇÕES</p>
                             <h2 class="text-3xl font-black text-purple-600 z-10" id="kpi-multimodal">0</h2>
                             <p class="text-[10px] text-purple-600 mt-2 font-semibold z-10">Participações Extras</p>
-                        </div>
-                    </div>
-
-                    <!-- CARD INFORMATIVO ESPECÍFICO DE LEITURAS (HOJE VS ATÉ 28/10) -->
-                    <div class="bg-gradient-to-r from-cob-dark to-cob-blue p-6 rounded-2xl shadow-md text-white flex flex-col md:flex-row justify-around items-center gap-4 text-center">
-                        <div>
-                            <p class="text-xs uppercase font-bold text-cyan-300 mb-1"><i class="fa-solid fa-calendar-day mr-1.5"></i> Lidas Hoje (29/10)</p>
-                            <h3 class="text-3xl font-black" id="info-lidas-hoje">0</h3>
-                        </div>
-                        <div class="hidden md:block w-px h-12 bg-white/20"></div>
-                        <div>
-                            <p class="text-xs uppercase font-bold text-amber-300 mb-1"><i class="fa-solid fa-clock-rotate-left mr-1.5"></i> Lidas até 28/10/26</p>
-                            <h3 class="text-3xl font-black" id="info-lidas-ate-28">0</h3>
                         </div>
                     </div>
 
@@ -752,21 +739,14 @@
             }
         }
 
-        // REGRA EXATA SOLICITADA:
-        // - Se a leitura ocorreu até 28/10/26: vai para DESAFIO VIRTUAL (independente de bloco ativo/inativo).
-        // - A partir de 29/10/26: se o bloco estiver ATIVO, conta como DESAFIO VIRTUAL. Se o bloco estiver inativo (ou Ativação), conta como ATIVAÇÃO.
+        // REGRA ATUALIZADA:
+        // - Se o bloco for 'Ativação' ou o status do bloco estiver 'Encerrado' / inativo -> ATIVAÇÃO.
+        // - Caso contrário (Blocos 1, 2, 3 quando ativos ou considerados Desafio Virtual) -> DESAFIO VIRTUAL.
         function isRecordInChallengeWindow(r) {
-            let recDate = r.created_at ? new Date(r.created_at) : new Date();
-            if (isNaN(recDate.getTime())) recDate = new Date();
-            let cutoffDate = new Date('2026-10-28T23:59:59');
-
-            if (recDate <= cutoffDate) {
-                return true; // Até 28/10/26 vai sempre para Desafio Virtual
-            }
-
-            if (r.modalidade === 'Presença / Ativação' || r.tempo === 'PRESENÇA' || r.bloco === 'Ativação') return false;
-            const status = getBlocoStatus(r.bloco || 'Bloco 3');
-            return status === 'Ativo';
+            const bloco = r.bloco || 'Bloco 1';
+            if (bloco === 'Ativação') return false;
+            const status = getBlocoStatus(bloco);
+            return (status === 'Ativo');
         }
 
         function formatDateTimePtBr(isoString) {
@@ -1208,35 +1188,17 @@
                         showModal('Erro', 'Não foi possível atualizar o registro.', 'error');
                     }
                 } else {
-                    let existingRecord = credencial 
-                        ? records.find(r => r.credencial === credencial && r.modalidade === modalidade)
-                        : records.find(r => r.atleta === atleta && r.modalidade === modalidade);
-
-                    if (existingRecord && tempo !== 'PRESENÇA') {
-                        const { error } = await _supabase.from('records')
-                            .update({ tempo: tempo, bloco: bloco, atleta: atleta, subcategoria: subcategoria, naipe: naipe, credencial: credencial })
-                            .eq('id', existingRecord.id);
-
-                        if (!error) {
-                            document.getElementById('time-entry-form').reset();
-                            document.getElementById('admin-bloco').value = getCurrentOrLastActiveBlock().name;
-                            await fetchRecords();
-                            showModal('Sucesso', 'O resultado deste participante foi atualizado!', 'success');
-                        } else {
-                            showModal('Erro', 'Não foi possível atualizar o registro.', 'error');
-                        }
+                    // CADA PARTICIPAÇÃO GERA UM NOVO REGISTRO (Permite múltiplas participações)
+                    const { error } = await _supabase.from('records')
+                        .insert([{ credencial, atleta, naipe, subcategoria, modalidade, bloco, tempo }]);
+                    
+                    if (!error) {
+                        document.getElementById('time-entry-form').reset();
+                        document.getElementById('admin-bloco').value = getCurrentOrLastActiveBlock().name;
+                        await fetchRecords();
+                        showModal('Sucesso', 'Nova participação registrada com sucesso!', 'success');
                     } else {
-                        const { error } = await _supabase.from('records')
-                            .insert([{ credencial, atleta, naipe, subcategoria, modalidade, bloco, tempo }]);
-                        
-                        if (!error) {
-                            document.getElementById('time-entry-form').reset();
-                            document.getElementById('admin-bloco').value = getCurrentOrLastActiveBlock().name;
-                            await fetchRecords();
-                            showModal('Sucesso', 'Registro oficial / Presença cadastrado com sucesso!', 'success');
-                        } else {
-                            showModal('Erro', 'Não foi possível salvar o registro no banco de dados.', 'error');
-                        }
+                        showModal('Erro', 'Não foi possível salvar o registro no banco de dados.', 'error');
                     }
                 }
             } catch (err) {
@@ -1439,19 +1401,12 @@
         function updateDashboard() {
             if (!isAdminLoggedIn || currentAdminSubTab !== 'dashboard') return;
             
-            const totalRecords = records.length;
+            const totalRecords = records.length; // Cada leitura conta como 1 participação
             const uniqueParticipants = new Set();
             const uniqueMap = new Map();
 
             let totalDesafio = 0, totalDesafioMas = 0, totalDesafioFem = 0;
             let totalPresenca = 0, totalPresencaMas = 0, totalPresencaFem = 0;
-            
-            let lidasHojeCount = 0;
-            let lidasAte28Count = 0;
-
-            const cutoffDate = new Date('2026-10-28T23:59:59');
-            const todayStart = new Date();
-            todayStart.setHours(0, 0, 0, 0);
 
             const perfisList = ['Atleta', 'Treinador', 'Arbitragem', 'Comitê Organizador', 'Público Geral'];
             let perfilStats = {};
@@ -1478,16 +1433,6 @@
             };
 
             records.forEach(r => {
-                let recDate = r.created_at ? new Date(r.created_at) : new Date();
-                if (isNaN(recDate.getTime())) recDate = new Date();
-
-                if (recDate <= cutoffDate) {
-                    lidasAte28Count++;
-                }
-                if (recDate >= todayStart) {
-                    lidasHojeCount++;
-                }
-
                 const bloco = r.bloco && modPorBloco[r.bloco] ? r.bloco : 'Bloco 1';
                 const modStr = r.modalidade || 'Outros';
                 
@@ -1500,9 +1445,7 @@
                 let rawNaipe = (r.naipe || 'MAS').toString().toUpperCase();
                 let naipe = (rawNaipe.includes('FEM') || rawNaipe === 'F') ? 'FEM' : 'MAS';
 
-                // APLICANDO A REGRA EXATA REQUISITADA:
-                // - Até 28/10/26 -> Sempre DESAFIO VIRTUAL
-                // - A partir de 29/10/26 -> Bloco ativo = DESAFIO VIRTUAL; Bloco inativo/ativação = ATIVAÇÃO
+                // CLASSIFICAÇÃO EXATA: DESAFIO VIRTUAL vs ATIVAÇÃO (por regras de bloco ativo/inativo)
                 const isDesafio = isRecordInChallengeWindow(r);
 
                 if (isDesafio) {
@@ -1557,9 +1500,6 @@
 
             document.getElementById('kpi-multimodal').innerText = repeticoesExatas;
 
-            document.getElementById('info-lidas-hoje').innerText = lidasHojeCount;
-            document.getElementById('info-lidas-ate-28').innerText = lidasAte28Count;
-
             const mods = ['Remo', 'Ciclismo', 'Fortnite'];
             const blocks = ['Bloco 1', 'Bloco 2', 'Bloco 3'];
 
@@ -1603,9 +1543,7 @@
                 ["DESAFIO VIRTUAL", document.getElementById('kpi-total-desafio').innerText],
                 ["ATIVAÇÃO", document.getElementById('kpi-total-presenca').innerText],
                 ["PARTICIPANTES ÚNICOS", document.getElementById('kpi-unicos').innerText],
-                ["REPETIÇÕES", document.getElementById('kpi-multimodal').innerText],
-                ["Lidas Hoje (29/10)", document.getElementById('info-lidas-hoje').innerText],
-                ["Lidas até 28/10/26", document.getElementById('info-lidas-ate-28').innerText]
+                ["REPETIÇÕES", document.getElementById('kpi-multimodal').innerText]
             ];
 
             doc.autoTable({
@@ -1635,23 +1573,28 @@
             doc.save('dashboard_estatistico_presenca_desafio_jj2026.pdf');
         }
 
-        function getUniqueTopRecords(recs, sortByPoints) {
+        // REGRA DE RANKING: ÚLTIMO REGISTRADO
+        // A pessoa pode participar várias vezes, mas para o ranking exibe apenas o último tempo/pontos registrado.
+        function getLatestRecordsForRanking(recs, sortByPoints) {
             let filteredValid = recs.filter(r => r.tempo !== 'PRESENÇA' && r.modalidade !== 'Presença / Ativação' && r.tempo);
-            let sorted = [...filteredValid].sort((a, b) => {
+            
+            // Agrupar por participante (credencial ou nome) mantendo o último inserido (maior ID ou mais recente)
+            let latestMap = new Map();
+            filteredValid.forEach(r => {
+                let key = r.credencial ? r.credencial.trim() : (r.atleta ? r.atleta.trim().toUpperCase() : 'DESCONHECIDO');
+                // Como records estão em ordem cronológica de inserção, sobrescrever garante que o último fique registrado
+                latestMap.set(key, r);
+            });
+
+            let latestList = Array.from(latestMap.values());
+
+            // Ordenar por melhor pontuação ou menor tempo
+            let sorted = latestList.sort((a, b) => {
                 if(sortByPoints) return parseInt(b.tempo || '0') - parseInt(a.tempo || '0'); 
                 return (a.tempo || '').localeCompare(b.tempo || ''); 
             });
-            
-            let uniqueList = [];
-            let seen = new Set();
-            for(let r of sorted) {
-                let key = r.credencial || r.atleta;
-                if(!seen.has(key)) {
-                    seen.add(key);
-                    uniqueList.push(r);
-                }
-            }
-            return uniqueList;
+
+            return sorted;
         }
 
         function exportFirstPlacesPDF() {
@@ -1674,8 +1617,9 @@
                         }
                         
                         if(recs.length > 0) {
-                            const top = getUniqueTopRecords(recs, mod === 'Fortnite')[0]; 
-                            if (top) {
+                            const tops = getLatestRecordsForRanking(recs, mod === 'Fortnite');
+                            if (tops.length > 0) {
+                                const top = tops[0];
                                 bodyData.push([b, mod, top.credencial || '-', top.atleta, top.naipe || naipe, top.tempo]);
                             }
                         }
@@ -1706,7 +1650,7 @@
             
             ['Remo', 'Ciclismo', 'Fortnite'].forEach(mod => {
                 const recs = records.filter(r => r.modalidade === mod);
-                const tops = getUniqueTopRecords(recs, mod === 'Fortnite').slice(0, 3); 
+                const tops = getLatestRecordsForRanking(recs, mod === 'Fortnite').slice(0, 3); 
                 tops.forEach((top, index) => {
                     bodyData.push([mod, `${index + 1}º`, top.credencial || '-', top.atleta, top.naipe || '-', top.tempo, top.bloco]);
                 });
@@ -1749,14 +1693,15 @@
                 if (naipe !== 'Todos') filtered = filtered.filter(r => r.naipe === naipe);
             }
 
-            let uniqueList = getUniqueTopRecords(filtered, modalidade === 'Fortnite');
+            // Exibe apenas o último resultado registrado de cada participante na prova
+            let latestList = getLatestRecordsForRanking(filtered, modalidade === 'Fortnite');
 
-            if (uniqueList.length === 0) {
+            if (latestList.length === 0) {
                 tbody.innerHTML = `<tr><td colspan="6" class="py-8 text-center text-slate-400">Nenhum resultado registrado para este filtro.</td></tr>`;
                 return;
             }
 
-            const htmlRows = uniqueList.map((r, index) => {
+            const htmlRows = latestList.map((r, index) => {
                 let badgeClass = "text-slate-500 font-bold";
                 if (index === 0) badgeClass = "text-amber-700 font-black bg-amber-100 px-3 py-1 rounded-full border border-amber-200";
                 if (index === 1) badgeClass = "text-slate-700 font-black bg-slate-200 px-3 py-1 rounded-full border border-slate-300";
