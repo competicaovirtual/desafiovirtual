@@ -1666,10 +1666,10 @@
         }
 
         function getUniqueTopRecords(recs, sortByPoints) {
-            let filteredValid = recs.filter(r => r.tempo !== 'PRESENÇA' && r.modalidade !== 'Presença / Ativação');
+            let filteredValid = recs.filter(r => r.tempo !== 'PRESENÇA' && r.modalidade !== 'Presença / Ativação' && r.tempo);
             let sorted = [...filteredValid].sort((a, b) => {
-                if(sortByPoints) return parseInt(b.tempo) - parseInt(a.tempo); 
-                return a.tempo.localeCompare(b.tempo); 
+                if(sortByPoints) return parseInt(b.tempo || '0') - parseInt(a.tempo || '0'); 
+                return (a.tempo || '').localeCompare(b.tempo || ''); 
             });
             
             let uniqueList = [];
@@ -1820,7 +1820,12 @@
             const btnExit = document.getElementById('btn-exit-tv');
             const tvTitle = document.getElementById('tv-title-display');
 
-            document.documentElement.requestFullscreen().catch(()=>{});
+            // Proteção contra Smart TVs que não suportam requestFullscreen
+            if (document.documentElement.requestFullscreen) {
+                document.documentElement.requestFullscreen().catch(e => console.log("Fullscreen API error:", e));
+            } else if (document.documentElement.webkitRequestFullscreen) {
+                document.documentElement.webkitRequestFullscreen();
+            }
             
             header.classList.add('hidden');
             footer.classList.add('hidden');
@@ -1842,7 +1847,12 @@
             }
             isComiteTVMode = false;
 
-            if (document.fullscreenElement) document.exitFullscreen().catch(()=>{});
+            // Proteção contra Smart TVs no Exit
+            if (document.fullscreenElement && document.exitFullscreen) {
+                document.exitFullscreen().catch(e => console.log("Exit Fullscreen API error:", e));
+            } else if (document.webkitFullscreenElement && document.webkitExitFullscreen) {
+                document.webkitExitFullscreen();
+            }
 
             const header = document.getElementById('main-header');
             const footer = document.getElementById('main-footer');
@@ -1870,13 +1880,14 @@
             tvStateIndex = 0;
             applyTVState();
             if (tvModeInterval) clearInterval(tvModeInterval);
+            
             tvModeInterval = setInterval(() => {
                 tvStateIndex = (tvStateIndex + 1) % tvStatesNormal.length;
                 applyTVState();
             }, 10000); 
         }
 
-        function applyTVState() {
+        async function applyTVState() {
             const state = tvStatesNormal[tvStateIndex];
             const activeBlockInfo = getCurrentOrLastActiveBlock();
             
@@ -1901,8 +1912,8 @@
             document.getElementById('tv-title-mod').innerText = state.modName;
             document.getElementById('tv-title-naipe').innerText = state.naipeName;
             
-            // Força a renderização diretamente, sem amarrar a promessa de fetch na animação
-            renderLeaderboard(); 
+            // Busca diretamente a atualização e desenha tudo instantaneamente sem depender do timer genérico
+            await fetchRecords(); 
         }
 
         document.addEventListener('DOMContentLoaded', async () => {
@@ -1914,10 +1925,12 @@
                 checkBlocoActivityForForm();
             }
 
-            // Polling incondicional a cada 10 segundos: Resolve o cache/hibernação de Smart TVs 
+            // Polling genérico fica restrito apenas para atualizar quando o painel de TV não está controlando a tela (Evita conflitos/flicker na TV)
             setInterval(() => {
                 if(isAdminLoggedIn && currentAdminSubTab === 'insercao') renderAdminBlocks();
-                fetchRecords();
+                if (!tvModeInterval) {
+                    fetchRecords();
+                }
             }, 10000); 
             
             await fetchRecords();
