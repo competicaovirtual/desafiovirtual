@@ -364,7 +364,6 @@
                                 </select>
                             </div>
 
-                            <!-- Container do Tempo/Pontos ocultado se o bloco não estiver ativo -->
                             <div id="container-tempo-pontos">
                                 <label id="label-tempo-pontos" class="block text-xs font-bold uppercase text-slate-600 mb-2">Tempo (HH:MM:SS)</label>
                                 <input type="text" id="admin-tempo" placeholder="00:00:00" oninput="formatInputData(this)" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-3 text-slate-900 font-mono text-lg focus:outline-none focus:border-cob-blue">
@@ -415,7 +414,7 @@
                     </div>
                 </div>
 
-                <!-- SUB-ABA 3: DASHBOARD E GRÁFICOS SOLICITADOS -->
+                <!-- SUB-ABA 3: DASHBOARD E GRÁFICOS CORRIGIDOS -->
                 <div id="subtab-dashboard" class="space-y-6 hidden animate-fadeIn">
                     <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                         <h3 class="text-2xl font-black text-slate-900 flex items-center"><i class="fa-solid fa-chart-bar text-cob-blue mr-3"></i> Dashboard Estatístico Consolidado</h3>
@@ -463,31 +462,26 @@
                     </h4>
 
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-                        <!-- GRÁFICO 1: Por Modalidade -->
                         <div class="bg-white border border-slate-200 p-4 md:p-6 rounded-2xl shadow-sm flex flex-col">
                             <h4 class="text-sm md:text-base font-bold text-slate-800 text-center mb-2">1. Acessos por Modalidade</h4>
                             <div class="relative h-72 w-full"><canvas id="chartModalidadePura"></canvas></div>
                         </div>
 
-                        <!-- GRÁFICO 2: Por Naipe por Modalidade -->
                         <div class="bg-white border border-slate-200 p-4 md:p-6 rounded-2xl shadow-sm flex flex-col">
                             <h4 class="text-sm md:text-base font-bold text-slate-800 text-center mb-2">2. Por Naipe por Modalidade</h4>
                             <div class="relative h-72 w-full"><canvas id="chartNaipePorModalidade"></canvas></div>
                         </div>
 
-                        <!-- GRÁFICO 3: Por Modalidade por Bloco -->
                         <div class="bg-white border border-slate-200 p-4 md:p-6 rounded-2xl shadow-sm flex flex-col">
                             <h4 class="text-sm md:text-base font-bold text-slate-800 text-center mb-2">3. Por Modalidade por Bloco</h4>
                             <div class="relative h-72 w-full"><canvas id="chartModalidadePorBloco"></canvas></div>
                         </div>
 
-                        <!-- GRÁFICO 4: Por Naipe, por Modalidade, por Bloco -->
                         <div class="bg-white border border-slate-200 p-4 md:p-6 rounded-2xl shadow-sm flex flex-col">
                             <h4 class="text-sm md:text-base font-bold text-slate-800 text-center mb-2">4. Por Naipe, por Modalidade, por Bloco</h4>
                             <div class="relative h-72 w-full"><canvas id="chartNaipeModBloco"></canvas></div>
                         </div>
 
-                        <!-- Demais gráficos complementares -->
                         <div class="bg-white border border-slate-200 p-4 md:p-6 rounded-2xl shadow-sm flex flex-col md:col-span-2">
                             <h4 class="text-sm md:text-base font-bold text-slate-800 text-center mb-2">Distribuição de Participantes por Perfil (Subcategoria) e Naipe</h4>
                             <div class="relative h-72 md:h-80 w-full"><canvas id="chartPerfisNaipe"></canvas></div>
@@ -495,7 +489,7 @@
 
                         <div class="bg-white border border-slate-200 p-4 md:p-6 rounded-2xl shadow-sm flex flex-col md:col-span-2">
                             <h4 class="text-sm md:text-base font-bold text-slate-800 text-center mb-2 flex items-center justify-center">
-                                <i class="fa-solid fa-clock text-cob-blue mr-2"></i>Horários Mais Acessados (Pico de Acesso Por Hora do Dia)
+                                <i class="fa-solid fa-clock text-cob-blue mr-2"></i>Horários Mais Acessados (Média de Leituras por Hora em cada Dia)
                             </h4>
                             <div class="relative h-72 md:h-80 w-full overflow-x-auto">
                                 <div class="min-w-[600px] h-full"><canvas id="chartEvolucaoHoraria"></canvas></div>
@@ -504,7 +498,7 @@
 
                         <div class="bg-white border border-slate-200 p-4 md:p-6 rounded-2xl shadow-sm flex flex-col md:col-span-2">
                             <h4 class="text-sm md:text-base font-bold text-slate-800 text-center mb-2 flex items-center justify-center">
-                                <i class="fa-solid fa-chart-line text-cob-blue mr-2"></i>Evolução Diária de Participações (Por Dia do Mês)
+                                <i class="fa-solid fa-chart-line text-cob-blue mr-2"></i>Evolução Diária de Participações (Por Dia Exato do Mês e Modalidade)
                             </h4>
                             <div class="relative h-72 md:h-80 w-full overflow-x-auto">
                                 <div class="min-w-[600px] h-full"><canvas id="chartEvolucaoDiaria"></canvas></div>
@@ -681,31 +675,25 @@
         let isAdminLoggedIn = false;
         let currentAdminSubTab = 'insercao';
         
-        // Mantém como fallback temporário inicial até a conexão com Supabase terminar (milissegundos)
         let blockConfig = JSON.parse(localStorage.getItem('jj2026_block_config')) || {
             'Bloco 1': { mode: 'auto', manualStatus: 'Encerrado', start: '2026-10-19T08:00', end: '2026-10-22T23:59' },
             'Bloco 2': { mode: 'auto', manualStatus: 'Encerrado', start: '2026-10-23T08:00', end: '2026-10-28T23:59' },
             'Bloco 3': { mode: 'auto', manualStatus: 'Encerrado', start: '2026-10-29T08:00', end: '2026-11-04T23:59' }
         };
 
-        // Função de Atualização Global da Configuração na Nuvem
         async function saveConfigToDB() {
-            localStorage.setItem('jj2026_block_config', JSON.stringify(blockConfig)); // Mantém cache local atualizado por garantia
-            
+            localStorage.setItem('jj2026_block_config', JSON.stringify(blockConfig));
             try {
-                // Busca se já tem a config do sistema salva
-                const { data, error } = await _supabase.from('records').select('id').eq('modalidade', 'SYSTEM_CONFIG').maybeSingle();
-                
+                const { data } = await _supabase.from('records').select('id').eq('modalidade', 'SYSTEM_CONFIG').maybeSingle();
                 const payload = { 
                     credencial: 'CONFIG_SYS', 
                     modalidade: 'SYSTEM_CONFIG', 
-                    atleta: JSON.stringify(blockConfig), // Salvamos os dados aqui para esconder do painel!
+                    atleta: JSON.stringify(blockConfig),
                     naipe: 'MAS',
                     subcategoria: 'Sistema',
                     bloco: 'Sistema',
                     tempo: 'CONFIG'
                 };
-                
                 if (data && data.id) {
                     await _supabase.from('records').update(payload).eq('id', data.id);
                 } else {
@@ -730,13 +718,11 @@
         
         function getCurrentOrLastActiveBlock() {
             const blocks = ['Bloco 1', 'Bloco 2', 'Bloco 3'];
-            
             for (let b of blocks) {
                 if (getBlocoStatus(b) === 'Ativo') {
                     return { name: b, active: true };
                 }
             }
-            
             return { name: 'Ativação', active: false };
         }
 
@@ -863,7 +849,7 @@
             if (start && end) {
                 blockConfig[bloco].start = start;
                 blockConfig[bloco].end = end;
-                saveConfigToDB(); // Chamando a nova função global em nuvem
+                saveConfigToDB();
                 closeEditModal();
                 renderAdminBlocks();
                 checkBlocoActivityForForm();
@@ -873,7 +859,7 @@
 
         function setBlockMode(bloco, mode) {
             blockConfig[bloco].mode = mode;
-            saveConfigToDB(); // Chamando a nova função global em nuvem
+            saveConfigToDB();
             renderAdminBlocks();
             checkBlocoActivityForForm();
         }
@@ -881,7 +867,7 @@
         function toggleManualStatus(bloco) {
             const current = blockConfig[bloco].manualStatus;
             blockConfig[bloco].manualStatus = current === 'Ativo' ? 'Encerrado' : 'Ativo';
-            saveConfigToDB(); // Chamando a nova função global em nuvem
+            saveConfigToDB();
             renderAdminBlocks();
             checkBlocoActivityForForm();
         }
@@ -995,21 +981,18 @@
         async function fetchRecords() {
             const { data, error } = await _supabase.from('records').select('*');
             if (!error && data) {
-                
-                // Extrai e separa nosso objeto secreto de configuração na nuvem
                 const configRecord = data.find(r => r.modalidade === 'SYSTEM_CONFIG');
                 if (configRecord && configRecord.atleta) {
                     try {
                         blockConfig = JSON.parse(configRecord.atleta);
-                        localStorage.setItem('jj2026_block_config', JSON.stringify(blockConfig)); // Mantém cache local saudável
+                        localStorage.setItem('jj2026_block_config', JSON.stringify(blockConfig));
                     } catch(e) {}
                 }
 
-                // Carrega os registros normais limpando o objeto de configuração para não aparecer em listas
                 records = data.filter(r => r.modalidade !== 'SYSTEM_CONFIG');
 
                 if (isAdminLoggedIn) {
-                    if (currentAdminSubTab === 'insercao') renderAdminBlocks(); // Real-time nas configurações visuais também!
+                    if (currentAdminSubTab === 'insercao') renderAdminBlocks();
                     if (currentAdminSubTab === 'registros') renderAdminRecords();
                     if (currentAdminSubTab === 'dashboard') updateDashboard();
                 }
@@ -1433,7 +1416,7 @@
                             font: { weight: 'bold', size: 10 },
                             formatter: (value) => {
                                 const num = parseFloat(value);
-                                return (!isNaN(num) && num > 0) ? num : '';
+                                return (!isNaN(num) && num > 0) ? (Number.isInteger(num) ? num : num.toFixed(1)) : '';
                             }
                         }
                     },
@@ -1457,7 +1440,8 @@
             let totalPresenca = 0, totalPresencaMas = 0, totalPresencaFem = 0;
 
             let dateMap = {}; 
-            let hourlyMap = Array(24).fill(0).map(() => ({ total: 0, MAS: 0, FEM: 0 }));
+            let hourlyRawMap = Array(24).fill(0).map(() => ({ MAS: 0, FEM: 0 }));
+            let activeDaysSet = new Set(); // Para calcular a média correta por dia nos horários de pico
 
             const perfisList = ['Atleta', 'Treinador', 'Arbitragem', 'Comitê Organizador', 'Público Geral'];
             let perfilStats = {};
@@ -1488,7 +1472,6 @@
                 };
             }
 
-            // Contadores para os novos gráficos solicitados
             let modPuraCount = { 'Remo': 0, 'Ciclismo': 0, 'Fortnite': 0 };
 
             let naipePorMod = {
@@ -1550,16 +1533,17 @@
                 let recDate = r.created_at ? new Date(r.created_at) : new Date();
                 if (isNaN(recDate.getTime())) recDate = new Date();
 
-                const hour = recDate.getHours();
-                if (hour >= 0 && hour < 24) {
-                    hourlyMap[hour].total++;
-                    hourlyMap[hour][naipe]++;
-                }
-
                 const day = String(recDate.getDate()).padStart(2, '0');
                 const month = String(recDate.getMonth() + 1).padStart(2, '0');
                 const year = recDate.getFullYear();
                 const d = `${day}/${month}/${year}`;
+
+                activeDaysSet.add(d); // Registra dias ativos para cálculo da média
+
+                const hour = recDate.getHours();
+                if (hour >= 0 && hour < 24) {
+                    hourlyRawMap[hour][naipe]++;
+                }
 
                 if (!dateMap[d]) {
                     dateMap[d] = {
@@ -1577,10 +1561,11 @@
                     dateMap[d].presenca++;
                 }
 
-                if (mod === 'Remo') { if(isDesafio) dateMap[d].Remo++; else dateMap[d].PresencaAtivacao++; }
-                if (mod === 'Ciclismo') { if(isDesafio) dateMap[d].Ciclismo++; else dateMap[d].PresencaAtivacao++; }
-                if (mod === 'Fortnite') { if(isDesafio) dateMap[d].Fortnite++; else dateMap[d].PresencaAtivacao++; }
-                if (r.modalidade === 'Presença / Ativação') dateMap[d].PresencaAtivacao++;
+                // CORREÇÃO: Atribuição exata por dia da modalidade correspondente
+                if (mod === 'Remo') { dateMap[d].Remo++; }
+                else if (mod === 'Ciclismo') { dateMap[d].Ciclismo++; }
+                else if (mod === 'Fortnite') { dateMap[d].Fortnite++; }
+                else { dateMap[d].PresencaAtivacao++; }
             });
 
             let unicosMas = 0, unicosFem = 0;
@@ -1590,6 +1575,7 @@
             });
 
             const repeticoesExatas = totalRecords - uniqueParticipants.size;
+            const totalDaysCount = Math.max(1, activeDaysSet.size);
 
             document.getElementById('kpi-total-interacoes').innerText = totalRecords;
             document.getElementById('kpi-interacoes-naipe').innerText = `MAS: ${totalDesafioMas + totalPresencaMas} | FEM: ${totalDesafioFem + totalPresencaFem}`;
@@ -1643,17 +1629,19 @@
                 { label: 'Feminino', data: perfisList.map(p => perfilStats[p].FEM), backgroundColor: '#00A859' }
             ], false);
 
+            // CORREÇÃO: Horários de pico mostrando a média por dia (total na hora / total de dias ativos)
             const hoursLabels = Array.from({length: 15}, (_, i) => `${String(i + 8).padStart(2, '0')}:00h`);
             drawVerticalBarChart('chartEvolucaoHoraria', hoursLabels, [
-                { label: 'Acessos Masc.', data: hoursLabels.map((_, i) => hourlyMap[i + 8].MAS), backgroundColor: '#004A80' },
-                { label: 'Acessos Fem.', data: hoursLabels.map((_, i) => hourlyMap[i + 8].FEM), backgroundColor: '#00A859' }
+                { label: 'Média Masc. / Dia', data: hoursLabels.map((_, i) => Number((hourlyRawMap[i + 8].MAS / totalDaysCount).toFixed(1))), backgroundColor: '#004A80' },
+                { label: 'Média Fem. / Dia', data: hoursLabels.map((_, i) => Number((hourlyRawMap[i + 8].FEM / totalDaysCount).toFixed(1))), backgroundColor: '#00A859' }
             ], false);
 
+            // CORREÇÃO: Evolução Diária exata por modalidade a cada dia do mês
             drawVerticalBarChart('chartEvolucaoDiaria', sortedDates, [
                 { label: 'Remo', data: sortedDates.map(d => dateMap[d].Remo), backgroundColor: '#0066CC' },
                 { label: 'Ciclismo', data: sortedDates.map(d => dateMap[d].Ciclismo), backgroundColor: '#00A859' },
                 { label: 'Fortnite', data: sortedDates.map(d => dateMap[d].Fortnite), backgroundColor: '#7e3ff2' },
-                { label: 'Presença Pura', data: sortedDates.map(d => dateMap[d].PresencaAtivacao), backgroundColor: '#0099FF' }
+                { label: 'Presença / Outros', data: sortedDates.map(d => dateMap[d].PresencaAtivacao), backgroundColor: '#0099FF' }
             ], false);
         }
 
