@@ -486,24 +486,6 @@
                             <h4 class="text-sm md:text-base font-bold text-slate-800 text-center mb-2">Distribuição de Participantes por Perfil (Subcategoria) e Naipe</h4>
                             <div class="relative h-72 md:h-80 w-full"><canvas id="chartPerfisNaipe"></canvas></div>
                         </div>
-
-                        <div class="bg-white border border-slate-200 p-4 md:p-6 rounded-2xl shadow-sm flex flex-col md:col-span-2">
-                            <h4 class="text-sm md:text-base font-bold text-slate-800 text-center mb-2 flex items-center justify-center">
-                                <i class="fa-solid fa-clock text-cob-blue mr-2"></i>Horários Mais Acessados (Média de Leituras por Hora em cada Dia)
-                            </h4>
-                            <div class="relative h-72 md:h-80 w-full overflow-x-auto">
-                                <div class="min-w-[600px] h-full"><canvas id="chartEvolucaoHoraria"></canvas></div>
-                            </div>
-                        </div>
-
-                        <div class="bg-white border border-slate-200 p-4 md:p-6 rounded-2xl shadow-sm flex flex-col md:col-span-2">
-                            <h4 class="text-sm md:text-base font-bold text-slate-800 text-center mb-2 flex items-center justify-center">
-                                <i class="fa-solid fa-chart-line text-cob-blue mr-2"></i>Evolução Diária de Participações (Por Dia Exato do Mês e Modalidade)
-                            </h4>
-                            <div class="relative h-72 md:h-80 w-full overflow-x-auto">
-                                <div class="min-w-[600px] h-full"><canvas id="chartEvolucaoDiaria"></canvas></div>
-                            </div>
-                        </div>
                     </div>
 
                     <div class="bg-gradient-to-r from-cob-dark to-cob-blue p-8 rounded-3xl shadow-lg text-white mt-8">
@@ -756,7 +738,9 @@
             }
         }
 
-        // REGRA SOLICITADA: Até 28/10/26 -> Desafio Virtual. A partir de hoje (29/10), depende se o bloco está ativo
+        // REGRA EXATA SOLICITADA:
+        // - Leituras até 28/10/26 contam como DESAFIO VIRTUAL.
+        // - A partir de hoje, se o bloco estiver ATIVO conta como DESAFIO VIRTUAL, se inativo conta como ATIVAÇÃO.
         function isRecordInChallengeWindow(r) {
             let recDate = r.created_at ? new Date(r.created_at) : new Date();
             let cutoffDate = new Date('2026-10-28T23:59:59');
@@ -1447,39 +1431,9 @@
             let totalDesafio = 0, totalDesafioMas = 0, totalDesafioFem = 0;
             let totalPresenca = 0, totalPresencaMas = 0, totalPresencaFem = 0;
 
-            let dateMap = {}; 
-            let hourlyRawMap = Array(24).fill(0).map(() => ({ MAS: 0, FEM: 0 }));
-            let activeDaysSet = new Set(); 
-
             const perfisList = ['Atleta', 'Treinador', 'Arbitragem', 'Comitê Organizador', 'Público Geral'];
             let perfilStats = {};
             perfisList.forEach(p => perfilStats[p] = { MAS: 0, FEM: 0 });
-
-            let minDate = null;
-            let maxDate = null;
-
-            records.forEach(r => {
-                let rd = r.created_at ? new Date(r.created_at) : new Date(2026, 9, 19); 
-                if (isNaN(rd.getTime())) rd = new Date(2026, 9, 19);
-                rd.setHours(0,0,0,0);
-                if (!minDate || rd < minDate) minDate = new Date(rd);
-                if (!maxDate || rd > maxDate) maxDate = new Date(rd);
-            });
-
-            if (!minDate) minDate = new Date(2026, 9, 19);
-            if (!maxDate) maxDate = new Date(2026, 10, 4);
-
-            for (let cur = new Date(minDate); cur <= maxDate; cur.setDate(cur.getDate() + 1)) {
-                const day = String(cur.getDate()).padStart(2, '0');
-                const month = String(cur.getMonth() + 1).padStart(2, '0');
-                const year = cur.getFullYear();
-                const d = `${day}/${month}/${year}`;
-
-                dateMap[d] = {
-                    total: 0, desafio: 0, presenca: 0, MAS: 0, FEM: 0,
-                    Remo: 0, Ciclismo: 0, Fortnite: 0
-                };
-            }
 
             let modPuraCount = { 'Remo': 0, 'Ciclismo': 0, 'Fortnite': 0 };
 
@@ -1502,9 +1456,6 @@
             };
 
             records.forEach(r => {
-                let recDate = r.created_at ? new Date(r.created_at) : new Date(2026, 9, 19); 
-                if (isNaN(recDate.getTime())) recDate = new Date(2026, 9, 19);
-
                 const bloco = r.bloco && modPorBloco[r.bloco] ? r.bloco : 'Bloco 1';
                 const modStr = r.modalidade || 'Outros';
                 
@@ -1517,8 +1468,7 @@
                 let rawNaipe = (r.naipe || 'MAS').toString().toUpperCase();
                 let naipe = (rawNaipe.includes('FEM') || rawNaipe === 'F') ? 'FEM' : 'MAS';
 
-                const inChallengeWindow = isRecordInChallengeWindow(r);
-                const isDesafio = inChallengeWindow;
+                const isDesafio = isRecordInChallengeWindow(r);
 
                 if (isDesafio) {
                     totalDesafio++;
@@ -1548,35 +1498,6 @@
                     uniqueParticipants.add(uniqueKey);
                     if (!uniqueMap.has(uniqueKey)) uniqueMap.set(uniqueKey, naipe);
                 }
-
-                const day = String(recDate.getDate()).padStart(2, '0');
-                const month = String(recDate.getMonth() + 1).padStart(2, '0');
-                const year = recDate.getFullYear();
-                const d = `${day}/${month}/${year}`;
-
-                activeDaysSet.add(d);
-
-                const hour = recDate.getHours();
-                if (hour >= 0 && hour < 24) {
-                    hourlyRawMap[hour][naipe]++;
-                }
-
-                if (!dateMap[d]) {
-                    dateMap[d] = { total: 0, desafio: 0, presenca: 0, MAS: 0, FEM: 0, Remo: 0, Ciclismo: 0, Fortnite: 0 };
-                }
-                
-                dateMap[d].total++;
-                dateMap[d][naipe]++;
-
-                if (isDesafio) {
-                    dateMap[d].desafio++;
-                } else {
-                    dateMap[d].presenca++;
-                }
-
-                if (mod === 'Remo') dateMap[d].Remo++;
-                if (mod === 'Ciclismo') dateMap[d].Ciclismo++;
-                if (mod === 'Fortnite') dateMap[d].Fortnite++;
             });
 
             let unicosMas = 0, unicosFem = 0;
@@ -1586,7 +1507,6 @@
             });
 
             const repeticoesExatas = Math.max(0, totalRecords - uniqueParticipants.size);
-            const totalDaysCount = Math.max(1, activeDaysSet.size);
 
             document.getElementById('kpi-total-interacoes').innerText = totalRecords;
             document.getElementById('kpi-interacoes-naipe').innerText = `MAS: ${totalDesafioMas + totalPresencaMas} | FEM: ${totalDesafioFem + totalPresencaFem}`;
@@ -1601,12 +1521,6 @@
             document.getElementById('kpi-unicos-naipe').innerText = `MAS: ${unicosMas} | FEM: ${unicosFem}`;
 
             document.getElementById('kpi-multimodal').innerText = repeticoesExatas;
-
-            const sortedDates = Object.keys(dateMap).sort((a, b) => {
-                const [d1, m1, y1] = a.split('/');
-                const [d2, m2, y2] = b.split('/');
-                return new Date(y1, m1-1, d1) - new Date(y2, m2-1, d2);
-            });
 
             const mods = ['Remo', 'Ciclismo', 'Fortnite'];
             const blocks = ['Bloco 1', 'Bloco 2', 'Bloco 3'];
@@ -1639,18 +1553,6 @@
                 { label: 'Masculino', data: perfisList.map(p => perfilStats[p].MAS), backgroundColor: '#004A80' },
                 { label: 'Feminino', data: perfisList.map(p => perfilStats[p].FEM), backgroundColor: '#00A859' }
             ], false);
-
-            const hoursLabels = Array.from({length: 15}, (_, i) => `${String(i + 8).padStart(2, '0')}:00h`);
-            drawVerticalBarChart('chartEvolucaoHoraria', hoursLabels, [
-                { label: 'Média Masc. / Dia', data: hoursLabels.map((_, i) => Number((hourlyRawMap[i + 8].MAS / totalDaysCount).toFixed(1))), backgroundColor: '#004A80' },
-                { label: 'Média Fem. / Dia', data: hoursLabels.map((_, i) => Number((hourlyRawMap[i + 8].FEM / totalDaysCount).toFixed(1))), backgroundColor: '#00A859' }
-            ], false);
-
-            drawVerticalBarChart('chartEvolucaoDiaria', sortedDates, [
-                { label: 'Remo', data: sortedDates.map(d => dateMap[d].Remo), backgroundColor: '#0066CC' },
-                { label: 'Ciclismo', data: sortedDates.map(d => dateMap[d].Ciclismo), backgroundColor: '#00A859' },
-                { label: 'Fortnite', data: sortedDates.map(d => dateMap[d].Fortnite), backgroundColor: '#7e3ff2' }
-            ], false);
         }
 
         function exportDashboardPDF() {
@@ -1675,7 +1577,7 @@
             });
 
             let currentY = doc.lastAutoTable.finalY + 10;
-            const chartIds = ['chartModalidadePura', 'chartNaipePorModalidade', 'chartModalidadePorBloco', 'chartNaipeModBloco', 'chartPerfisNaipe', 'chartEvolucaoHoraria', 'chartEvolucaoDiaria'];
+            const chartIds = ['chartModalidadePura', 'chartNaipePorModalidade', 'chartModalidadePorBloco', 'chartNaipeModBloco', 'chartPerfisNaipe'];
             
             chartIds.forEach((id) => {
                 const canvas = document.getElementById(id);
