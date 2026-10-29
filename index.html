@@ -654,7 +654,6 @@
         const SUPABASE_ANON_KEY = 'sb_publishable_WB_Reg-TuFE8KD8QvwBHiw_1EOotbdq';
         const _supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-        // Carrega cache prévio instantaneamente para zero atrasos ao abrir
         let records = JSON.parse(localStorage.getItem('jj2026_cached_records')) || [];
         let isAdminLoggedIn = false;
         let currentAdminSubTab = 'insercao';
@@ -961,10 +960,10 @@
             { mod: 'Fortnite', naipe: 'FEM', modName: 'FORTNITE', naipeName: 'FEMININO' }
         ];
 
-        // FETCH OTIMIZADO COM CACHE LOCAL INSTANTÂNEO
+        // FETCH OTIMIZADO COM .range(0, 9999) PARA TRAZER TODOS OS 1.016+ REGISTROS
         async function fetchRecords() {
             try {
-                const { data, error } = await _supabase.from('records').select('*');
+                const { data, error } = await _supabase.from('records').select('*').range(0, 9999);
                 if (!error && data) {
                     const configRecord = data.find(r => r.modalidade === 'SYSTEM_CONFIG');
                     if (configRecord && configRecord.atleta) {
@@ -975,7 +974,6 @@
                     }
 
                     records = data.filter(r => r.modalidade !== 'SYSTEM_CONFIG');
-                    // Salva em cache para reaberturas instantâneas
                     localStorage.setItem('jj2026_cached_records', JSON.stringify(records));
 
                     refreshUIComponents();
@@ -1819,7 +1817,6 @@
         }
 
         document.addEventListener('DOMContentLoaded', () => {
-            // Renderização imediata baseada no cache local (Zero espera inicial)
             refreshUIComponents();
             
             if (isAdminLoggedIn) renderAdminBlocks();
@@ -1830,10 +1827,8 @@
                 checkBlocoActivityForForm();
             }
 
-            // Sincronização em segundo plano imediata com o Supabase
             fetchRecords();
 
-            // Realtime WebSocket otimizado
             _supabase
                 .channel('public:records')
                 .on('postgres_changes', { event: '*', schema: 'public', table: 'records' }, () => {
