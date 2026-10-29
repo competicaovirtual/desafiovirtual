@@ -35,7 +35,7 @@
                         }
                     },
                     animation: {
-                        fadeIn: 'fadeIn 0.2s ease-in-out',
+                        fadeIn: 'fadeIn 0.15s ease-in-out',
                     },
                     keyframes: {
                         fadeIn: {
@@ -654,7 +654,8 @@
         const SUPABASE_ANON_KEY = 'sb_publishable_WB_Reg-TuFE8KD8QvwBHiw_1EOotbdq';
         const _supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-        let records = [];
+        // Carrega cache prévio instantaneamente para zero atrasos ao abrir
+        let records = JSON.parse(localStorage.getItem('jj2026_cached_records')) || [];
         let isAdminLoggedIn = false;
         let currentAdminSubTab = 'insercao';
         
@@ -682,9 +683,7 @@
                 } else {
                     await _supabase.from('records').insert([payload]);
                 }
-            } catch(e) {
-                console.error("Erro ao salvar configuração global:", e);
-            }
+            } catch(e) {}
         }
 
         function getBlocoStatus(blocoName) {
@@ -739,9 +738,6 @@
             }
         }
 
-        // REGRA ATUALIZADA:
-        // - Se o bloco for 'Ativação' ou o status do bloco estiver 'Encerrado' / inativo -> ATIVAÇÃO.
-        // - Caso contrário (Blocos 1, 2, 3 quando ativos ou considerados Desafio Virtual) -> DESAFIO VIRTUAL.
         function isRecordInChallengeWindow(r) {
             const bloco = r.bloco || 'Bloco 1';
             if (bloco === 'Ativação') return false;
@@ -925,7 +921,7 @@
         function closeScannerModal() {
             document.getElementById('scanner-modal').classList.add('hidden');
             if (html5QrCode && html5QrCode.isScanning) {
-                html5QrCode.stop().catch(err => console.error("Erro ao parar a câmera.", err));
+                html5QrCode.stop().catch(err => {});
             }
         }
 
@@ -965,26 +961,35 @@
             { mod: 'Fortnite', naipe: 'FEM', modName: 'FORTNITE', naipeName: 'FEMININO' }
         ];
 
+        // FETCH OTIMIZADO COM CACHE LOCAL INSTANTÂNEO
         async function fetchRecords() {
-            const { data, error } = await _supabase.from('records').select('*');
-            if (!error && data) {
-                const configRecord = data.find(r => r.modalidade === 'SYSTEM_CONFIG');
-                if (configRecord && configRecord.atleta) {
-                    try {
-                        blockConfig = JSON.parse(configRecord.atleta);
-                        localStorage.setItem('jj2026_block_config', JSON.stringify(blockConfig));
-                    } catch(e) {}
-                }
+            try {
+                const { data, error } = await _supabase.from('records').select('*');
+                if (!error && data) {
+                    const configRecord = data.find(r => r.modalidade === 'SYSTEM_CONFIG');
+                    if (configRecord && configRecord.atleta) {
+                        try {
+                            blockConfig = JSON.parse(configRecord.atleta);
+                            localStorage.setItem('jj2026_block_config', JSON.stringify(blockConfig));
+                        } catch(e) {}
+                    }
 
-                records = data.filter(r => r.modalidade !== 'SYSTEM_CONFIG');
+                    records = data.filter(r => r.modalidade !== 'SYSTEM_CONFIG');
+                    // Salva em cache para reaberturas instantâneas
+                    localStorage.setItem('jj2026_cached_records', JSON.stringify(records));
 
-                if (isAdminLoggedIn) {
-                    if (currentAdminSubTab === 'insercao') renderAdminBlocks();
-                    if (currentAdminSubTab === 'registros') renderAdminRecords();
-                    if (currentAdminSubTab === 'dashboard') updateDashboard();
+                    refreshUIComponents();
                 }
-                renderLeaderboard();
+            } catch(e) {}
+        }
+
+        function refreshUIComponents() {
+            if (isAdminLoggedIn) {
+                if (currentAdminSubTab === 'insercao') renderAdminBlocks();
+                if (currentAdminSubTab === 'registros') renderAdminRecords();
+                if (currentAdminSubTab === 'dashboard') updateDashboard();
             }
+            renderLeaderboard();
         }
 
         function switchTab(tabId) {
@@ -1188,7 +1193,6 @@
                         showModal('Erro', 'Não foi possível atualizar o registro.', 'error');
                     }
                 } else {
-                    // CADA PARTICIPAÇÃO GERA UM NOVO REGISTRO (Permite múltiplas participações)
                     const { error } = await _supabase.from('records')
                         .insert([{ credencial, atleta, naipe, subcategoria, modalidade, bloco, tempo }]);
                     
@@ -1201,9 +1205,7 @@
                         showModal('Erro', 'Não foi possível salvar o registro no banco de dados.', 'error');
                     }
                 }
-            } catch (err) {
-                console.error(err);
-            }
+            } catch (err) {}
             resetSaveBtn(btn, originalHTML);
         }
 
@@ -1249,9 +1251,7 @@
                 } else {
                     showModal('Erro', 'Não foi possível atualizar o registro.', 'error');
                 }
-            } catch (err) {
-                console.error(err);
-            }
+            } catch (err) {}
             resetSaveBtn(btn, originalHTML);
         }
 
@@ -1262,7 +1262,6 @@
 
         function openEditParticipantModal(id) {
             const r = records.find(rec => String(rec.id) === String(id));
-            
             if (r) {
                 document.getElementById('modal-edit-id').value = r.id;
                 document.getElementById('modal-credencial').value = r.credencial || '';
@@ -1276,8 +1275,6 @@
                 document.getElementById('modal-tempo').value = r.tempo || ''; 
                 
                 document.getElementById('edit-participant-modal').classList.remove('hidden');
-            } else {
-                console.error("Registro não encontrado para o ID:", id);
             }
         }
 
@@ -1401,7 +1398,7 @@
         function updateDashboard() {
             if (!isAdminLoggedIn || currentAdminSubTab !== 'dashboard') return;
             
-            const totalRecords = records.length; // Cada leitura conta como 1 participação
+            const totalRecords = records.length;
             const uniqueParticipants = new Set();
             const uniqueMap = new Map();
 
@@ -1445,7 +1442,6 @@
                 let rawNaipe = (r.naipe || 'MAS').toString().toUpperCase();
                 let naipe = (rawNaipe.includes('FEM') || rawNaipe === 'F') ? 'FEM' : 'MAS';
 
-                // CLASSIFICAÇÃO EXATA: DESAFIO VIRTUAL vs ATIVAÇÃO (por regras de bloco ativo/inativo)
                 const isDesafio = isRecordInChallengeWindow(r);
 
                 if (isDesafio) {
@@ -1573,22 +1569,17 @@
             doc.save('dashboard_estatistico_presenca_desafio_jj2026.pdf');
         }
 
-        // REGRA DE RANKING: ÚLTIMO REGISTRADO
-        // A pessoa pode participar várias vezes, mas para o ranking exibe apenas o último tempo/pontos registrado.
         function getLatestRecordsForRanking(recs, sortByPoints) {
             let filteredValid = recs.filter(r => r.tempo !== 'PRESENÇA' && r.modalidade !== 'Presença / Ativação' && r.tempo);
             
-            // Agrupar por participante (credencial ou nome) mantendo o último inserido (maior ID ou mais recente)
             let latestMap = new Map();
             filteredValid.forEach(r => {
                 let key = r.credencial ? r.credencial.trim() : (r.atleta ? r.atleta.trim().toUpperCase() : 'DESCONHECIDO');
-                // Como records estão em ordem cronológica de inserção, sobrescrever garante que o último fique registrado
                 latestMap.set(key, r);
             });
 
             let latestList = Array.from(latestMap.values());
 
-            // Ordenar por melhor pontuação ou menor tempo
             let sorted = latestList.sort((a, b) => {
                 if(sortByPoints) return parseInt(b.tempo || '0') - parseInt(a.tempo || '0'); 
                 return (a.tempo || '').localeCompare(b.tempo || ''); 
@@ -1693,7 +1684,6 @@
                 if (naipe !== 'Todos') filtered = filtered.filter(r => r.naipe === naipe);
             }
 
-            // Exibe apenas o último resultado registrado de cada participante na prova
             let latestList = getLatestRecordsForRanking(filtered, modalidade === 'Fortnite');
 
             if (latestList.length === 0) {
@@ -1736,7 +1726,7 @@
             const tvTitle = document.getElementById('tv-title-display');
 
             if (document.documentElement.requestFullscreen) {
-                document.documentElement.requestFullscreen().catch(e => console.log("Fullscreen API error:", e));
+                document.documentElement.requestFullscreen().catch(e => {});
             } else if (document.documentElement.webkitRequestFullscreen) {
                 document.documentElement.webkitRequestFullscreen();
             }
@@ -1762,7 +1752,7 @@
             isComiteTVMode = false;
 
             if (document.fullscreenElement && document.exitFullscreen) {
-                document.exitFullscreen().catch(e => console.log("Exit Fullscreen API error:", e));
+                document.exitFullscreen().catch(e => {});
             } else if (document.webkitFullscreenElement && document.webkitExitFullscreen) {
                 document.webkitExitFullscreen();
             }
@@ -1825,10 +1815,13 @@
             document.getElementById('tv-title-mod').innerText = state.modName;
             document.getElementById('tv-title-naipe').innerText = state.naipeName;
             
-            await fetchRecords(); 
+            renderLeaderboard();
         }
 
-        document.addEventListener('DOMContentLoaded', async () => {
+        document.addEventListener('DOMContentLoaded', () => {
+            // Renderização imediata baseada no cache local (Zero espera inicial)
+            refreshUIComponents();
+            
             if (isAdminLoggedIn) renderAdminBlocks();
             
             const blocoSelect = document.getElementById('admin-bloco');
@@ -1837,17 +1830,13 @@
                 checkBlocoActivityForForm();
             }
 
-            setInterval(() => {
-                if (!tvModeInterval) {
-                    fetchRecords();
-                }
-            }, 10000); 
-            
-            await fetchRecords();
+            // Sincronização em segundo plano imediata com o Supabase
+            fetchRecords();
 
+            // Realtime WebSocket otimizado
             _supabase
                 .channel('public:records')
-                .on('postgres_changes', { event: '*', schema: 'public', table: 'records' }, payload => {
+                .on('postgres_changes', { event: '*', schema: 'public', table: 'records' }, () => {
                     fetchRecords();
                 })
                 .subscribe();
