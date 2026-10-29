@@ -414,7 +414,7 @@
                     </div>
                 </div>
 
-                <!-- SUB-ABA 3: DASHBOARD E GRÁFICOS CORRIGIDOS -->
+                <!-- SUB-ABA 3: DASHBOARD E ESTATÍSTICAS ISOLADAS -->
                 <div id="subtab-dashboard" class="space-y-6 hidden animate-fadeIn">
                     <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                         <h3 class="text-2xl font-black text-slate-900 flex items-center"><i class="fa-solid fa-chart-bar text-cob-blue mr-3"></i> Dashboard Estatístico Consolidado</h3>
@@ -424,6 +424,7 @@
                         </button>
                     </div>
                     
+                    <!-- CARDS DE MÉTRICAS EXATAS SOLICITADAS -->
                     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
                         <div class="bg-white border border-slate-200 p-5 rounded-2xl shadow-sm text-center flex flex-col justify-center relative overflow-hidden">
                             <div class="absolute -right-4 -top-4 w-16 h-16 bg-cob-blue/10 rounded-full"></div>
@@ -454,6 +455,19 @@
                             <p class="text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1 z-10">REPETIÇÕES</p>
                             <h2 class="text-3xl font-black text-purple-600 z-10" id="kpi-multimodal">0</h2>
                             <p class="text-[10px] text-purple-600 mt-2 font-semibold z-10">Participações Extras</p>
+                        </div>
+                    </div>
+
+                    <!-- CARD INFORMATIVO ESPECÍFICO DE LEITURAS (HOJE VS ATÉ 28/10) -->
+                    <div class="bg-gradient-to-r from-cob-dark to-cob-blue p-6 rounded-2xl shadow-md text-white flex flex-col md:flex-row justify-around items-center gap-4 text-center">
+                        <div>
+                            <p class="text-xs uppercase font-bold text-cyan-300 mb-1"><i class="fa-solid fa-calendar-day mr-1.5"></i> Lidas Hoje (29/10)</p>
+                            <h3 class="text-3xl font-black" id="info-lidas-hoje">0</h3>
+                        </div>
+                        <div class="hidden md:block w-px h-12 bg-white/20"></div>
+                        <div>
+                            <p class="text-xs uppercase font-bold text-amber-300 mb-1"><i class="fa-solid fa-clock-rotate-left mr-1.5"></i> Lidas até 28/10/26</p>
+                            <h3 class="text-3xl font-black" id="info-lidas-ate-28">0</h3>
                         </div>
                     </div>
 
@@ -739,14 +753,15 @@
         }
 
         // REGRA EXATA SOLICITADA:
-        // - Leituras até 28/10/26 contam como DESAFIO VIRTUAL.
-        // - A partir de hoje, se o bloco estiver ATIVO conta como DESAFIO VIRTUAL, se inativo conta como ATIVAÇÃO.
+        // - Se a leitura ocorreu até 28/10/26: vai para DESAFIO VIRTUAL (independente de bloco ativo/inativo).
+        // - A partir de 29/10/26: se o bloco estiver ATIVO, conta como DESAFIO VIRTUAL. Se o bloco estiver inativo (ou Ativação), conta como ATIVAÇÃO.
         function isRecordInChallengeWindow(r) {
             let recDate = r.created_at ? new Date(r.created_at) : new Date();
+            if (isNaN(recDate.getTime())) recDate = new Date();
             let cutoffDate = new Date('2026-10-28T23:59:59');
 
             if (recDate <= cutoffDate) {
-                return true; // Até 28/10/26 conta como Desafio Virtual
+                return true; // Até 28/10/26 vai sempre para Desafio Virtual
             }
 
             if (r.modalidade === 'Presença / Ativação' || r.tempo === 'PRESENÇA' || r.bloco === 'Ativação') return false;
@@ -1430,6 +1445,13 @@
 
             let totalDesafio = 0, totalDesafioMas = 0, totalDesafioFem = 0;
             let totalPresenca = 0, totalPresencaMas = 0, totalPresencaFem = 0;
+            
+            let lidasHojeCount = 0;
+            let lidasAte28Count = 0;
+
+            const cutoffDate = new Date('2026-10-28T23:59:59');
+            const todayStart = new Date();
+            todayStart.setHours(0, 0, 0, 0);
 
             const perfisList = ['Atleta', 'Treinador', 'Arbitragem', 'Comitê Organizador', 'Público Geral'];
             let perfilStats = {};
@@ -1456,6 +1478,16 @@
             };
 
             records.forEach(r => {
+                let recDate = r.created_at ? new Date(r.created_at) : new Date();
+                if (isNaN(recDate.getTime())) recDate = new Date();
+
+                if (recDate <= cutoffDate) {
+                    lidasAte28Count++;
+                }
+                if (recDate >= todayStart) {
+                    lidasHojeCount++;
+                }
+
                 const bloco = r.bloco && modPorBloco[r.bloco] ? r.bloco : 'Bloco 1';
                 const modStr = r.modalidade || 'Outros';
                 
@@ -1468,6 +1500,9 @@
                 let rawNaipe = (r.naipe || 'MAS').toString().toUpperCase();
                 let naipe = (rawNaipe.includes('FEM') || rawNaipe === 'F') ? 'FEM' : 'MAS';
 
+                // APLICANDO A REGRA EXATA REQUISITADA:
+                // - Até 28/10/26 -> Sempre DESAFIO VIRTUAL
+                // - A partir de 29/10/26 -> Bloco ativo = DESAFIO VIRTUAL; Bloco inativo/ativação = ATIVAÇÃO
                 const isDesafio = isRecordInChallengeWindow(r);
 
                 if (isDesafio) {
@@ -1522,6 +1557,9 @@
 
             document.getElementById('kpi-multimodal').innerText = repeticoesExatas;
 
+            document.getElementById('info-lidas-hoje').innerText = lidasHojeCount;
+            document.getElementById('info-lidas-ate-28').innerText = lidasAte28Count;
+
             const mods = ['Remo', 'Ciclismo', 'Fortnite'];
             const blocks = ['Bloco 1', 'Bloco 2', 'Bloco 3'];
 
@@ -1565,7 +1603,9 @@
                 ["DESAFIO VIRTUAL", document.getElementById('kpi-total-desafio').innerText],
                 ["ATIVAÇÃO", document.getElementById('kpi-total-presenca').innerText],
                 ["PARTICIPANTES ÚNICOS", document.getElementById('kpi-unicos').innerText],
-                ["REPETIÇÕES", document.getElementById('kpi-multimodal').innerText]
+                ["REPETIÇÕES", document.getElementById('kpi-multimodal').innerText],
+                ["Lidas Hoje (29/10)", document.getElementById('info-lidas-hoje').innerText],
+                ["Lidas até 28/10/26", document.getElementById('info-lidas-ate-28').innerText]
             ];
 
             doc.autoTable({
