@@ -960,12 +960,42 @@
             { mod: 'Fortnite', naipe: 'FEM', modName: 'FORTNITE', naipeName: 'FEMININO' }
         ];
 
-        // FETCH OTIMIZADO COM .range(0, 9999) PARA TRAZER TODOS OS 1.016+ REGISTROS
+        // FETCH PAGINADO EM LOTES PARA SUPORTAR ACIMA DE 5.000+ REGISTROS
         async function fetchRecords() {
             try {
-                const { data, error } = await _supabase.from('records').select('*').range(0, 9999);
-                if (!error && data) {
-                    const configRecord = data.find(r => r.modalidade === 'SYSTEM_CONFIG');
+                let allData = [];
+                let pageSize = 1000;
+                let page = 0;
+                let fetchMore = true;
+
+                while (fetchMore) {
+                    const start = page * pageSize;
+                    const end = start + pageSize - 1;
+                    
+                    const { data, error } = await _supabase
+                        .from('records')
+                        .select('*')
+                        .range(start, end);
+
+                    if (error) {
+                        fetchMore = false;
+                        break;
+                    }
+
+                    if (data && data.length > 0) {
+                        allData = allData.concat(data);
+                        if (data.length < pageSize) {
+                            fetchMore = false;
+                        } else {
+                            page++;
+                        }
+                    } else {
+                        fetchMore = false;
+                    }
+                }
+
+                if (allData.length > 0) {
+                    const configRecord = allData.find(r => r.modalidade === 'SYSTEM_CONFIG');
                     if (configRecord && configRecord.atleta) {
                         try {
                             blockConfig = JSON.parse(configRecord.atleta);
@@ -973,7 +1003,7 @@
                         } catch(e) {}
                     }
 
-                    records = data.filter(r => r.modalidade !== 'SYSTEM_CONFIG');
+                    records = allData.filter(r => r.modalidade !== 'SYSTEM_CONFIG');
                     localStorage.setItem('jj2026_cached_records', JSON.stringify(records));
 
                     refreshUIComponents();
