@@ -708,7 +708,6 @@
                 }
             }
             
-            // Se nenhum bloco estiver ativo, retorna "Ativação" como padrão
             return { name: 'Ativação', active: false };
         }
 
@@ -1773,7 +1772,8 @@
             let filtered = records.filter(r => r.modalidade === modalidade);
             
             if (isComiteTVMode) {
-                filtered = records.filter(r => r.subcategoria === 'Comitê Organizador');
+                filtered = filtered.filter(r => r.subcategoria === 'Comitê Organizador');
+                if (naipe !== 'Todos') filtered = filtered.filter(r => r.naipe === naipe);
             } else {
                 if (bloco !== 'Geral') filtered = filtered.filter(r => r.bloco === bloco);
                 if (naipe !== 'Todos') filtered = filtered.filter(r => r.naipe === naipe);
@@ -1832,15 +1832,7 @@
             main.classList.remove('max-w-7xl', 'px-4', 'sm:px-6', 'lg:px-8', 'py-8');
             main.classList.add('max-w-full', 'px-2', 'py-2');
 
-            if (isComiteTVMode) {
-                document.getElementById('tv-subtitle').innerText = "DESTAQUE ESPECIAL (02/11/2026)";
-                document.getElementById('tv-title-mod').innerText = "COMITÊ ORGANIZADOR";
-                document.getElementById('tv-title-naipe').innerText = "DESAFIO VIRTUAL";
-                document.getElementById('tv-badge').innerText = "PARTICIPAÇÃO DA ORGANIZAÇÃO";
-                renderLeaderboard();
-            } else {
-                startTVCycle();
-            }
+            startTVCycle();
         }
 
         function exitTVMode() {
@@ -1877,32 +1869,40 @@
         function startTVCycle() {
             tvStateIndex = 0;
             applyTVState();
+            if (tvModeInterval) clearInterval(tvModeInterval);
             tvModeInterval = setInterval(() => {
                 tvStateIndex = (tvStateIndex + 1) % tvStatesNormal.length;
                 applyTVState();
             }, 10000); 
         }
 
-        async function applyTVState() {
-            if (isComiteTVMode) return;
+        function applyTVState() {
             const state = tvStatesNormal[tvStateIndex];
             const activeBlockInfo = getCurrentOrLastActiveBlock();
             
             document.getElementById('filter-modalidade').value = state.mod;
             document.getElementById('filter-naipe').value = state.naipe;
 
-            if (activeBlockInfo.active) {
-                document.getElementById('filter-bloco').value = activeBlockInfo.name;
-                document.getElementById('tv-subtitle').innerText = "DESAFIO VIRTUAL - " + activeBlockInfo.name.toUpperCase();
-            } else {
+            if (isComiteTVMode) {
                 document.getElementById('filter-bloco').value = "Geral";
-                document.getElementById('tv-subtitle').innerText = "DESAFIO VIRTUAL - RANKING GERAL";
+                document.getElementById('tv-subtitle').innerText = "DESTAQUE ESPECIAL (02/11/2026)";
+                document.getElementById('tv-badge').innerText = "PARTICIPAÇÃO DA ORGANIZAÇÃO";
+            } else {
+                if (activeBlockInfo.active) {
+                    document.getElementById('filter-bloco').value = activeBlockInfo.name;
+                    document.getElementById('tv-subtitle').innerText = "DESAFIO VIRTUAL - " + activeBlockInfo.name.toUpperCase();
+                } else {
+                    document.getElementById('filter-bloco').value = "Geral";
+                    document.getElementById('tv-subtitle').innerText = "DESAFIO VIRTUAL - RANKING GERAL";
+                }
+                document.getElementById('tv-badge').innerText = "RANKING OFICIAL ATUALIZADO";
             }
             
             document.getElementById('tv-title-mod').innerText = state.modName;
             document.getElementById('tv-title-naipe').innerText = state.naipeName;
             
-            await fetchRecords(); 
+            // Força a renderização diretamente, sem amarrar a promessa de fetch na animação
+            renderLeaderboard(); 
         }
 
         document.addEventListener('DOMContentLoaded', async () => {
@@ -1914,11 +1914,10 @@
                 checkBlocoActivityForForm();
             }
 
+            // Polling incondicional a cada 10 segundos: Resolve o cache/hibernação de Smart TVs 
             setInterval(() => {
                 if(isAdminLoggedIn && currentAdminSubTab === 'insercao') renderAdminBlocks();
-                if (!tvModeInterval) {
-                    fetchRecords();
-                }
+                fetchRecords();
             }, 10000); 
             
             await fetchRecords();
