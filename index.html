@@ -1357,7 +1357,7 @@
                 }
                 
                 const dtStr = r.created_at ? formatDateTimePtBr(r.created_at) : '--/--/--';
-                const isPresenca = (r.tempo === 'PRESENÇA' || r.modalidade === 'Presença / Ativação');
+                const isPresenca = (r.tempo === 'PRESENÇA' || r.modalidade === 'Presença / Ativação' || r.bloco === 'Ativação');
 
                 return `
                     <tr class="hover:bg-slate-50 transition-colors">
@@ -1458,7 +1458,7 @@
             };
 
             records.forEach(r => {
-                const bloco = r.bloco && modPorBloco[r.bloco] ? r.bloco : 'Bloco 1';
+                const bloco = r.bloco || 'Bloco 1';
                 const modStr = r.modalidade || 'Outros';
                 
                 let mod = 'Remo';
@@ -1470,9 +1470,10 @@
                 let rawNaipe = (r.naipe || 'MAS').toString().toUpperCase();
                 let naipe = (rawNaipe.includes('FEM') || rawNaipe === 'F') ? 'FEM' : 'MAS';
 
-                const isDesafio = isRecordInChallengeWindow(r);
+                // CORREÇÃO: "Desafio" são os Blocos 1, 2 e 3. "Ativação" é o Bloco "Ativação" ou tempo "PRESENÇA"
+                const isAtivacao = (bloco === 'Ativação' || r.tempo === 'PRESENÇA' || modStr === 'Presença / Ativação');
 
-                if (isDesafio) {
+                if (!isAtivacao && (bloco === 'Bloco 1' || bloco === 'Bloco 2' || bloco === 'Bloco 3')) {
                     totalDesafio++;
                     if (naipe === 'MAS') totalDesafioMas++; else totalDesafioFem++;
                 } else {
@@ -1480,10 +1481,10 @@
                     if (naipe === 'MAS') totalPresencaMas++; else totalPresencaFem++;
                 }
 
-                if (modPuraCount[mod] !== undefined) {
+                if (!isAtivacao && modPuraCount[mod] !== undefined) {
                     modPuraCount[mod]++;
                     naipePorMod[mod][naipe]++;
-                    modPorBloco[bloco][mod]++;
+                    if (modPorBloco[bloco]) modPorBloco[bloco][mod]++;
                     if (naipeModBloco[bloco] && naipeModBloco[bloco][mod]) {
                         naipeModBloco[bloco][mod][naipe]++;
                     }
