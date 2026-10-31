@@ -1470,7 +1470,6 @@
                 let rawNaipe = (r.naipe || 'MAS').toString().toUpperCase();
                 let naipe = (rawNaipe.includes('FEM') || rawNaipe === 'F') ? 'FEM' : 'MAS';
 
-                // CORREÇÃO: "Desafio" são os Blocos 1, 2 e 3. "Ativação" é o Bloco "Ativação" ou tempo "PRESENÇA"
                 const isAtivacao = (bloco === 'Ativação' || r.tempo === 'PRESENÇA' || modStr === 'Presença / Ativação');
 
                 if (!isAtivacao && (bloco === 'Bloco 1' || bloco === 'Bloco 2' || bloco === 'Bloco 3')) {
@@ -1601,20 +1600,33 @@
         function getLatestRecordsForRanking(recs, sortByPoints) {
             let filteredValid = recs.filter(r => r.tempo !== 'PRESENÇA' && r.modalidade !== 'Presença / Ativação' && r.tempo);
             
-            let latestMap = new Map();
+            let bestMap = new Map();
+            
             filteredValid.forEach(r => {
                 let key = r.credencial ? r.credencial.trim() : (r.atleta ? r.atleta.trim().toUpperCase() : 'DESCONHECIDO');
-                latestMap.set(key, r);
+                
+                if (!bestMap.has(key)) {
+                    bestMap.set(key, r);
+                } else {
+                    let currentBest = bestMap.get(key);
+                    if (sortByPoints) {
+                        if (parseInt(r.tempo || '0') > parseInt(currentBest.tempo || '0')) {
+                            bestMap.set(key, r);
+                        }
+                    } else {
+                        if ((r.tempo || '') < (currentBest.tempo || '')) {
+                            bestMap.set(key, r);
+                        }
+                    }
+                }
             });
 
-            let latestList = Array.from(latestMap.values());
+            let bestList = Array.from(bestMap.values());
 
-            let sorted = latestList.sort((a, b) => {
-                if(sortByPoints) return parseInt(b.tempo || '0') - parseInt(a.tempo || '0'); 
+            return bestList.sort((a, b) => {
+                if (sortByPoints) return parseInt(b.tempo || '0') - parseInt(a.tempo || '0'); 
                 return (a.tempo || '').localeCompare(b.tempo || ''); 
             });
-
-            return sorted;
         }
 
         function exportFirstPlacesPDF() {
